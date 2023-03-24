@@ -1,6 +1,6 @@
-# iotelkiosk
+# <title>iotelkiosk</title>
 
-A new Flutter project.
+KIOSK application for iOtel 
 
 ## Getting Started
 
