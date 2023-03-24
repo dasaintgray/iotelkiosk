@@ -1,0 +1,9 @@
+output: 
+  bindings: 'lib\native\lockset_bindings.dart'
+headers:
+  entry-points:
+    - 'assets\library\lockset.h'
+llvm-path:
+  - 'D:\programming\LLVM'
+name: LocketNative
+description: Calling Lockset dll from Flutter

@@ -1,0 +1,61 @@
+name: iotelkiosk
+version: 1.0.0+1
+publish_to: none
+description: A new Flutter project.
+environment: 
+  sdk: '>=2.19.0 <3.0.0'
+
+dependencies: 
+  cupertino_icons: ^1.0.2
+  get: 4.6.5
+  flutter: 
+    sdk: flutter
+
+  #WINDOW UI
+  window_manager: ^0.3.0
+  sizer: ^2.0.15
+  flutter_acrylic: ^1.1.0+1
+  one_clock: ^1.0.8
+  timezone: ^0.9.1
+  flutter_svg: ^2.0.0+1
+  vector_graphics_compiler: ^1.0.1
+  flutter_carousel_widget: ^2.0.2
+  virtual_keyboard_multi_language: ^1.0.3
+  flutter_form_builder: ^7.8.0
+  flutter_datetime_picker: ^1.5.1
+  # expandable_page_view: ^1.0.17
+
+  #FORMATTING and DATE
+  intl: ^0.17.0
+
+  #HTTP COMMUNICATION
+  http: ^0.13.5
+  hasura_connect: ^4.0.0+4
+  graphql_flutter: ^5.1.2
+
+  #STORAGE
+  get_storage: ^2.1.1
+
+
+
+dev_dependencies: 
+  flutter_lints: ^2.0.0
+  flutter_test: 
+    sdk: flutter
+
+flutter:
+  fonts:
+    - family: ProductSans
+      fonts:
+        - asset: fonts/PRODUCT-SANS-REGULAR.ttf
+        - asset: fonts/PRODUCT-SANS-BOLD-ITALIC.ttf
+          # style: italic
+  assets:
+    - assets/background/
+    - assets/icons/
+    - assets/locales/
+    - assets/svg/
+    - assets/png/
+    - assets/menus/
+  uses-material-design: true
+

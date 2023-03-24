@@ -1,0 +1,9 @@
+output: 
+  bindings: 'lib/native/K720_ffi_bindings.dart'
+headers:
+  entry-points:
+    - 'assets/library/K720.h'
+llvm-path:
+  - 'D:\programming\LLVM'
+name: K720Native
+description: Calling K720 Dll from Flutter
