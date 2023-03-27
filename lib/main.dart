@@ -32,10 +32,10 @@ void main() async {
 
   // aero mode
   if (Platform.isWindows) {
-    await Window.setEffect(
-      effect: WindowEffect.aero,
-      color: Colors.blue.withOpacity(0.6),
-    );
+    // await Window.setEffect(
+    //   effect: WindowEffect.aero,
+    //   color: const Color.fromARGB(255, 8, 59, 100).withOpacity(0.6),
+    // );
 
     await Window.initialize();
   }

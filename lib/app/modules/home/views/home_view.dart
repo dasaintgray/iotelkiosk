@@ -19,6 +19,8 @@ class HomeView extends GetView<HomeController> {
   final hc = Get.find<HomeController>();
   final sc = Get.find<ScreenController>();
 
+  // final GlobalKey<FormState> formKey = GlobalKey();
+
   // final DateTime dtLocalTime = DateTime.now();
 
   @override
@@ -85,6 +87,12 @@ class HomeView extends GetView<HomeController> {
                             // 5
                             menuSelectArrivalTime(orientation,
                                 languageID: hc.selecttedLanguageID.value, code: '', type: ''),
+                            // 6
+                            menuRoomType(orientation,
+                                languageID: hc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
+                            // 7
+                            menuGuestInformation(orientation,
+                                languageID: hc.selecttedLanguageID.value, code: 'GI', type: 'ITEM'),
                           ],
                         ),
                       ),
@@ -92,6 +100,7 @@ class HomeView extends GetView<HomeController> {
                         () => Visibility(
                           visible: hc.menuIndex.value != 0,
                           child: SizedBox(
+                            height: orientation == Orientation.landscape ? 2.h : 10.h,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -99,6 +108,7 @@ class HomeView extends GetView<HomeController> {
                                   onTap: () {
                                     // var response = hc.getMenu(languageID: 0, code: 'SLMT', type: 'TITLE');
                                     // if (response) {
+                                    hc.getTransaction();
                                     hc.menuIndex.value = 0;
                                     // }
                                     // Get.back();
@@ -140,7 +150,7 @@ class HomeView extends GetView<HomeController> {
   Widget menuLanguage(Orientation orientation) {
     return Obx(
       () => SizedBox(
-        height: orientation == Orientation.portrait ? 45.h : 25.h,
+        height: orientation == Orientation.portrait ? 45.h : 20.h,
         width: 70.w,
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
@@ -196,7 +206,7 @@ class HomeView extends GetView<HomeController> {
 
   Widget menuTransactionTitle(Orientation orientation, {int? languageID, String? code, String? type}) {
     return Obx(() => SizedBox(
-          height: orientation == Orientation.portrait ? 45.h : 25.h,
+          height: orientation == Orientation.portrait ? 45.h : 20.h,
           width: 70.w,
           child: ListView.builder(
             padding: const EdgeInsets.all(25.0),
@@ -228,7 +238,7 @@ class HomeView extends GetView<HomeController> {
                         onTap: () {
                           var response = hc.getMenu(languageID: languageID, code: code, type: type);
                           if (response) {
-                            hc.menuIndex.value = 2;
+                            hc.menuIndex.value = 6;
                           }
                         },
                         child: SizedBox(
@@ -250,7 +260,7 @@ class HomeView extends GetView<HomeController> {
   Widget menuCheckIn(Orientation orientation, {int? languageID, String? code, String? type}) {
     return Obx(
       () => SizedBox(
-        height: orientation == Orientation.portrait ? 45.h : 25.h,
+        height: orientation == Orientation.portrait ? 45.h : 20.h,
         width: 70.w,
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
@@ -312,7 +322,7 @@ class HomeView extends GetView<HomeController> {
   Widget menuBookingProcess(Orientation orientation, {int? languageID, String? code, String? type}) {
     return Obx(
       () => SizedBox(
-        height: orientation == Orientation.portrait ? 45.h : 25.h,
+        height: orientation == Orientation.portrait ? 45.h : 20.h,
         width: 70.w,
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
@@ -373,7 +383,7 @@ class HomeView extends GetView<HomeController> {
   Widget menuInputBookingNumber(Orientation orientation, {int? languageID, String? code, String? type}) {
     return Obx(
       () => SizedBox(
-        height: orientation == Orientation.portrait ? 45.h : 25.h,
+        height: orientation == Orientation.portrait ? 45.h : 20.h,
         width: 70.w,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -461,16 +471,71 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  Widget menuRoomType(Orientation orientation, {int? languageID, String? code, String? type}) {
+    return Obx(
+      () => SizedBox(
+        height: orientation == Orientation.portrait ? 45.h : 20.h,
+        width: 70.w,
+        child: ListView.builder(
+          padding: const EdgeInsets.all(25.0),
+          itemCount: hc.pageTrans.length,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              height: 10.h,
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 25.w,
+                    top: 35,
+                    right: 10.w,
+                    child: SizedBox(
+                      width: 10.w,
+                      child: Text(
+                        hc.pageTrans[index].translationText,
+                        style: TextStyle(
+                          color: HenryColors.darkGreen,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 8.w,
+                    right: 8.w,
+                    child: GestureDetector(
+                      onTap: () {
+                        var response = hc.getMenu(languageID: languageID, code: code, type: type);
+                        if (response) {
+                          hc.menuIndex.value = 2;
+                        }
+                      },
+                      child: SizedBox(
+                        height: 7.h,
+                        child: hc.languageList.isEmpty
+                            ? null
+                            : Image.asset(hc.pageTrans[index].images!, fit: BoxFit.contain),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   // MENU SELECT ARRIVAL TIME
   Widget menuSelectArrivalTime(Orientation orientation, {int? languageID, String? code, String? type}) {
     return SizedBox(
-      height: orientation == Orientation.portrait ? 45.h : 25.h,
+      height: orientation == Orientation.portrait ? 45.h : 20.h,
       width: 70.w,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            height: 25.h,
+            height: orientation == Orientation.portrait ? 25.h : 20.h,
             child: TimePickerDialog(
               initialTime: TimeOfDay(
                   hour: int.parse(DateFormat('HH').format(hc.localTime)),
@@ -505,6 +570,27 @@ class HomeView extends GetView<HomeController> {
         ],
       ),
     );
+  }
+
+  Widget menuGuestInformation(Orientation orientation, {int? languageID, String? code, String? type}) {
+    final GlobalKey<FormState> formKey = GlobalKey();
+    return Obx(() => SizedBox(
+          height: orientation == Orientation.portrait ? 45.h : 20.h,
+          width: 70.w,
+          child: ListView.builder(
+            padding: const EdgeInsets.all(25.0),
+            itemCount: hc.pageTrans.length,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                height: 10.h,
+                child: Form(
+                  key: formKey,
+                  child: Text(hc.pageTrans[index].translationText),
+                ),
+              );
+            },
+          ),
+        ));
   }
 
   Widget clockAndWeather() {
@@ -695,8 +781,11 @@ class HomeView extends GetView<HomeController> {
               ),
             );
           },
-          options:
-              CarouselOptions(autoPlay: hc.titleTrans.length == 1 ? false : true, showIndicator: false, reverse: true),
+          options: CarouselOptions(
+              autoPlay: hc.titleTrans.length == 1 ? false : true,
+              showIndicator: false,
+              reverse: true,
+              scrollDirection: Axis.vertical),
         ),
       ),
     );
