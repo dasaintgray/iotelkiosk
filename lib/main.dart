@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 
@@ -39,6 +40,9 @@ void main() async {
 
     await Window.initialize();
   }
+
+  // VIDEO PLAYER
+  DartVLC.initialize();
 
   runApp(
     GetMaterialApp(

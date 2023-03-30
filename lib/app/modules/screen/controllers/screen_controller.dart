@@ -1,3 +1,4 @@
+import 'package:dart_vlc/dart_vlc.dart';
 import 'package:get/get.dart';
 
 import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
@@ -15,10 +16,15 @@ class ScreenController extends GetxController with BaseController {
   // LIST or OBJECT DATA
   final weatherList = <WeatherModel>[].obs;
 
+  final player = Player(
+    id: 69420,
+  );
+
   @override
   void onInit() {
     super.onInit();
     getWeather();
+    mediaOpen();
   }
 
   // @override
@@ -31,6 +37,13 @@ class ScreenController extends GetxController with BaseController {
   // void onClose() {
   //   super.onClose();
   // }
+
+  void mediaOpen() {
+    player.open(
+      Media.asset('assets/background/iOtelEdited.mp4'),
+      autoStart: true,
+    );
+  }
 
   Future<bool> getWeather() async {
     isLoading.value = true;

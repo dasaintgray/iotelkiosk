@@ -19,8 +19,6 @@ class HomeView extends GetView<HomeController> {
   final hc = Get.find<HomeController>();
   final sc = Get.find<ScreenController>();
 
-  // final GlobalKey<FormState> formKey = GlobalKey();
-
   // final DateTime dtLocalTime = DateTime.now();
 
   @override
@@ -29,6 +27,7 @@ class HomeView extends GetView<HomeController> {
       builder: (BuildContext context, Orientation orientation, DeviceType deviceType) {
         return GestureDetector(
           onTap: () {
+            sc.player.play();
             hc.resetTimer();
             hc.initTimezone();
           },
@@ -100,7 +99,7 @@ class HomeView extends GetView<HomeController> {
                         () => Visibility(
                           visible: hc.menuIndex.value != 0,
                           child: SizedBox(
-                            height: orientation == Orientation.landscape ? 2.h : 10.h,
+                            height: orientation == Orientation.landscape ? 2.h : 5.h,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -205,62 +204,63 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget menuTransactionTitle(Orientation orientation, {int? languageID, String? code, String? type}) {
-    return Obx(() => SizedBox(
-          height: orientation == Orientation.portrait ? 45.h : 20.h,
-          width: 70.w,
-          child: ListView.builder(
-            padding: const EdgeInsets.all(25.0),
-            itemCount: hc.pageTrans.length,
-            itemBuilder: (BuildContext context, int index) {
-              return SizedBox(
-                height: 10.h,
-                child: Stack(
-                  children: [
-                    Positioned(
-                      left: 25.w,
-                      top: 35,
-                      right: 10.w,
+    return Obx(
+      () => SizedBox(
+        height: orientation == Orientation.portrait ? 45.h : 20.h,
+        width: 70.w,
+        child: ListView.builder(
+          padding: const EdgeInsets.all(25.0),
+          itemCount: hc.pageTrans.length,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              height: 10.h,
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 25.w,
+                    top: 35,
+                    right: 10.w,
+                    child: SizedBox(
+                      width: 10.w,
+                      child: Text(
+                        hc.pageTrans[index].translationText,
+                        style: TextStyle(
+                          color: HenryColors.darkGreen,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 8.w,
+                    right: 8.w,
+                    child: GestureDetector(
+                      onTap: () {
+                        var response = hc.getMenu(languageID: languageID, code: code, type: type);
+                        if (response) {
+                          hc.menuIndex.value = 6;
+                        }
+                      },
                       child: SizedBox(
-                        width: 10.w,
-                        child: Text(
-                          hc.pageTrans[index].translationText,
-                          style: TextStyle(
-                            color: HenryColors.darkGreen,
-                            fontSize: 12.sp,
-                          ),
-                        ),
+                        height: 7.h,
+                        child:
+                            hc.pageTrans.isEmpty ? null : Image.asset(hc.pageTrans[index].images!, fit: BoxFit.contain),
                       ),
                     ),
-                    Positioned(
-                      left: 8.w,
-                      right: 8.w,
-                      child: GestureDetector(
-                        onTap: () {
-                          var response = hc.getMenu(languageID: languageID, code: code, type: type);
-                          if (response) {
-                            hc.menuIndex.value = 6;
-                          }
-                        },
-                        child: SizedBox(
-                          height: 7.h,
-                          child: hc.languageList.isEmpty
-                              ? null
-                              : Image.asset(hc.pageTrans[index].images!, fit: BoxFit.contain),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ));
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   Widget menuCheckIn(Orientation orientation, {int? languageID, String? code, String? type}) {
     return Obx(
       () => SizedBox(
-        height: orientation == Orientation.portrait ? 45.h : 20.h,
+        height: orientation == Orientation.portrait ? 45.h : 25.h,
         width: 70.w,
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
@@ -504,9 +504,9 @@ class HomeView extends GetView<HomeController> {
                     right: 8.w,
                     child: GestureDetector(
                       onTap: () {
-                        var response = hc.getMenu(languageID: languageID, code: code, type: type);
+                        var response = hc.getMenu(languageID: languageID, code: 'GI', type: 'ITEM');
                         if (response) {
-                          hc.menuIndex.value = 2;
+                          hc.menuIndex.value = 7;
                         }
                       },
                       child: SizedBox(
@@ -573,24 +573,29 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget menuGuestInformation(Orientation orientation, {int? languageID, String? code, String? type}) {
-    final GlobalKey<FormState> formKey = GlobalKey();
-    return Obx(() => SizedBox(
-          height: orientation == Orientation.portrait ? 45.h : 20.h,
-          width: 70.w,
-          child: ListView.builder(
-            padding: const EdgeInsets.all(25.0),
-            itemCount: hc.pageTrans.length,
-            itemBuilder: (BuildContext context, int index) {
-              return SizedBox(
-                height: 10.h,
-                child: Form(
-                  key: formKey,
-                  child: Text(hc.pageTrans[index].translationText),
+    // final GlobalKey<FormState> formKey = GlobalKey<FormState>;
+    return Obx(
+      () => SizedBox(
+        height: orientation == Orientation.portrait ? 45.h : 20.h,
+        width: 70.w,
+        child: ListView.builder(
+          padding: const EdgeInsets.all(25.0),
+          itemCount: hc.pageTrans.length,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              height: 2.h,
+              child: Form(
+                // key: formKey,
+                child: Text(
+                  hc.pageTrans[index].translationText,
+                  style: TextStyle(color: Colors.white, fontSize: 10.sp),
                 ),
-              );
-            },
-          ),
-        ));
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   Widget clockAndWeather() {

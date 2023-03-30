@@ -1,3 +1,4 @@
+import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -22,19 +23,29 @@ class ScreenView extends GetView<ScreenController> {
       builder: (BuildContext context, Orientation orientation, DeviceType deviceType) {
         return GestureDetector(
           onTap: () {
+            sc.player.stop();
             Get.to(() => HomeView());
           },
           child: Stack(
             children: [
+              // BACKGROUND
+              // Positioned(
+              //   child: Container(
+              //     decoration: const BoxDecoration(
+              //       image: DecorationImage(
+              //         image: AssetImage('assets/background/main.png'),
+              //         fit: BoxFit.fill,
+              //         alignment: Alignment.topLeft,
+              //       ),
+              //     ),
+              //   ),
+              // ),
+
+              // VIDEOS
               Positioned(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/background/main.png'),
-                      fit: BoxFit.fill,
-                      alignment: Alignment.topLeft,
-                    ),
-                  ),
+                child: Video(
+                  player: sc.player,
+                  showControls: false,
                 ),
               ),
 
@@ -49,52 +60,55 @@ class ScreenView extends GetView<ScreenController> {
                   width: 100,
                 ),
               ),
-              Scaffold(
-                body: SizedBox(
-                  height: 8.h,
-                  width: double.infinity,
-                  child: sc.imgUrl.isEmpty
-                      ? null
-                      : Padding(
-                          padding: const EdgeInsets.only(top: 20, right: 40),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Row(
-                                // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Image.network(
-                                    sc.imgUrl.value,
-                                    fit: BoxFit.contain,
-                                    height: 80,
-                                    width: 100,
-                                  ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        '${sc.weatherList.first.current.tempC.toStringAsFixed(0)}° C',
-                                        style: TextStyle(color: HenryColors.puti, fontSize: 5.sp),
-                                      ),
-                                      Text(
-                                        '${sc.weatherList.first.current.tempF.toStringAsFixed(0)}° F',
-                                        style: TextStyle(color: HenryColors.puti, fontSize: 5.sp),
-                                      ),
-                                      Text(sc.weatherList.first.current.condition.text,
-                                          style: TextStyle(color: HenryColors.puti, fontSize: 3.sp)),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              Text('${sc.weatherList.first.location.name}, ${sc.weatherList.first.location.country}',
-                                  style: TextStyle(color: HenryColors.puti, fontSize: 3.sp))
-                            ],
+
+              Obx(
+                () => Scaffold(
+                  body: SizedBox(
+                    height: 8.h,
+                    width: double.infinity,
+                    child: sc.imgUrl.isEmpty
+                        ? null
+                        : Padding(
+                            padding: const EdgeInsets.only(top: 20, right: 40),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Row(
+                                  // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Image.network(
+                                      sc.imgUrl.value,
+                                      fit: BoxFit.contain,
+                                      height: 80,
+                                      width: 100,
+                                    ),
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          '${sc.weatherList.first.current.tempC.toStringAsFixed(0)}° C',
+                                          style: TextStyle(color: HenryColors.puti, fontSize: 5.sp),
+                                        ),
+                                        Text(
+                                          '${sc.weatherList.first.current.tempF.toStringAsFixed(0)}° F',
+                                          style: TextStyle(color: HenryColors.puti, fontSize: 5.sp),
+                                        ),
+                                        Text(sc.weatherList.first.current.condition.text,
+                                            style: TextStyle(color: HenryColors.puti, fontSize: 3.sp)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Text('${sc.weatherList.first.location.name}, ${sc.weatherList.first.location.country}',
+                                    style: TextStyle(color: HenryColors.puti, fontSize: 3.sp))
+                              ],
+                            ),
                           ),
-                        ),
+                  ),
                 ),
               ),
             ],
