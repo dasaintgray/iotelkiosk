@@ -80,9 +80,9 @@ class ScreenView extends GetView<ScreenController> {
 
               // CM LGO
               Positioned(
-                top: 93.h,
+                top: 95.h,
                 left: 40.w,
-                // bottom: 20.h,
+                // bottom: 10.h,
                 right: 40.w,
                 child: Container(
                   height: 5.h,
@@ -107,20 +107,23 @@ class ScreenView extends GetView<ScreenController> {
                   height: 200,
                   width: 100,
                   child: DefaultTextStyle(
-                    style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: HenryColors.puti),
-                    child: Marquee(
-                      text: HenryGlobal.longText,
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: HenryColors.puti),
-                      scrollAxis: Axis.horizontal,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      blankSpace: 20.0,
-                      velocity: 100.0,
-                      pauseAfterRound: const Duration(seconds: 1),
-                      startPadding: 10.0,
-                      accelerationDuration: const Duration(seconds: 1),
-                      accelerationCurve: Curves.linear,
-                      decelerationDuration: const Duration(milliseconds: 500),
-                      decelerationCurve: Curves.elasticIn,
+                    style: TextStyle(fontSize: 25.sp, color: HenryColors.puti),
+                    textAlign: TextAlign.center,
+                    child: Center(
+                      child: Marquee(
+                        text: HenryGlobal.longText,
+                        // style: const TextStyle(color: HenryColors.puti),
+                        scrollAxis: Axis.vertical,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        blankSpace: 20.0,
+                        velocity: 100.0,
+                        pauseAfterRound: const Duration(seconds: 2),
+                        startPadding: 10.0,
+                        accelerationDuration: const Duration(seconds: 2),
+                        accelerationCurve: Curves.linear,
+                        decelerationDuration: const Duration(milliseconds: 500),
+                        decelerationCurve: Curves.elasticIn,
+                      ),
                     ),
                   ),
                 ),

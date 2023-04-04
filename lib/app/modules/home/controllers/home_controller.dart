@@ -106,7 +106,7 @@ class HomeController extends GetxController with BaseController {
     //   Get.back();
     // });
 
-    timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+    timer = Timer.periodic(const Duration(minutes: 30), (timer) {
       initTimezone();
       screenController.player.play();
       menuIndex.value = 0;
@@ -172,7 +172,7 @@ class HomeController extends GetxController with BaseController {
     try {
       if (response != null) {
         accommodationTypeList.add(response);
-        print('TOTAL ACCOMMODATION: ${accommodationTypeList.length}');
+        print('TOTAL ACCOMMODATION: ${accommodationTypeList.first.data.accommodationTypes.length}');
         isLoading.value = false;
         return true;
       }

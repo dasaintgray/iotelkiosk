@@ -44,7 +44,7 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
               Positioned(
-                top: orientation == Orientation.portrait ? 25.h : 5.h,
+                top: orientation == Orientation.portrait ? 15.h : 5.h,
                 bottom: orientation == Orientation.portrait ? 65.h : 45.h,
                 left: orientation == Orientation.portrait ? 35.w : 45.w,
                 right: orientation == Orientation.portrait ? 35.w : 45.w,
@@ -60,11 +60,15 @@ class HomeView extends GetView<HomeController> {
                     children: [
                       clockAndWeather(),
                       SizedBox(
-                        height: orientation == Orientation.portrait ? 15.h : 1.h,
+                        height: orientation == Orientation.portrait ? 12.h : 1.h,
                         width: double.infinity,
                         // child: menuTitle(hc.tlSLList),
                       ),
                       menuTitle(),
+                      // SizedBox(
+                      //   height: orientation == Orientation.portrait ? 2.h : 1.h,
+                      //   width: double.infinity,
+                      // ),
                       Obx(
                         () => IndexedStack(
                           index: hc.menuIndex.value,
@@ -92,16 +96,20 @@ class HomeView extends GetView<HomeController> {
                             // 7
                             menuGuestInformation(orientation,
                                 languageID: hc.selecttedLanguageID.value, code: 'GI', type: 'ITEM'),
+                            // 8 - ACCOMMODATION TYPE - THE DATA IS OUTSIDE THE TRANSLATION
+                            menuAccommodationType(orientation),
                           ],
                         ),
                       ),
+
                       Obx(
                         () => Visibility(
                           visible: hc.menuIndex.value != 0,
                           child: SizedBox(
-                            height: orientation == Orientation.landscape ? 2.h : 5.h,
+                            height: orientation == Orientation.portrait ? 10.h : 2.h,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 InkWell(
                                   onTap: () {
@@ -135,6 +143,10 @@ class HomeView extends GetView<HomeController> {
                           ),
                         ),
                       ),
+                      // SizedBox(
+                      //   height: 5.h,
+                      //   width: double.infinity,
+                      // ),
                     ],
                   ),
                 ),
@@ -511,7 +523,7 @@ class HomeView extends GetView<HomeController> {
                         var response = hc.getMenu(
                             languageID: languageID, code: 'SRT', type: 'ITEM', indexCode: hc.menuIndex.value);
                         if (response) {
-                          hc.menuIndex.value = 6;
+                          hc.menuIndex.value = 8;
                         }
                       },
                       child: SizedBox(
@@ -577,6 +589,62 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  menuAccommodationType(Orientation orientation) {
+    return Obx(
+      () => SizedBox(
+        height: orientation == Orientation.portrait ? 49.h : 20.h,
+        width: 70.w,
+        child: ListView.builder(
+          padding: const EdgeInsets.all(25.0),
+          itemCount: hc.accommodationTypeList.first.data.accommodationTypes.length,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              height: 10.h,
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 25.w,
+                    top: 35,
+                    right: 10.w,
+                    child: SizedBox(
+                      width: 10.w,
+                      child: Text(
+                        hc.accommodationTypeList.first.data.accommodationTypes[index].description,
+                        style: TextStyle(
+                          color: HenryColors.darkGreen,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 8.w,
+                    right: 8.w,
+                    child: GestureDetector(
+                      onTap: () {
+                        // var response = hc.getMenu(
+                        //     languageID: languageID, code: 'SRT', type: 'ITEM', indexCode: hc.menuIndex.value);
+                        // if (response) {
+                        //   hc.menuIndex.value = 6;
+                        // }
+                      },
+                      child: SizedBox(
+                        height: 7.h,
+                        child: hc.languageList.isEmpty
+                            ? null
+                            : Image.asset('assets/menus/extend.png', fit: BoxFit.contain),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   Widget menuGuestInformation(Orientation orientation, {int? languageID, String? code, String? type}) {
     // final GlobalKey<FormState> formKey = GlobalKey<FormState>;
     return Obx(
@@ -605,7 +673,7 @@ class HomeView extends GetView<HomeController> {
 
   Widget clockAndWeather() {
     return SizedBox(
-      height: 23.h,
+      height: 20.h,
       width: double.infinity,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
