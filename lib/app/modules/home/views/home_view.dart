@@ -86,7 +86,7 @@ class HomeView extends GetView<HomeController> {
                             // 5
                             menuSelectArrivalTime(orientation,
                                 languageID: hc.selecttedLanguageID.value, code: '', type: ''),
-                            // 6
+                            // 6 - CHECK-IN PROCESS
                             menuRoomType(orientation,
                                 languageID: hc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
                             // 7
@@ -181,7 +181,8 @@ class HomeView extends GetView<HomeController> {
                         int lID = hc.languageList.first.data.languages[index].id;
                         String sCode = 'ST';
                         hc.selecttedLanguageID.value = hc.languageList.first.data.languages[index].id;
-                        var response = hc.getMenu(languageID: lID, code: sCode, type: 'ITEM');
+                        var response =
+                            hc.getMenu(languageID: lID, code: sCode, type: 'ITEM', indexCode: hc.menuIndex.value);
                         if (response) {
                           hc.menuIndex.value = 1;
                         }
@@ -236,7 +237,8 @@ class HomeView extends GetView<HomeController> {
                     right: 8.w,
                     child: GestureDetector(
                       onTap: () {
-                        var response = hc.getMenu(languageID: languageID, code: code, type: type);
+                        var response =
+                            hc.getMenu(languageID: languageID, code: code, type: type, indexCode: hc.menuIndex.value);
                         if (response) {
                           hc.menuIndex.value = 6;
                         }
@@ -288,14 +290,15 @@ class HomeView extends GetView<HomeController> {
                     right: 8.w,
                     child: GestureDetector(
                       onTap: () {
-                        var response = hc.getMenu(languageID: languageID, code: code, type: type);
+                        var response =
+                            hc.getMenu(languageID: languageID, code: code, type: type, indexCode: hc.menuIndex.value);
                         if (response) {
                           switch (index) {
                             case 0:
                               hc.menuIndex.value = 3;
                               break;
                             case 1:
-                              hc.getMenu(languageID: languageID, code: 'SAT');
+                              hc.getMenu(languageID: languageID, code: 'SAT', indexCode: hc.menuIndex.value);
                               hc.menuIndex.value = 5;
                               break;
                           }
@@ -358,7 +361,8 @@ class HomeView extends GetView<HomeController> {
                     right: 8.w,
                     child: GestureDetector(
                       onTap: () {
-                        var response = hc.getMenu(languageID: languageID, code: code, type: type);
+                        var response =
+                            hc.getMenu(languageID: languageID, code: code, type: type, indexCode: hc.menuIndex.value);
                         if (response) {
                           hc.menuIndex.value = 4;
                         }
@@ -494,7 +498,7 @@ class HomeView extends GetView<HomeController> {
                         hc.pageTrans[index].translationText,
                         style: TextStyle(
                           color: HenryColors.darkGreen,
-                          fontSize: 12.sp,
+                          fontSize: hc.pageTrans[index].languageId == 1 ? 10.sp : 12.sp,
                         ),
                       ),
                     ),
@@ -504,9 +508,10 @@ class HomeView extends GetView<HomeController> {
                     right: 8.w,
                     child: GestureDetector(
                       onTap: () {
-                        var response = hc.getMenu(languageID: languageID, code: 'GI', type: 'ITEM');
+                        var response = hc.getMenu(
+                            languageID: languageID, code: 'SRT', type: 'ITEM', indexCode: hc.menuIndex.value);
                         if (response) {
-                          hc.menuIndex.value = 7;
+                          hc.menuIndex.value = 6;
                         }
                       },
                       child: SizedBox(

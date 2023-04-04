@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/home_view.dart';
+import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
+import 'package:marquee/marquee.dart';
 import 'package:sizer/sizer.dart';
 
 import '../controllers/screen_controller.dart';
@@ -18,7 +20,16 @@ class ScreenView extends GetView<ScreenController> {
 
   @override
   Widget build(BuildContext context) {
+    sc.player.playbackStream.listen(
+      (PlaybackState state) {
+        if (state.isCompleted) {
+          sc.player.play();
+        }
+      },
+    );
+
     hc.startTimer();
+
     return Sizer(
       builder: (BuildContext context, Orientation orientation, DeviceType deviceType) {
         return GestureDetector(
@@ -46,6 +57,43 @@ class ScreenView extends GetView<ScreenController> {
                 child: Video(
                   player: sc.player,
                   showControls: false,
+                  filterQuality: FilterQuality.high,
+                ),
+              ),
+
+              // IOTEL LOGO
+              Positioned(
+                top: 20.sp,
+                left: 10.sp,
+                child: Container(
+                  height: 20.h,
+                  width: 20.w,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/png/iotellogo.png'),
+                      fit: BoxFit.contain,
+                      alignment: Alignment.topLeft,
+                    ),
+                  ),
+                ),
+              ),
+
+              // CM LGO
+              Positioned(
+                top: 93.h,
+                left: 40.w,
+                // bottom: 20.h,
+                right: 40.w,
+                child: Container(
+                  height: 5.h,
+                  width: 5.w,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/png/cmlogo.png'),
+                      fit: BoxFit.contain,
+                      alignment: Alignment.topLeft,
+                    ),
+                  ),
                 ),
               ),
 
@@ -55,9 +103,26 @@ class ScreenView extends GetView<ScreenController> {
                 left: 10.sp,
                 right: 10.sp,
                 child: Container(
-                  color: Colors.white,
+                  color: Colors.transparent,
                   height: 200,
                   width: 100,
+                  child: DefaultTextStyle(
+                    style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: HenryColors.puti),
+                    child: Marquee(
+                      text: HenryGlobal.longText,
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: HenryColors.puti),
+                      scrollAxis: Axis.horizontal,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      blankSpace: 20.0,
+                      velocity: 100.0,
+                      pauseAfterRound: const Duration(seconds: 1),
+                      startPadding: 10.0,
+                      accelerationDuration: const Duration(seconds: 1),
+                      accelerationCurve: Curves.linear,
+                      decelerationDuration: const Duration(milliseconds: 500),
+                      decelerationCurve: Curves.elasticIn,
+                    ),
+                  ),
                 ),
               ),
 

@@ -3,8 +3,10 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
+import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 
@@ -33,15 +35,19 @@ class HomeController extends GetxController with BaseController {
   final currentIndex = 0.obs;
   final selecttedLanguageID = 1.obs;
 
-  // LIST
+  // MODEL LIST
   final languageList = <LanguageModel>[].obs;
   final transactionList = <TransactionModel>[].obs;
   final pageTrans = <Translation>[].obs;
   final titleTrans = <Translation>[].obs;
   final btnMessage = <Translation>[].obs;
+  final accommodationTypeList = <AccomTypeModel>[].obs;
 
   // UI
   late TextEditingController textEditingController = TextEditingController();
+
+  // ScreenController screenController = Get.put(ScreenController());
+  final ScreenController screenController = Get.find<ScreenController>();
 
   @override
   void onInit() {
@@ -50,6 +56,7 @@ class HomeController extends GetxController with BaseController {
     startTimer();
     getLanguages();
     getTransaction();
+    getAccommodation();
   }
 
   @override
@@ -62,6 +69,7 @@ class HomeController extends GetxController with BaseController {
   void onClose() {
     super.onClose();
     stopTimer();
+    screenController.dispose();
   }
 
   String properCase(String value) {
@@ -98,8 +106,10 @@ class HomeController extends GetxController with BaseController {
     //   Get.back();
     // });
 
-    timer = Timer.periodic(const Duration(minutes: 10), (timer) {
+    timer = Timer.periodic(const Duration(minutes: 1), (timer) {
       initTimezone();
+      screenController.player.play();
+      menuIndex.value = 0;
       Get.back();
     });
   }
@@ -155,7 +165,24 @@ class HomeController extends GetxController with BaseController {
     return false;
   }
 
-  bool getMenu({int? languageID, String? code, String? type}) {
+  Future<bool> getAccommodation() async {
+    isLoading.value = true;
+    final response = await GlobalProvider().fetchAccommodationType();
+
+    try {
+      if (response != null) {
+        accommodationTypeList.add(response);
+        print('TOTAL ACCOMMODATION: ${accommodationTypeList.length}');
+        isLoading.value = false;
+        return true;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
+  }
+
+  bool getMenu({int? languageID, String? code, String? type, int? indexCode}) {
     pageTrans.clear();
     titleTrans.clear();
     if (transactionList.isNotEmpty) {
@@ -178,7 +205,7 @@ class HomeController extends GetxController with BaseController {
             .translations
             .where((element) => element.languageId == languageID && element.code == code && element.type == type),
       );
-      print('TOTAL MENU ITEMS ($code : $type) : ${pageTrans.length}');
+      print('TOTAL MENU ITEMS ($code : $type) : ${pageTrans.length} : INDEX: $indexCode');
 
       // btnMessage.addAll(
       //   transactionList[0]

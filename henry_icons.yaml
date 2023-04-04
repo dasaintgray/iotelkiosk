@@ -1,0 +1,20 @@
+#command: flutter pub run flutter_launcher_icons:main
+#flutter pub run flutter_launcher_icons:main -f <your config file name here>
+flutter_icons:
+  android: launcher_icon
+  image_path: assets/png/ologo.png
+  ios: true
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: assets/png/ologo.png
+    background_color: "#4f637c"
+    theme_color: "#4f637c"
+  macos:
+    generate: true
+    image_path: assets/png/ologo.png
+  windows:
+    generate: true
+    image_path: assets/png/ologo.png
+    icon_size: 256 # min:48, max:256, default: 48
+  

@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:hasura_connect/hasura_connect.dart';
+import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
@@ -58,6 +60,28 @@ class GlobalProvider extends BaseController {
 
     if (response != null) {
       return transactionModelFromJson(jsonEncode(response));
+    }
+    return null;
+  }
+
+  Future<SettingsModel?> fetchSettings() async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+
+    final response = await hasuraConnect.query(qrySettings).catchError(handleError);
+
+    if (response != null) {
+      return settingsModelFromJson(jsonEncode(response));
+    }
+    return null;
+  }
+
+  Future<AccomTypeModel?> fetchAccommodationType() async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+
+    final response = await hasuraConnect.query(qryAccomodationType).catchError(handleError);
+
+    if (response != null) {
+      return accomTypeModelFromJson(jsonEncode(response));
     }
     return null;
   }

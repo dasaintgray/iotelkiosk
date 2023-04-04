@@ -50,6 +50,26 @@ String qryTranslation = """query getTranslation {
     }
   }""";
 
+String qrySettings = """query getSettings {
+    Settings {
+      code
+      value
+      description
+    }
+  }""";
+
+String qryAccomodationType = """query getAccomType {
+    AccommodationTypes(order_by: {seq: asc}) {
+      Id
+      valueMin
+      valueMax
+      description
+      code
+      seq
+    }
+  }
+  """;
+
 
 // String qryTransaction = """query getTranslation(\$title: String!) {
 //     Translations(where: {type: {_eq: \$title}}){

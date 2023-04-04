@@ -14,13 +14,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
 
+  // VIDEO PLAYER
+  DartVLC.initialize();
+
   WindowOptions windowOptions = const WindowOptions(
     // size: Size(1080, 1920),
     fullScreen: true,
     center: true,
     alwaysOnTop: true,
     skipTaskbar: false,
-    titleBarStyle: TitleBarStyle.normal,
+    // titleBarStyle: TitleBarStyle.normal,
   );
   windowManager.waitUntilReadyToShow(
     windowOptions,
@@ -34,15 +37,11 @@ void main() async {
   // aero mode
   if (Platform.isWindows) {
     // await Window.setEffect(
-    //   effect: WindowEffect.aero,
+    //   effect: WindowEffect.acrylic,
     //   color: const Color.fromARGB(255, 8, 59, 100).withOpacity(0.6),
     // );
-
     await Window.initialize();
   }
-
-  // VIDEO PLAYER
-  DartVLC.initialize();
 
   runApp(
     GetMaterialApp(
