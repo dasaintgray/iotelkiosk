@@ -6,11 +6,14 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
+import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/henryclock_widget.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter_carousel_widget/flutter_carousel_widget.dart';
 import 'package:virtual_keyboard_multi_language/virtual_keyboard_multi_language.dart';
+
+import 'package:camera_platform_interface/camera_platform_interface.dart';
 
 import '../controllers/home_controller.dart';
 
@@ -66,9 +69,33 @@ class HomeView extends GetView<HomeController> {
                         // child: menuTitle(hc.tlSLList),
                       ),
                       menuTitle(),
-                      // SizedBox(
-                      //   height: orientation == Orientation.portrait ? 2.h : 1.h,
-                      //   width: double.infinity,
+                      // DISPLAYING OF THE MENUS BASE ON INDEX KEY
+                      // Obx(
+                      //   () => ProsteIndexedStack(
+                      //     index: hc.menuIndex.value,
+                      //     children: [
+                      //       // 0
+                      //       IndexedStackChild(child: menuLanguage(orientation)),
+                      //       // 1
+                      //       IndexedStackChild(
+                      //         child: menuTransactionTitle(orientation,
+                      //             languageID: hc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
+                      //       ),
+                      //       // 2
+                      //       IndexedStackChild(
+                      //         child: menuRoomType(orientation,
+                      //             languageID: hc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
+                      //       ),
+                      //       // 3 - ACCOMMODATION TYPE - THE DATA IS OUTSIDE THE TRANSLATION
+                      //       IndexedStackChild(
+                      //         child: menuAccommodationType(orientation, languageID: hc.selecttedLanguageID.value),
+                      //       ),
+                      //       // 4 - DISCLAIMER
+                      //       IndexedStackChild(
+                      //         child: menuDisclaimer(orientation),
+                      //       ),
+                      //     ],
+                      //   ),
                       // ),
                       Obx(
                         () => IndexedStack(
@@ -78,27 +105,29 @@ class HomeView extends GetView<HomeController> {
                             menuLanguage(orientation),
                             // 1
                             menuTransactionTitle(orientation,
-                                languageID: hc.selecttedLanguageID.value, code: 'SCIP', type: 'ITEM'),
+                                languageID: hc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
                             // 2
-                            menuCheckIn(orientation,
-                                languageID: hc.selecttedLanguageID.value, code: 'SBP', type: 'ITEM'),
-                            // 3
-                            menuBookingProcess(orientation,
-                                languageID: hc.selecttedLanguageID.value, code: 'PIBN', type: 'BUTTON'),
-                            // 4
-                            menuInputBookingNumber(orientation,
-                                languageID: hc.selecttedLanguageID.value, code: '', type: ''),
-                            // 5
-                            menuSelectArrivalTime(orientation,
-                                languageID: hc.selecttedLanguageID.value, code: '', type: ''),
-                            // 6 - CHECK-IN PROCESS
                             menuRoomType(orientation,
                                 languageID: hc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
-                            // 7
-                            menuGuestInformation(orientation,
-                                languageID: hc.selecttedLanguageID.value, code: 'GI', type: 'ITEM'),
+                            // 3 - ACCOMMODATION TYPE - THE DATA IS OUTSIDE THE TRANSLATION
+                            menuAccommodationType(
+                              orientation,
+                              languageID: hc.selecttedLanguageID.value,
+                            ),
+                            // 4 - DISCLAIMER
+                            menuDisclaimer(orientation),
+
+                            // menuCheckIn(orientation,
+                            //     languageID: hc.selecttedLanguageID.value, code: 'SBP', type: 'ITEM'),
+                            // menuBookingProcess(orientation,
+                            //     languageID: hc.selecttedLanguageID.value, code: 'PIBN', type: 'BUTTON'),
+                            // menuInputBookingNumber(orientation,
+                            //     languageID: hc.selecttedLanguageID.value, code: '', type: ''),
+                            // menuSelectArrivalTime(orientation,
+                            //     languageID: hc.selecttedLanguageID.value, code: '', type: ''),
+                            // menuGuestInformation(orientation,
+                            //     languageID: hc.selecttedLanguageID.value, code: 'GI', type: 'ITEM'),
                             // 8 - ACCOMMODATION TYPE - THE DATA IS OUTSIDE THE TRANSLATION
-                            menuAccommodationType(orientation),
                           ],
                         ),
                       ),
@@ -114,12 +143,13 @@ class HomeView extends GetView<HomeController> {
                               children: [
                                 InkWell(
                                   onTap: () {
-                                    // var response = hc.getMenu(languageID: 0, code: 'SLMT', type: 'TITLE');
-                                    // if (response) {
                                     hc.getTransaction();
-                                    hc.menuIndex.value = 0;
-                                    // }
-                                    // Get.back();
+                                    if (hc.menuIndex.value > 2) {
+                                      var currentIndex = hc.menuIndex.value--;
+                                      hc.menuIndex.value = currentIndex;
+                                    } else {
+                                      hc.menuIndex.value = 0;
+                                    }
                                   },
                                   child: Image.asset(
                                     'assets/menus/back-arrow.png',
@@ -129,16 +159,16 @@ class HomeView extends GetView<HomeController> {
                                 const SizedBox(
                                   width: 50,
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    // hc.getMenu(languageID: 0, code: 'SLMT', type: 'TITLE');
-                                    // Get.back();
-                                  },
-                                  child: Image.asset(
-                                    'assets/menus/forward-arrow.png',
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
+                                // GestureDetector(
+                                //   onTap: () {
+                                //     // hc.getMenu(languageID: 0, code: 'SLMT', type: 'TITLE');
+                                //     // Get.back();
+                                //   },
+                                //   child: Image.asset(
+                                //     'assets/menus/forward-arrow.png',
+                                //     fit: BoxFit.cover,
+                                //   ),
+                                // ),
                               ],
                             ),
                           ),
@@ -177,12 +207,17 @@ class HomeView extends GetView<HomeController> {
                     top: 25,
                     // right: 10.w,
                     child: SizedBox(
-                      child: Text(
-                        hc.languageList.first.data.languages[index].description,
-                        style: TextStyle(
-                          color: HenryColors.darkGreen,
-                          fontSize: 15.sp,
-                        ),
+                      child: Animate(
+                        child: Text(
+                          hc.languageList.first.data.languages[index].description,
+                          style: TextStyle(
+                            color: HenryColors.darkGreen,
+                            fontSize: 15.sp,
+                          ),
+                        )
+                            .animate()
+                            .slide(duration: HenryGlobal.animationSpeed)
+                            .scale(duration: HenryGlobal.animationSpeed),
                       ),
                     ),
                   ),
@@ -198,13 +233,17 @@ class HomeView extends GetView<HomeController> {
                             hc.getMenu(languageID: lID, code: sCode, type: 'ITEM', indexCode: hc.menuIndex.value);
                         if (response) {
                           hc.menuIndex.value = 1;
+                          debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
                         }
                       },
                       child: SizedBox(
                         height: 7.h,
                         child: hc.languageList.isEmpty
                             ? null
-                            : Image.asset(hc.languageList.first.data.languages[index].flag, fit: BoxFit.fill),
+                            : Image.asset(hc.languageList.first.data.languages[index].flag, fit: BoxFit.fill)
+                                .animate()
+                                .fade(duration: HenryGlobal.animationSpeed)
+                                .scale(duration: HenryGlobal.animationSpeed),
                       ),
                     ),
                   ),
@@ -242,7 +281,10 @@ class HomeView extends GetView<HomeController> {
                           color: HenryColors.darkGreen,
                           fontSize: 12.sp,
                         ),
-                      ),
+                      )
+                          .animate()
+                          .fade(duration: HenryGlobal.animationSpeed)
+                          .scale(duration: HenryGlobal.animationSpeed),
                     ),
                   ),
                   Positioned(
@@ -250,16 +292,21 @@ class HomeView extends GetView<HomeController> {
                     right: 8.w,
                     child: GestureDetector(
                       onTap: () {
-                        var response =
-                            hc.getMenu(languageID: languageID, code: code, type: type, indexCode: hc.menuIndex.value);
+                        var response = hc.getMenu(
+                            languageID: languageID, code: 'SRT', type: 'ITEM', indexCode: hc.menuIndex.value);
                         if (response) {
-                          hc.menuIndex.value = 6;
+                          hc.menuIndex.value = 2;
+                          debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
                         }
                       },
                       child: SizedBox(
                         height: 7.h,
-                        child:
-                            hc.pageTrans.isEmpty ? null : Image.asset(hc.pageTrans[index].images!, fit: BoxFit.contain),
+                        child: hc.pageTrans.isEmpty
+                            ? null
+                            : Image.asset(hc.pageTrans[index].images!, fit: BoxFit.contain)
+                                .animate()
+                                .fade(duration: HenryGlobal.animationSpeed)
+                                .scale(duration: HenryGlobal.animationSpeed),
                       ),
                     ),
                   ),
@@ -511,9 +558,12 @@ class HomeView extends GetView<HomeController> {
                         hc.pageTrans[index].translationText,
                         style: TextStyle(
                           color: HenryColors.darkGreen,
-                          fontSize: hc.pageTrans[index].languageId == 1 ? 10.sp : 12.sp,
+                          fontSize: 12.sp,
                         ),
-                      ),
+                      )
+                          .animate()
+                          .fade(duration: HenryGlobal.animationSpeed)
+                          .scale(duration: HenryGlobal.animationSpeed),
                     ),
                   ),
                   Positioned(
@@ -522,16 +572,19 @@ class HomeView extends GetView<HomeController> {
                     child: GestureDetector(
                       onTap: () {
                         var response = hc.getMenu(
-                            languageID: languageID, code: 'SRT', type: 'ITEM', indexCode: hc.menuIndex.value);
+                            languageID: languageID, code: 'SACT', type: 'ITEM', indexCode: hc.menuIndex.value);
                         if (response) {
-                          hc.menuIndex.value = 8;
+                          hc.menuIndex.value = 3;
                         }
                       },
                       child: SizedBox(
                         height: 7.h,
                         child: hc.languageList.isEmpty
                             ? null
-                            : Image.asset(hc.pageTrans[index].images!, fit: BoxFit.contain),
+                            : Image.asset(hc.pageTrans[index].images!, fit: BoxFit.contain)
+                                .animate()
+                                .fade(duration: HenryGlobal.animationSpeed)
+                                .scale(duration: HenryGlobal.animationSpeed),
                       ),
                     ),
                   ),
@@ -590,7 +643,7 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  menuAccommodationType(Orientation orientation) {
+  menuAccommodationType(Orientation orientation, {int? languageID, String? code, String? type}) {
     return Obx(
       () => SizedBox(
         height: orientation == Orientation.portrait ? 49.h : 20.h,
@@ -598,6 +651,7 @@ class HomeView extends GetView<HomeController> {
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
           itemCount: hc.accommodationTypeList.first.data.accommodationTypes.length,
+          physics: const ClampingScrollPhysics(),
           itemBuilder: (BuildContext context, int index) {
             return SizedBox(
               height: 10.h,
@@ -617,7 +671,10 @@ class HomeView extends GetView<HomeController> {
                             color: HenryColors.darkGreen,
                             fontSize: 12.sp,
                           ),
-                        ).animate().fade(duration: 500.ms).scale(duration: 500.ms),
+                        )
+                            .animate()
+                            .fade(duration: HenryGlobal.animationSpeed)
+                            .scale(duration: HenryGlobal.animationSpeed),
                       ),
                     ),
                   ),
@@ -626,17 +683,22 @@ class HomeView extends GetView<HomeController> {
                     right: 8.w,
                     child: GestureDetector(
                       onTap: () {
-                        // var response = hc.getMenu(
-                        //     languageID: languageID, code: 'SRT', type: 'ITEM', indexCode: hc.menuIndex.value);
-                        // if (response) {
-                        //   hc.menuIndex.value = 6;
-                        // }
+                        var response = hc.getMenu(languageID: languageID, code: 'DI', type: 'ITEM');
+                        if (response) {
+                          hc.initializeCamera();
+                          hc.menuIndex.value = 4;
+                        }
                       },
                       child: SizedBox(
                         height: 7.h,
-                        child: hc.languageList.isEmpty
-                            ? null
-                            : Image.asset('assets/menus/extend.png', fit: BoxFit.contain),
+                        child: hc.accommodationTypeList.first.data.accommodationTypes.isNotEmpty
+                            ? Image.asset(
+                                    'assets/menus/hour${hc.accommodationTypeList.first.data.accommodationTypes[index].seq}.png',
+                                    fit: BoxFit.contain)
+                                .animate()
+                                .fade(duration: HenryGlobal.animationSpeed)
+                                .scale(duration: HenryGlobal.animationSpeed)
+                            : null,
                       ),
                     ),
                   ),
@@ -645,6 +707,54 @@ class HomeView extends GetView<HomeController> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  menuDisclaimer(Orientation orientation) {
+    return SizedBox(
+      height: orientation == Orientation.portrait ? 49.h : 20.h,
+      width: 75.w,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 20.h,
+            width: 60.w,
+            child: CameraPlatform.instance.buildPreview(hc.cameraID.value),
+          ),
+          SizedBox(
+            height: 5.h,
+            width: double.infinity,
+          ),
+          hc.pageTrans.isNotEmpty
+              ? Text(
+                  hc.pageTrans.first.translationText,
+                  style: TextStyle(
+                    color: HenryColors.puti,
+                    fontSize: 5.sp,
+                  ),
+                )
+              : const SizedBox(),
+          SizedBox(
+            height: 5.h,
+            width: double.infinity,
+          ),
+          hc.pageTrans.isNotEmpty
+              ? SizedBox(
+                  child: MaterialButton(
+                    onPressed: () {},
+                    color: HenryColors.darkGreen,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    child: Text(
+                      hc.pageTrans.last.translationText,
+                      style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                    ),
+                  ),
+                )
+              : const SizedBox(),
+        ],
       ),
     );
   }
@@ -727,11 +837,11 @@ class HomeView extends GetView<HomeController> {
                   width: 65.w,
                 ),
                 Expanded(
-                  flex: 1,
+                  flex: 2,
                   child: SizedBox(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Row(
                           // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -755,8 +865,11 @@ class HomeView extends GetView<HomeController> {
                                   '${sc.weatherList.first.current.tempF.toStringAsFixed(0)}° F',
                                   style: TextStyle(color: HenryColors.puti, fontSize: 5.sp),
                                 ),
-                                Text(sc.weatherList.first.current.condition.text,
-                                    style: TextStyle(color: HenryColors.puti, fontSize: 3.sp)),
+                                Text(
+                                  sc.weatherList.first.current.condition.text,
+                                  style: TextStyle(
+                                      color: HenryColors.puti, fontSize: 3.sp, overflow: TextOverflow.ellipsis),
+                                ),
                               ],
                             ),
                           ],

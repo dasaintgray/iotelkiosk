@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
@@ -12,8 +13,8 @@ import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 
 import 'package:timezone/data/latest.dart' as tzd;
 import 'package:timezone/standalone.dart' as tz;
-
-// FFI
+// ignore: depend_on_referenced_packages
+import 'package:camera_platform_interface/camera_platform_interface.dart';
 
 class HomeController extends GetxController with BaseController {
   DateTime japanNow = DateTime.now();
@@ -43,6 +44,16 @@ class HomeController extends GetxController with BaseController {
   final btnMessage = <Translation>[].obs;
   final accommodationTypeList = <AccomTypeModel>[].obs;
 
+  // CAMERA GLOBAL VARIABLES
+  final cameraInfo = 'Unkown'.obs;
+  final cameraList = [].obs;
+  final isInitialized = false.obs;
+  final cameraID = 0.obs;
+  late Size previewSize;
+
+  StreamSubscription<CameraClosingEvent>? errorStreamSubscription;
+  StreamSubscription<CameraClosingEvent>? cameraClosingEvent;
+
   // UI
   late TextEditingController textEditingController = TextEditingController();
 
@@ -53,6 +64,7 @@ class HomeController extends GetxController with BaseController {
   void onInit() {
     super.onInit();
     initTimezone();
+    getCamera();
     startTimer();
     getLanguages();
     getTransaction();
@@ -85,6 +97,65 @@ class HomeController extends GetxController with BaseController {
     }
     return result;
   }
+
+  bool checkMonitor() {
+    final monitorData = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+
+    final bool isMonitor = monitorData.size.shortestSide > 600;
+    if (isMonitor) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // INITIALIZING CAMERAS
+  // AUTHOR: Henry V. Mempin
+
+  Future<void> getCamera() async {
+    try {
+      cameraList.value = await CameraPlatform.instance.availableCameras();
+      if (cameraList.isEmpty) {
+        cameraInfo.value = 'No Available Camera';
+      } else {
+        debugPrint(cameraList.toString());
+      }
+    } on PlatformException catch (e) {
+      cameraInfo.value = 'Failed to get cameras : ${e.code} : ${e.message}';
+    }
+  }
+
+  Future<void> initializeCamera() async {
+    assert(!isInitialized.value);
+
+    if (cameraList.isEmpty) {
+      return;
+    }
+
+    try {
+      final CameraDescription camera = cameraList[0];
+
+      cameraID.value = await CameraPlatform.instance.createCamera(camera, ResolutionPreset.veryHigh);
+      errorStreamSubscription?.cancel();
+      // errorStreamSubscription = CameraPlatform.instance.onCameraClosing(cameraID.value).listen((event) { })
+
+      final Future<CameraInitializedEvent> initialized =
+          CameraPlatform.instance.onCameraInitialized(cameraID.value).first;
+
+      await CameraPlatform.instance.initializeCamera(cameraID.value);
+
+      final CameraInitializedEvent event = await initialized;
+      previewSize = Size(event.previewHeight, event.previewWidth);
+    } on CameraException catch (e) {
+      if (cameraID.value >= 0) {
+        await CameraPlatform.instance.dispose(cameraID.value);
+      } else {
+        debugPrint('Failed to dispose camera ${e.code} : ${e.description}');
+      }
+    }
+  }
+
+  // END OF INITIALIZING CAMERAS
 
   void initTimezone() {
     tzd.initializeTimeZones();
@@ -206,14 +277,10 @@ class HomeController extends GetxController with BaseController {
             .where((element) => element.languageId == languageID && element.code == code && element.type == type),
       );
       print('TOTAL MENU ITEMS ($code : $type) : ${pageTrans.length} : INDEX: $indexCode');
-
-      // btnMessage.addAll(
-      //   transactionList[0]
-      //       .data
-      //       .translations
-      //       .where((element) => element.languageId == languageID && element.code == code && element.type == 'BUTTON'),
-      // );
+      return true;
+    } else {
+      return false;
     }
-    return true;
+    // return true;
   }
 }

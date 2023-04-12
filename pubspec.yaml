@@ -26,6 +26,9 @@ dependencies:
   dart_vlc: ^0.4.0
   marquee: ^2.2.3
   flutter_animate: ^4.1.1+1
+  camera_windows: ^0.2.1+5
+  # proste_indexed_stack: ^0.2.4
+
   #local_session_timeout: ^2.2.0  //for local activity checkier
   
   # expandable_page_view: ^1.0.17

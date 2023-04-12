@@ -32,8 +32,8 @@ class ScreenController extends GetxController with BaseController {
   void onInit() async {
     super.onInit();
     await getSettings();
-    mediaOpen();
     await getWeather();
+    mediaOpen();
   }
 
   // @override
@@ -50,7 +50,12 @@ class ScreenController extends GetxController with BaseController {
   void mediaOpen() {
     player.setVolume(0);
     player.open(
-      Media.asset('assets/background/iotel.mp4'),
+      Playlist(
+        medias: [
+          Media.asset('assets/background/iotel.mp4'),
+          Media.asset('assets/background/iOtelWalkin.mp4'),
+        ],
+      ),
       autoStart: true,
     );
   }

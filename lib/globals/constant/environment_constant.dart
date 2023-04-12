@@ -1,3 +1,5 @@
+import 'package:flutter_animate/flutter_animate.dart';
+
 class HenryGlobal {
   HenryGlobal._();
 
@@ -5,6 +7,9 @@ class HenryGlobal {
   static const int receiveTimeOut = 20;
   static const int connectionTimeOut = 20;
   static const int sendTimeOut = 20;
+
+  // ANIMATION SPEED
+  static Duration animationSpeed = 200.ms;
 
   static const weatherURL = 'http://api.weatherapi.com';
   static const weatherEndpoint = '/v1/current.json?key=48954ba0e91f4dc6bfd12110223105&';
