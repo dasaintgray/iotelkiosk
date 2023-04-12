@@ -48,6 +48,7 @@ class ScreenController extends GetxController with BaseController {
   // }
 
   void mediaOpen() {
+    player.setVolume(0);
     player.open(
       Media.asset('assets/background/iotel.mp4'),
       autoStart: true,

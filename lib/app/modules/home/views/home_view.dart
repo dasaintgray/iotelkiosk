@@ -1,6 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -608,12 +609,15 @@ class HomeView extends GetView<HomeController> {
                     right: 10.w,
                     child: SizedBox(
                       width: 10.w,
-                      child: Text(
-                        hc.accommodationTypeList.first.data.accommodationTypes[index].description,
-                        style: TextStyle(
-                          color: HenryColors.darkGreen,
-                          fontSize: 12.sp,
-                        ),
+                      child: Animate(
+                        // effects: const [FadeEffect(), ScaleEffect()],
+                        child: Text(
+                          hc.accommodationTypeList.first.data.accommodationTypes[index].description,
+                          style: TextStyle(
+                            color: HenryColors.darkGreen,
+                            fontSize: 12.sp,
+                          ),
+                        ).animate().fade(duration: 500.ms).scale(duration: 500.ms),
                       ),
                     ),
                   ),
