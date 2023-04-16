@@ -725,7 +725,7 @@ class HomeView extends GetView<HomeController> {
             child: CameraPlatform.instance.buildPreview(hc.cameraID.value),
           ),
           SizedBox(
-            height: 5.h,
+            height: 2.h,
             width: double.infinity,
           ),
           hc.pageTrans.isNotEmpty
@@ -738,7 +738,7 @@ class HomeView extends GetView<HomeController> {
                 )
               : const SizedBox(),
           SizedBox(
-            height: 5.h,
+            height: 2.h,
             width: double.infinity,
           ),
           hc.pageTrans.isNotEmpty
