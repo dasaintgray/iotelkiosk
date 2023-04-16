@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
@@ -43,6 +44,7 @@ class HomeController extends GetxController with BaseController {
   final titleTrans = <Translation>[].obs;
   final btnMessage = <Translation>[].obs;
   final accommodationTypeList = <AccomTypeModel>[].obs;
+  final seriesDetailsList = <SeriesDetailsModel>[].obs;
 
   // CAMERA GLOBAL VARIABLES
   final cameraInfo = 'Unkown'.obs;
@@ -64,17 +66,18 @@ class HomeController extends GetxController with BaseController {
   void onInit() {
     super.onInit();
     initTimezone();
-    getCamera();
     startTimer();
     getLanguages();
     getTransaction();
     getAccommodation();
+    getSeriesDetails();
   }
 
   @override
   void onReady() {
     // ignore: unnecessary_overrides
     super.onReady();
+    getCamera();
   }
 
   @override
@@ -151,6 +154,16 @@ class HomeController extends GetxController with BaseController {
         await CameraPlatform.instance.dispose(cameraID.value);
       } else {
         debugPrint('Failed to dispose camera ${e.code} : ${e.description}');
+      }
+    }
+  }
+
+  Future<void> disposeCamera() async {
+    if (cameraID.value >= 0) {
+      try {
+        await CameraPlatform.instance.dispose(cameraID.value);
+      } on CameraException catch (e) {
+        cameraInfo.value = 'Failed to dispose camera ${e.code} : ${e.description}';
       }
     }
   }
@@ -238,12 +251,29 @@ class HomeController extends GetxController with BaseController {
 
   Future<bool> getAccommodation() async {
     isLoading.value = true;
-    final response = await GlobalProvider().fetchAccommodationType();
+    final response = await GlobalProvider().fetchAccommodationType(3);
 
     try {
       if (response != null) {
         accommodationTypeList.add(response);
         print('TOTAL ACCOMMODATION: ${accommodationTypeList.first.data.accommodationTypes.length}');
+        isLoading.value = false;
+        return true;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
+  }
+
+  Future<bool> getSeriesDetails() async {
+    isLoading.value = true;
+
+    final response = await GlobalProvider().fetchSeriesDetails();
+
+    try {
+      if (response != null) {
+        seriesDetailsList.add(response);
         isLoading.value = false;
         return true;
       }

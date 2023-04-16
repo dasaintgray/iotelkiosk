@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:hasura_connect/hasura_connect.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
@@ -75,13 +76,26 @@ class GlobalProvider extends BaseController {
     return null;
   }
 
-  Future<AccomTypeModel?> fetchAccommodationType() async {
+  Future<AccomTypeModel?> fetchAccommodationType(int? topRecords) async {
+    // for declartion of passing parameters
+    final params = {'limit': topRecords};
+
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
 
-    final response = await hasuraConnect.query(qryAccomodationType).catchError(handleError);
+    final response = await hasuraConnect.query(qryAccomodationType, variables: params).catchError(handleError);
 
     if (response != null) {
       return accomTypeModelFromJson(jsonEncode(response));
+    }
+    return null;
+  }
+
+  Future<SeriesDetailsModel?> fetchSeriesDetails() async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+
+    final response = await hasuraConnect.query(qrySeriesDetails).catchError(handleError);
+    if (response != null) {
+      return seriesDetailsModelFromJson(response);
     }
     return null;
   }

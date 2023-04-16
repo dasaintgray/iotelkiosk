@@ -148,6 +148,7 @@ class HomeView extends GetView<HomeController> {
                                       var currentIndex = hc.menuIndex.value--;
                                       hc.menuIndex.value = currentIndex;
                                     } else {
+                                      hc.disposeCamera();
                                       hc.menuIndex.value = 0;
                                     }
                                   },
@@ -746,7 +747,8 @@ class HomeView extends GetView<HomeController> {
                   child: MaterialButton(
                     onPressed: () {},
                     color: HenryColors.darkGreen,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    padding: const EdgeInsets.all(30),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
                     child: Text(
                       hc.pageTrans.last.translationText,
                       style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
