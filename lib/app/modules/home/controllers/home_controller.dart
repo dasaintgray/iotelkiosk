@@ -8,6 +8,7 @@ import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
+import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
@@ -45,6 +46,7 @@ class HomeController extends GetxController with BaseController {
   final btnMessage = <Translation>[].obs;
   final accommodationTypeList = <AccomTypeModel>[].obs;
   final seriesDetailsList = <SeriesDetailsModel>[].obs;
+  final roomAvailableList = <RoomAvailableModel>[].obs;
 
   // CAMERA GLOBAL VARIABLES
   final cameraInfo = 'Unkown'.obs;
@@ -71,6 +73,7 @@ class HomeController extends GetxController with BaseController {
     getTransaction();
     getAccommodation();
     getSeriesDetails();
+    getAvailableRooms();
   }
 
   @override
@@ -274,8 +277,30 @@ class HomeController extends GetxController with BaseController {
     try {
       if (response != null) {
         seriesDetailsList.add(response);
+        print(response.data.seriesDetails.first.docNo);
         isLoading.value = false;
         return true;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
+  }
+
+  Future<bool> getAvailableRooms() async {
+    isLoading.value = true;
+
+    final dtNow = DateTime.now();
+    final availResponse = await GlobalProvider().fetchAvailableRooms(1, 1, 1, dtNow, dtNow, false, 1, 1);
+
+    try {
+      if (availResponse != null) {
+        roomAvailableList.addAll(availResponse);
+        print('AVAILABLE ROOMS: ${roomAvailableList.length}');
+        isLoading.value = true;
+        return true;
+      } else {
+        isLoading.value = false;
       }
     } finally {
       isLoading.value = false;

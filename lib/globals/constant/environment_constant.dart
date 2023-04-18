@@ -21,6 +21,9 @@ class HenryGlobal {
     'Connection': 'keep-alive',
   };
 
+  // HTTP AVAILABLE ROOMS
+  static const availableRoomsURL = "http://msdb1.ad.circuitmindz.com/_json/getAvailableRoomsForce";
+
   // GRAPHQL HEADERS
   static var graphQlHeaders = {'Content-Type': 'application/json', 'x-hasura-admin-secret': 'iph2020agorah!'};
 
@@ -104,7 +107,7 @@ String qryGetRooms = """query GetRooms {
   }
 }""";
 
-String qrySeriesDetails = r'''query getSeriesDetails {
+String qrySeriesDetails = r"""query getSeriesDetails {
   SeriesDetails(where: {ModuleId: {_eq: 5}, _and: {isActive: {_eq: true}}}, limit: 1, order_by: {Id: asc}) {
     Id
     SeriesId
@@ -118,7 +121,7 @@ String qrySeriesDetails = r'''query getSeriesDetails {
     modifiedBy
   }
 }
-''';
+""";
 
 String qryAvaiableRooms =
     r'''query GetRooms($RoomTypeID Int!, $AccommodationTypeId Int!, $endDate1 String!, $startDate String!) {
@@ -151,14 +154,73 @@ String qryAvaiableRooms =
   }
 } ''';
 
+// MUTATION AREA (INSERT, UPDATE, DELETE)
+// ----------------------------------------------------------------------------------------------------
+String updateSeries =
+    r''' mutation updateSeriesDetails($ID: Int!, $DocNo: String!, $isActive: Boolean!, $modifiedBy: String!, $modifiedDate: datetime!) {
+  update_SeriesDetails(where: {Id: {_eq: $ID}, _and: {docNo: {_eq: $DocNo}}}, _set: {isActive: $isActive, modifiedBy: $modifiedBy, modifiedDate: $modifiedDate}) {
+    returning {
+      Id
+      docNo
+      isActive
+      modifiedBy
+      LocationId
+      ModuleId
+      SeriesId
+    }
+    affected_rows
+  }
+}
+''';
 
-// String qryTransaction = """query getTranslation(\$title: String!) {
-//     Translations(where: {type: {_eq: \$title}}){
-//       LanguageId
-//       translationText
-//       description
-//       code
-//       images
-//       type
-//     }
-//   }""";
+String insertBooking = r'''mutation insertBookings(
+  $isActive: Boolean!, 
+  $RoomID: Int!, 
+  $startDate: datetime!, 
+  $endDate: datetime!, 
+  $actualStartDate: datetime!, 
+  $ContactID: Int!, 
+  $AgentID: Int!, 
+  $AccommodationTypeId: Int!,
+  $RoomTypeID: Int!, 
+  $roomRate: Float!,
+  $discountAmount: Float!,
+  $KeyCardID: Int!,
+  $numPAX: Int!,
+  $isWithBreakfast: Boolean!,
+  $bed: Int!,
+  $isDoNotDisturb: Boolean!,
+  $wakeUpTime: datetime!
+  $serviceCharge: Float!,
+  $BookingStatusID: Int!,
+  $docNo: String!
+) {
+  insert_Bookings(
+    objects: {
+      isActive: $isActive, 
+      RoomId: $RoomID, 
+      startDate: $startDate, 
+      endDate: $endDate, 
+      actualStartDate: $actualStartDate, 
+      ContactId: $ContactID, 
+      AgentId: $AgentID, 
+      AccommodationTypeId: $AccommodationTypeId, 
+      RoomTypeId: $RoomTypeID, 
+      roomRate: $roomRate, 
+      discountAmount: $discountAmount, 
+      KeyCardId: $KeyCardID, 
+      numPAX: $numPAX, 
+      isWithBreakfast: $isWithBreakfast, 
+      bed: $bed, 
+      isDoNotDesturb: $isDoNotDisturb, 
+      wakeUpTime: $wakeUpTime,  
+      serviceCharge: $serviceCharge, 
+      BookingStatusId: $BookingStatusID, 
+      docNo: $docNo}) {
+    returning {
+      Id
+      isActive
+    }
+    affected_rows
+  }
+}''';

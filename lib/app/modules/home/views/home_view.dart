@@ -1,5 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -723,7 +725,11 @@ class HomeView extends GetView<HomeController> {
           SizedBox(
             height: 20.h,
             width: 60.w,
-            child: CameraPlatform.instance.buildPreview(hc.cameraID.value),
+            child: Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.rotationY(math.pi),
+              child: CameraPlatform.instance.buildPreview(hc.cameraID.value),
+            ),
           ),
           SizedBox(
             height: 2.h,
