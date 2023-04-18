@@ -6,13 +6,16 @@ import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
+import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/services/base/base_client_service.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 
 class GlobalProvider extends BaseController {
+  // REST API
   // GET
+
   Future<WeatherModel?> fetchWeather({String? queryParam}) async {
     final String searchParams = 'q=$queryParam';
     final weatherResponse = await HenryBaseClient()
@@ -23,6 +26,22 @@ class GlobalProvider extends BaseController {
       return weatherModelFromJson(weatherResponse);
     }
     return null;
+  }
+
+  // ------------------------------------------------------------------------------------------------------------------------
+  Future<List<RoomAvailableModel>?> fetchAvailableRooms(int? agentID, int? roomType, int? accommodationtypeid,
+      DateTime? startDate, DateTime? endDate, bool? isWithBreakfast, int? bed, int? numPAX) async {
+    final String queryParams =
+        "?agentId=$agentID&roomTypeId=$roomType&accommodationTypeId=$accommodationtypeid&startDate=$startDate&endDate=$endDate&isWithBreakfast=$isWithBreakfast&bed=$bed&numPAX=$numPAX";
+
+    final availRoomResponse = await HenryBaseClient()
+        .getRequest(HenryGlobal.availableRoomsURL, queryParams, HenryGlobal.defaultHttpHeaders)
+        .catchError(handleError);
+    if (availRoomResponse != null) {
+      return roomAvailableModelFromJson(availRoomResponse);
+    } else {
+      return null;
+    }
   }
 
   // POST
@@ -94,9 +113,14 @@ class GlobalProvider extends BaseController {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
 
     final response = await hasuraConnect.query(qrySeriesDetails).catchError(handleError);
+
     if (response != null) {
-      return seriesDetailsModelFromJson(response);
+      // return seriesDetailsModelFromJson(response);
+      return SeriesDetailsModel.fromJson(response);
     }
+
     return null;
   }
+
+  // MUTATION AREA (INSERT, UPDATE, DELETE)
 }
