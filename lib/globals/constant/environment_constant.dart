@@ -154,10 +154,67 @@ String qryAvaiableRooms =
   }
 } ''';
 
+String qryRoomTypes = r'''query getRoomTypes {
+  RoomTypes {
+    Id
+    LocationId
+    isActive
+    code
+    description
+  }
+}''';
+
+String qryRooms = r'''
+query getRooms($isInclude: Boolean!, $includeFragments: Boolean!) {
+  Rooms {
+    Id
+    isActive @include(if: $isInclude)
+    bed
+    code
+    description
+    ...roomFragments @include(if: $includeFragments)
+  }
+}
+
+fragment roomFragments on Rooms {
+  LocationId
+  isFunctionRoom
+  RoomTypeId
+  RoomCategoryId
+  isWithBreakfast
+  RoomStatusId
+}
+''';
+
+String qryNationalities = r'''
+query getNationalities($code: String!) {
+  Nationalities(where: {code: {_eq: $code}}) {
+    Id
+    code
+    description
+    isActive
+  }
+}
+''';
+
 // MUTATION AREA (INSERT, UPDATE, DELETE)
 // ----------------------------------------------------------------------------------------------------
-String updateSeries =
-    r''' mutation updateSeriesDetails($ID: Int!, $DocNo: String!, $isActive: Boolean!, $modifiedBy: String!, $modifiedDate: datetime!) {
+
+String login = r'''
+mutation hayupsimaster {
+  Login(password: "admin1", username: "admin") {
+    accessToken
+    creationTime
+    expirationTime
+    expiresIn
+  }
+}
+''';
+
+String updateSeries = r''' 
+mutation updateSeriesDetails($ID: Int!, $DocNo: String!, 
+    $isActive: Boolean!, $modifiedBy: String!, 
+    $modifiedDate: datetime!) {
   update_SeriesDetails(where: {Id: {_eq: $ID}, _and: {docNo: {_eq: $DocNo}}}, _set: {isActive: $isActive, modifiedBy: $modifiedBy, modifiedDate: $modifiedDate}) {
     returning {
       Id
@@ -173,54 +230,98 @@ String updateSeries =
 }
 ''';
 
-String insertBooking = r'''mutation insertBookings(
-  $isActive: Boolean!, 
-  $RoomID: Int!, 
-  $startDate: datetime!, 
-  $endDate: datetime!, 
-  $actualStartDate: datetime!, 
-  $ContactID: Int!, 
-  $AgentID: Int!, 
-  $AccommodationTypeId: Int!,
-  $RoomTypeID: Int!, 
-  $roomRate: Float!,
-  $discountAmount: Float!,
-  $KeyCardID: Int!,
-  $numPAX: Int!,
-  $isWithBreakfast: Boolean!,
-  $bed: Int!,
-  $isDoNotDisturb: Boolean!,
-  $wakeUpTime: datetime!
-  $serviceCharge: Float!,
-  $BookingStatusID: Int!,
-  $docNo: String!
-) {
-  insert_Bookings(
-    objects: {
-      isActive: $isActive, 
-      RoomId: $RoomID, 
-      startDate: $startDate, 
-      endDate: $endDate, 
-      actualStartDate: $actualStartDate, 
-      ContactId: $ContactID, 
-      AgentId: $AgentID, 
-      AccommodationTypeId: $AccommodationTypeId, 
-      RoomTypeId: $RoomTypeID, 
-      roomRate: $roomRate, 
-      discountAmount: $discountAmount, 
-      KeyCardId: $KeyCardID, 
-      numPAX: $numPAX, 
-      isWithBreakfast: $isWithBreakfast, 
-      bed: $bed, 
-      isDoNotDesturb: $isDoNotDisturb, 
-      wakeUpTime: $wakeUpTime,  
-      serviceCharge: $serviceCharge, 
-      BookingStatusId: $BookingStatusID, 
-      docNo: $docNo}) {
+String insertBooking = r'''
+  mutation insertBookings(
+    $isActive: Boolean!, 
+    $RoomID: Int!, 
+    $startDate: datetime!, 
+    $endDate: datetime!, 
+    $actualStartDate: datetime!, 
+    $ContactID: Int!, 
+    $AgentID: Int!, 
+    $AccommodationTypeId: Int!,
+    $RoomTypeID: Int!, 
+    $roomRate: Float!,
+    $discountAmount: Float!,
+    $KeyCardID: Int!,
+    $numPAX: Int!,
+    $isWithBreakfast: Boolean!,
+    $bed: Int!,
+    $isDoNotDisturb: Boolean!,
+    $wakeUpTime: datetime!
+    $serviceCharge: Float!,
+    $BookingStatusID: Int!,
+    $docNo: String!
+  ) {
+    insert_Bookings(
+      objects: {
+        isActive: $isActive, 
+        RoomId: $RoomID, 
+        startDate: $startDate, 
+        endDate: $endDate, 
+        actualStartDate: $actualStartDate, 
+        ContactId: $ContactID, 
+        AgentId: $AgentID, 
+        AccommodationTypeId: $AccommodationTypeId, 
+        RoomTypeId: $RoomTypeID, 
+        roomRate: $roomRate, 
+        discountAmount: $discountAmount, 
+        KeyCardId: $KeyCardID, 
+        numPAX: $numPAX, 
+        isWithBreakfast: $isWithBreakfast, 
+        bed: $bed, 
+        isDoNotDesturb: $isDoNotDisturb, 
+        wakeUpTime: $wakeUpTime,  
+        serviceCharge: $serviceCharge, 
+        BookingStatusId: $BookingStatusID, 
+        docNo: $docNo}) {
+      returning {
+        Id
+        isActive
+      }
+      affected_rows
+    }
+  }
+''';
+
+String insertContacts = r'''
+mutation addContact($code: String!, $firstName: String!, $lastName: String!, $middleName: String!, $prefixID: Int!, $suffixID: Int!, $nationalityID: Int!, $createdDate: datetime!, $createdBy: String!, $genderID: Int!, $discriminator: String!) {
+  insert_People(objects: {
+    code: $code, 
+    fName: $firstName, 
+    lName: $lastName, 
+    mName: $middleName, 
+    PrefixId: $prefixID, 
+    SuffixId: $suffixID, 
+    NationalityId: $nationalityID, 
+    createdDate: $createdDate, 
+    createdBy: $createdBy, 
+    GenderId: $genderID, 
+    Discriminator: $discriminator}
+  ) {
     returning {
       Id
-      isActive
+      code
+      Name
     }
     affected_rows
   }
-}''';
+}
+''';
+
+String addPhotos = r''' 
+  mutation addPhoto($ContactID: Int!, $isActive: Boolean!, $Photo: String!, $createdDate: datetime!, $createdBy: String!) {
+  insert_ContactPhotoes(objects: {
+    ContactId: $ContactID, 
+    isActive: $isActive, 
+    photo: $Photo,
+    createdDate: $createdDate,
+    createdBy: $createdBy}) {
+    returning {
+      Id
+      createdBy
+    }
+    affected_rows
+  }
+}
+''';

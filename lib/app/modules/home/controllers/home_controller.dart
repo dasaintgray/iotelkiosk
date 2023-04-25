@@ -1,11 +1,14 @@
 // ignore_for_file: avoid_print
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/roomtypes_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
@@ -36,17 +39,29 @@ class HomeController extends GetxController with BaseController {
   // INT
   final menuIndex = 0.obs;
   final currentIndex = 0.obs;
+
+  // TRANSACTION VARIABLE
+  final hostname = ''.obs;
   final selecttedLanguageID = 1.obs;
+  final selectedTransactionType = ''.obs;
+  final selectedRoomType = ''.obs;
+  final selectedAccommodationType = 0.obs;
+  final selectedNationalities = 77.obs;
 
   // MODEL LIST
-  final languageList = <LanguageModel>[].obs;
-  final transactionList = <TransactionModel>[].obs;
   final pageTrans = <Translation>[].obs;
   final titleTrans = <Translation>[].obs;
   final btnMessage = <Translation>[].obs;
+
+  final languageList = <LanguageModel>[].obs;
+  final transactionList = <TransactionModel>[].obs;
   final accommodationTypeList = <AccomTypeModel>[].obs;
   final seriesDetailsList = <SeriesDetailsModel>[].obs;
   final roomAvailableList = <RoomAvailableModel>[].obs;
+  final roomTypeList = <RoomTypesModel>[].obs;
+
+  final roomsList = [].obs; //DYNAMIC KASI PABABAGO ANG OUTPUT
+  final resultList = [].obs;
 
   // CAMERA GLOBAL VARIABLES
   final cameraInfo = 'Unkown'.obs;
@@ -74,6 +89,7 @@ class HomeController extends GetxController with BaseController {
     getAccommodation();
     getSeriesDetails();
     getAvailableRooms();
+    // getRooms();
   }
 
   @override
@@ -81,6 +97,7 @@ class HomeController extends GetxController with BaseController {
     // ignore: unnecessary_overrides
     super.onReady();
     getCamera();
+    hostname.value = Platform.localHostname;
   }
 
   @override
@@ -168,6 +185,18 @@ class HomeController extends GetxController with BaseController {
       } on CameraException catch (e) {
         cameraInfo.value = 'Failed to dispose camera ${e.code} : ${e.description}';
       }
+    }
+  }
+
+  Future<String?> takePicture() async {
+    final XFile pictureFile = await CameraPlatform.instance.takePicture(cameraID.value);
+    final imgBytes = File(pictureFile.path).readAsBytesSync();
+
+    final img64 = base64Encode(imgBytes);
+    if (img64.isNotEmpty) {
+      return img64.toString();
+    } else {
+      return '';
     }
   }
 
@@ -297,6 +326,8 @@ class HomeController extends GetxController with BaseController {
       if (availResponse != null) {
         roomAvailableList.addAll(availResponse);
         print('AVAILABLE ROOMS: ${roomAvailableList.length}');
+        roomAvailableList.shuffle();
+        print(roomAvailableList.first.description);
         isLoading.value = true;
         return true;
       } else {
@@ -308,6 +339,79 @@ class HomeController extends GetxController with BaseController {
     return false;
   }
 
+  Future<bool> getRooms() async {
+    isLoading.value = true;
+
+    final responseValue = await GlobalProvider().fetchRooms(isInclude: false, includeFragments: true);
+
+    try {
+      if (responseValue != null) {
+        // var listBooks = (result['data']['books'] as List).map((e) => Books.fromMap(e)).toList();
+        var resultList = (responseValue['data']['Rooms'] as List);
+        resultList.shuffle();
+        print(resultList[0]['description']);
+        roomsList.add(resultList);
+        isLoading.value = true;
+        return true;
+      } else {
+        isLoading.value = false;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
+  }
+
+  Future addTransaction() async {
+    isLoading.value = true;
+    final dtNow = DateTime.now();
+
+    // add contact first
+    var result = languageList.first.data.languages.where((element) => element.id == selecttedLanguageID.value);
+    var nationalCode = result.first.code;
+
+    int? resultID = await GlobalProvider().fetchNationalities(code: nationalCode);
+
+    if (resultID != 0) {
+      selectedNationalities.value = resultID!;
+      String? name = '$hostname-${seriesDetailsList.first.data.seriesDetails.first.docNo}';
+
+      int? contactID = await GlobalProvider().addContacts(
+          code: seriesDetailsList.first.data.seriesDetails.first.docNo,
+          firstName: name,
+          lastName: "Terminal",
+          middleName: 'Kiosk',
+          prefixID: 1,
+          suffixID: 1,
+          nationalityID: selectedNationalities.value,
+          createdDate: dtNow,
+          createdBy: hostname.value,
+          genderID: 1,
+          discriminitor: 'Contact');
+
+      String? basePhoto = await takePicture();
+
+      var response = await GlobalProvider().addContactPhotoes(
+          contactID: contactID, isActive: true, photo: basePhoto, createdDate: dtNow, createdBy: hostname.value);
+
+      if (response) {
+        // update series
+        await GlobalProvider().updateSeriesDetails(
+            idNo: seriesDetailsList.first.data.seriesDetails.first.id,
+            docNo: seriesDetailsList.first.data.seriesDetails.first.docNo,
+            isActive: false,
+            modifiedBy: hostname.value,
+            modifiedDate: dtNow);
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  // ---------------------------------------------------------------------------------------------------------
   bool getMenu({int? languageID, String? code, String? type, int? indexCode}) {
     pageTrans.clear();
     titleTrans.clear();
@@ -338,4 +442,5 @@ class HomeController extends GetxController with BaseController {
     }
     // return true;
   }
+  // ---------------------------------------------------------------------------------------------------------
 }

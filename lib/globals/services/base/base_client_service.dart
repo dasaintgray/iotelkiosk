@@ -189,4 +189,6 @@ class HenryBaseClient {
         throw FetchDataException('Error occured with code : ${response.statusCode}', response.request!.url.toString());
     }
   }
+
+  // HARDWARE COMMUNICATION
 }

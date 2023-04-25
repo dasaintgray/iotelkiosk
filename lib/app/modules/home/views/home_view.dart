@@ -298,6 +298,7 @@ class HomeView extends GetView<HomeController> {
                         var response = hc.getMenu(
                             languageID: languageID, code: 'SRT', type: 'ITEM', indexCode: hc.menuIndex.value);
                         if (response) {
+                          hc.selectedTransactionType.value = hc.pageTrans[index].code;
                           hc.menuIndex.value = 2;
                           debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
                         }
@@ -578,6 +579,7 @@ class HomeView extends GetView<HomeController> {
                             languageID: languageID, code: 'SACT', type: 'ITEM', indexCode: hc.menuIndex.value);
                         if (response) {
                           hc.menuIndex.value = 3;
+                          hc.selectedRoomType.value = hc.pageTrans[index].code;
                         }
                       },
                       child: SizedBox(
@@ -688,6 +690,8 @@ class HomeView extends GetView<HomeController> {
                       onTap: () {
                         var response = hc.getMenu(languageID: languageID, code: 'DI', type: 'ITEM');
                         if (response) {
+                          hc.selectedAccommodationType.value =
+                              hc.accommodationTypeList.first.data.accommodationTypes[index].id;
                           hc.initializeCamera();
                           hc.menuIndex.value = 4;
                         }
@@ -735,6 +739,7 @@ class HomeView extends GetView<HomeController> {
             height: 2.h,
             width: double.infinity,
           ),
+          // DISCLAIMER
           hc.pageTrans.isNotEmpty
               ? Text(
                   hc.pageTrans.first.translationText,
@@ -751,10 +756,16 @@ class HomeView extends GetView<HomeController> {
           hc.pageTrans.isNotEmpty
               ? SizedBox(
                   child: MaterialButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      var response = await hc.addTransaction();
+                      if (response) {
+                        hc.isLoading.value = false;
+                      }
+                    },
                     color: HenryColors.darkGreen,
                     padding: const EdgeInsets.all(30),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
+                    // AGREE BUTTON
                     child: Text(
                       hc.pageTrans.last.translationText,
                       style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
