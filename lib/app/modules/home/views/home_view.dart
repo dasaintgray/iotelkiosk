@@ -232,6 +232,8 @@ class HomeView extends GetView<HomeController> {
                         int lID = hc.languageList.first.data.languages[index].id;
                         String sCode = 'ST';
                         hc.selecttedLanguageID.value = hc.languageList.first.data.languages[index].id;
+                        hc.selectedLanguageCode.value = hc.languageList.first.data.languages[index].code;
+
                         var response =
                             hc.getMenu(languageID: lID, code: sCode, type: 'ITEM', indexCode: hc.menuIndex.value);
                         if (response) {
@@ -755,28 +757,44 @@ class HomeView extends GetView<HomeController> {
           ),
           hc.pageTrans.isNotEmpty
               ? SizedBox(
-                  child: MaterialButton(
-                    onPressed: () async {
-                      var response = await hc.addTransaction();
-                      if (response) {
-                        hc.isLoading.value = false;
-                      }
-                    },
-                    color: HenryColors.darkGreen,
-                    padding: const EdgeInsets.all(30),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
-                    // AGREE BUTTON
-                    child: Text(
-                      hc.pageTrans.last.translationText,
-                      style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
-                    ),
-                  ),
+                  child: hc.isLoading.value
+                      ? Column(
+                          children: [
+                            const CircularProgressIndicator.adaptive(
+                              backgroundColor: HenryColors.puti,
+                            ),
+                            Text(
+                              'Processing, please wait',
+                              style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                            )
+                          ],
+                        )
+                      : MaterialButton(
+                          onPressed: () async {
+                            hc.isLoading.value = true;
+                            var response = await hc.addTransaction();
+                            if (response) {
+                              //
+                              hc.isLoading.value = false;
+                            }
+                          },
+                          color: HenryColors.darkGreen,
+                          padding: const EdgeInsets.all(30),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
+                          // AGREE BUTTON
+                          child: Text(
+                            hc.pageTrans.last.translationText,
+                            style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                          ),
+                        ),
                 )
               : const SizedBox(),
         ],
       ),
     );
   }
+
+  menuPayment() {}
 
   Widget menuGuestInformation(Orientation orientation, {int? languageID, String? code, String? type}) {
     // final GlobalKey<FormState> formKey = GlobalKey<FormState>;

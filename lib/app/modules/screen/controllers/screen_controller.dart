@@ -17,6 +17,7 @@ class ScreenController extends GetxController with BaseController {
   // STRING
   final imgUrl = ''.obs;
   final sCity = ''.obs;
+  final defaultLanguageCode = 'en'.obs;
 
   // INTEGER
 
@@ -71,6 +72,11 @@ class ScreenController extends GetxController with BaseController {
         // GET CITY
         final cityIndex = settingsResponse.data.settings.indexWhere((element) => element.code == "CITY");
         sCity.value = settingsResponse.data.settings[cityIndex].value;
+
+        // DEFAULT LANGUAGE CODE
+        final langIndex =
+            settingsResponse.data.settings.indexWhere((element) => element.code == "EN" || element.value == "English");
+        defaultLanguageCode.value = settingsResponse.data.settings[langIndex].code;
 
         isLoading.value = false;
         return true;

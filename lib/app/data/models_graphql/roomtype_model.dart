@@ -9,11 +9,11 @@ RoomTypesModel roomTypesModelFromJson(String str) => RoomTypesModel.fromJson(jso
 String roomTypesModelToJson(RoomTypesModel data) => json.encode(data.toJson());
 
 class RoomTypesModel {
+  Data data;
+
   RoomTypesModel({
     required this.data,
   });
-
-  Data data;
 
   factory RoomTypesModel.fromJson(Map<String, dynamic> json) => RoomTypesModel(
         data: Data.fromJson(json["data"]),
@@ -25,11 +25,11 @@ class RoomTypesModel {
 }
 
 class Data {
+  List<RoomType> roomTypes;
+
   Data({
     required this.roomTypes,
   });
-
-  List<RoomType> roomTypes;
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
         roomTypes: List<RoomType>.from(json["RoomTypes"].map((x) => RoomType.fromJson(x))),
@@ -41,33 +41,33 @@ class Data {
 }
 
 class RoomType {
+  int id;
+  int locationId;
+  bool isActive;
+  String description;
+  String code;
+
   RoomType({
     required this.id,
     required this.locationId,
     required this.isActive,
-    required this.code,
     required this.description,
+    required this.code,
   });
-
-  int id;
-  int locationId;
-  bool isActive;
-  String code;
-  String description;
 
   factory RoomType.fromJson(Map<String, dynamic> json) => RoomType(
         id: json["Id"],
         locationId: json["LocationId"],
         isActive: json["isActive"],
-        code: json["code"],
         description: json["description"],
+        code: json["code"],
       );
 
   Map<String, dynamic> toJson() => {
         "Id": id,
         "LocationId": locationId,
         "isActive": isActive,
-        "code": code,
         "description": description,
+        "code": code,
       };
 }

@@ -7,8 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
-import 'package:iotelkiosk/app/data/models_graphql/roomtypes_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/paymentType_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
@@ -20,6 +22,7 @@ import 'package:timezone/data/latest.dart' as tzd;
 import 'package:timezone/standalone.dart' as tz;
 // ignore: depend_on_referenced_packages
 import 'package:camera_platform_interface/camera_platform_interface.dart';
+import 'package:translator/translator.dart';
 
 class HomeController extends GetxController with BaseController {
   DateTime japanNow = DateTime.now();
@@ -43,22 +46,27 @@ class HomeController extends GetxController with BaseController {
   // TRANSACTION VARIABLE
   final hostname = ''.obs;
   final selecttedLanguageID = 1.obs;
+  final selectedLanguageCode = 'en'.obs;
   final selectedTransactionType = ''.obs;
   final selectedRoomType = ''.obs;
   final selectedAccommodationType = 0.obs;
   final selectedNationalities = 77.obs;
 
   // MODEL LIST
-  final pageTrans = <Translation>[].obs;
-  final titleTrans = <Translation>[].obs;
-  final btnMessage = <Translation>[].obs;
+  final pageTrans = <Conversion>[].obs;
+  final titleTrans = <Conversion>[].obs;
+  final btnMessage = <Conversion>[].obs;
 
   final languageList = <LanguageModel>[].obs;
   final transactionList = <TransactionModel>[].obs;
   final accommodationTypeList = <AccomTypeModel>[].obs;
   final seriesDetailsList = <SeriesDetailsModel>[].obs;
   final roomAvailableList = <RoomAvailableModel>[].obs;
+
   final roomTypeList = <RoomTypesModel>[].obs;
+  final paymentTypeList = <PaymentTypeModel>[].obs;
+
+  final availableRoomList = <AvailableRoomsModel>[].obs;
 
   final roomsList = [].obs; //DYNAMIC KASI PABABAGO ANG OUTPUT
   final resultList = [].obs;
@@ -70,6 +78,8 @@ class HomeController extends GetxController with BaseController {
   final cameraID = 0.obs;
   late Size previewSize;
 
+  // SERIAL TEST
+
   StreamSubscription<CameraClosingEvent>? errorStreamSubscription;
   StreamSubscription<CameraClosingEvent>? cameraClosingEvent;
 
@@ -78,6 +88,9 @@ class HomeController extends GetxController with BaseController {
 
   // ScreenController screenController = Get.put(ScreenController());
   final ScreenController screenController = Get.find<ScreenController>();
+
+  // TRANSLATOR
+  final translator = GoogleTranslator();
 
   @override
   void onInit() {
@@ -88,7 +101,10 @@ class HomeController extends GetxController with BaseController {
     getTransaction();
     getAccommodation();
     getSeriesDetails();
-    getAvailableRooms();
+    getRoomType();
+    // getAvailableRooms();
+    getPaymentType();
+    getAvailableRoomsGraphQL();
     // getRooms();
   }
 
@@ -98,6 +114,9 @@ class HomeController extends GetxController with BaseController {
     super.onReady();
     getCamera();
     hostname.value = Platform.localHostname;
+    // var os = Platform.operatingSystem;
+    // var system = Platform.operatingSystemVersion;
+    // openSerialPort();
   }
 
   @override
@@ -105,6 +124,45 @@ class HomeController extends GetxController with BaseController {
     super.onClose();
     stopTimer();
     screenController.dispose();
+  }
+
+  // SERIAL PORT TEST
+  Future openSerialPort() async {
+    // final portName = SerialPort.availablePorts.first;
+    // SerialPort serialPort = SerialPort(portName);
+    // var response = await serialPort.open(mode: SerialPortMode.readWrite);
+
+    // final port = SerialPort(portName);
+    // port.config.baudRate = 9600;
+
+    // var result = port.openReadWrite();
+    // if (result) {
+    //   try {
+    //     port.write(stringToUint8List('0XC0'));
+
+    //     final portReader = SerialPortReader(port);
+    //     Stream<String> dataRead = portReader.stream.map(
+    //       (event) {
+    //         return String.fromCharCodes(event);
+    //       },
+    //     );
+
+    //     dataRead.listen(
+    //       (event) {
+    //         print('read data: $event');
+    //       },
+    //     );
+    //   } on SerialPortError catch (err, _) {
+    //     print(SerialPort.lastError);
+    //     port.close();
+    //   }
+    // }
+  }
+
+  Uint8List stringToUint8List(String data) {
+    List<int> codeUnits = data.codeUnits;
+    Uint8List uint8list = Uint8List.fromList(codeUnits);
+    return uint8list;
   }
 
   String properCase(String value) {
@@ -194,6 +252,7 @@ class HomeController extends GetxController with BaseController {
 
     final img64 = base64Encode(imgBytes);
     if (img64.isNotEmpty) {
+      File(pictureFile.path).delete();
       return img64.toString();
     } else {
       return '';
@@ -268,7 +327,7 @@ class HomeController extends GetxController with BaseController {
     try {
       if (response != null) {
         transactionList.add(response);
-        print('TRANSLATION RECORDS: ${transactionList.first.data.translations.length}');
+        print('TRANSLATION RECORDS: ${transactionList.first.data.conversion.length}');
         getMenu(languageID: 0, code: 'SLMT', type: 'TITLE');
         isLoading.value = false;
         return true;
@@ -284,10 +343,15 @@ class HomeController extends GetxController with BaseController {
   Future<bool> getAccommodation() async {
     isLoading.value = true;
     final response = await GlobalProvider().fetchAccommodationType(3);
+    // const inputHenry = 'Acknowledgement';
 
     try {
       if (response != null) {
+        // await translator.translate('sex', from: 'en', to: 'zh-cn').then((value) => print(value));
+        // print(await inputHenry.translate(from: 'en', to: 'ja'));
+
         accommodationTypeList.add(response);
+
         print('TOTAL ACCOMMODATION: ${accommodationTypeList.first.data.accommodationTypes.length}');
         isLoading.value = false;
         return true;
@@ -339,6 +403,28 @@ class HomeController extends GetxController with BaseController {
     return false;
   }
 
+  Future<bool?> getAvailableRoomsGraphQL() async {
+    isLoading.value = true;
+
+    final dtnow = DateTime.now();
+
+    final response = await GlobalProvider().fetchAvailableRoomsGraphQL(
+        agentID: 1, roomTypeID: 1, accommodationTypeID: 1, startDate: dtnow, endDate: dtnow);
+
+    try {
+      if (response != null) {
+        availableRoomList.add(response);
+        availableRoomList.shuffle();
+        return true;
+      } else {
+        isLoading.value = false;
+        return false;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<bool> getRooms() async {
     isLoading.value = true;
 
@@ -362,18 +448,51 @@ class HomeController extends GetxController with BaseController {
     return false;
   }
 
+  // PAYMENT TYPE
+  Future<bool> getPaymentType() async {
+    isLoading.value = true;
+
+    final response = await GlobalProvider().fetchPaymentType();
+    try {
+      if (response != null) {
+        paymentTypeList.add(response);
+        return true;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
+  }
+
+  // ROOM TYPE
+  Future<bool> getRoomType() async {
+    isLoading.value = true;
+
+    final response = await GlobalProvider().fetchRoomTypes();
+
+    try {
+      if (response != null) {
+        roomTypeList.add(response);
+        return true;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
+  }
+
   Future addTransaction() async {
     isLoading.value = true;
     final dtNow = DateTime.now();
 
     // add contact first
-    var result = languageList.first.data.languages.where((element) => element.id == selecttedLanguageID.value);
-    var nationalCode = result.first.code;
+    // var result = languageList.first.data.languages.where((element) => element.id == selecttedLanguageID.value);
+    // var nationalCode = result.first.code;
 
-    int? resultID = await GlobalProvider().fetchNationalities(code: nationalCode);
+    // int? resultID = await GlobalProvider().fetchNationalities(code: nationalCode);
 
-    if (resultID != 0) {
-      selectedNationalities.value = resultID!;
+    if (selecttedLanguageID.value != 0) {
+      // selectedNationalities.value = resultID!;
       String? name = '$hostname-${seriesDetailsList.first.data.seriesDetails.first.docNo}';
 
       int? contactID = await GlobalProvider().addContacts(
@@ -383,7 +502,7 @@ class HomeController extends GetxController with BaseController {
           middleName: 'Kiosk',
           prefixID: 1,
           suffixID: 1,
-          nationalityID: selectedNationalities.value,
+          nationalityID: selecttedLanguageID.value,
           createdDate: dtNow,
           createdBy: hostname.value,
           genderID: 1,
@@ -419,23 +538,43 @@ class HomeController extends GetxController with BaseController {
       // TITLE
       if (type == "TITLE") {
         titleTrans.addAll(
-            transactionList[0].data.translations.where((element) => element.code == code && element.type == 'TITLE'));
+            transactionList[0].data.conversion.where((element) => element.code == code && element.type == 'TITLE'));
       } else {
         titleTrans.addAll(transactionList[0]
             .data
-            .translations
+            .conversion
             .where((element) => element.languageId == languageID && element.code == code && element.type == 'TITLE'));
+        // titleTrans.addAll(
+        //     transactionList[0].data.conversion.where((element) => element.code == code && element.type == 'TITLE'));
       }
+      // for (var ctr = 0; ctr < titleTrans.length; ctr++) {
+      //   var valueString = await titleTrans[ctr].translationText.translate(
+      //       from: screenController.defaultLanguageCode.value.toLowerCase(),
+      //       to: selectedLanguageCode.value.toLowerCase());
+      //   titleTrans[ctr].translationText = valueString.toString();
+      //   print(valueString);
+      // }
       print('TOTAL MENU : ${titleTrans.length}');
 
       // ITEM
       pageTrans.addAll(
         transactionList[0]
             .data
-            .translations
+            .conversion
             .where((element) => element.languageId == languageID && element.code == code && element.type == type),
       );
+      // pageTrans.addAll(
+      //   transactionList[0].data.conversion.where((element) => element.code == code && element.type == type),
+      // );
+
+      // for (var ctr = 0; ctr < pageTrans.length; ctr++) {
+      //   var valueString = await pageTrans[ctr].translationText.translate(
+      //       from: screenController.defaultLanguageCode.value.toLowerCase(),
+      //       to: selectedLanguageCode.value.toLowerCase());
+      //   pageTrans[ctr].translationText = valueString.toString();
+      // }
       print('TOTAL MENU ITEMS ($code : $type) : ${pageTrans.length} : INDEX: $indexCode');
+
       return true;
     } else {
       return false;

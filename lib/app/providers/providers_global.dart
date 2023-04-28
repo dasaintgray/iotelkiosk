@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:hasura_connect/hasura_connect.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
-import 'package:iotelkiosk/app/data/models_graphql/roomtypes_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/paymentType_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
@@ -48,7 +50,7 @@ class GlobalProvider extends BaseController {
   // POST
 
   // GRAPHQL
-  Future<LanguageModel?> fetchLanguages() async {
+  Future<LanguageModel?> fetchLanguages({int? agentID}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
 
     final response = await hasuraConnect.query(HenryGlobal.qryLanguage).catchError(handleError);
@@ -59,18 +61,25 @@ class GlobalProvider extends BaseController {
     return null;
   }
 
-  // Future<TransactionModel?> fetchTransaction(String? title) async {
-  //   final qryVariable = {'title': title};
+  Future<AvailableRoomsModel?> fetchAvailableRoomsGraphQL(
+      {int? agentID, int? roomTypeID, int? accommodationTypeID, DateTime? startDate, DateTime? endDate}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL);
 
-  //   HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+    final params = {
+      "agentID": agentID,
+      "roomTypeID": roomTypeID,
+      "accommodationTypeID": accommodationTypeID,
+      "startDate": startDate?.toIso8601String().substring(0, startDate.toIso8601String().length - 3),
+      "endDate": endDate?.toIso8601String().substring(0, endDate.toIso8601String().length - 3)
+    };
 
-  //   final response = await hasuraConnect.query(qryTransaction, variables: qryVariable).catchError(handleError);
+    final response = await hasuraConnect.query(qryAvaiableRooms, variables: params).catchError(handleError);
 
-  //   if (response != null) {
-  //     return transactionModelFromJson(jsonEncode(response));
-  //   }
-  //   return null;
-  // }
+    if (response != null) {
+      return availableRoomsModelFromJson(jsonEncode(response));
+    }
+    return null;
+  }
 
   Future<TransactionModel?> getTranslation() async {
     // final qryVariable = {'title': title};
@@ -129,7 +138,7 @@ class GlobalProvider extends BaseController {
     final response = await hasuraConnect.query(qryRoomTypes).catchError(handleError);
 
     if (response != null) {
-      return roomTypesModelFromJson(response);
+      return roomTypesModelFromJson(jsonEncode(response));
     }
 
     return null;
@@ -163,6 +172,31 @@ class GlobalProvider extends BaseController {
       return 0;
     }
   }
+
+  Future<PaymentTypeModel?> fetchPaymentType() async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+
+    final response = await hasuraConnect.query(qryPaymentType).catchError(handleError);
+    if (response != null) {
+      return paymentTypeModelFromJson(jsonEncode(response));
+    }
+    return null;
+  }
+
+  // DYNAMIC AND GLOBAL FETCH ON ALL QUERY
+  //  -----------------------------------------------------------------------------------------------------
+  Future<dynamic> fetchGraphQLData(
+      {String? documents, Map<String, dynamic>? params, Map<String, String>? headers}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+
+    final response = await hasuraConnect.query(documents!, variables: params, headers: headers).catchError(handleError);
+    if (response != null) {
+      return jsonEncode(response);
+    } else {
+      return null;
+    }
+  }
+  //  -----------------------------------------------------------------------------------------------------
 
   // MUTATION AREA (INSERT, UPDATE, DELETE)
   Future<int>? addContacts(
@@ -254,7 +288,9 @@ class GlobalProvider extends BaseController {
       "DocNo": docNo,
       "isActive": isActive,
       "modifiedBy": modifiedBy,
-      "modifiedDate": ngayon
+      "modifiedDate": ngayon,
+      "tranDate": ngayon,
+      "reservationDate": ngayon
     };
 
     var response = await hasuraConnect.mutation(updateSeries, variables: updateParams).catchError(handleError);

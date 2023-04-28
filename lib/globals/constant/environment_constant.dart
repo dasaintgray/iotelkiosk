@@ -30,7 +30,8 @@ class HenryGlobal {
   static var loginBody = {"Username": "immarketplace", "Password": "uw2zkyIlUQJ73LlmaGXz176meEYWo8i7bHa5oWg3H3U="};
 
   // GRAPHQL HOST AND QUERY
-  static const hostURL = 'https://gql.circuitmindz.com/v1/graphql';
+  static const hostURL = "https://gql.circuitmindz.com/v1/graphql";
+  static const sandboxGQL = 'http://sandbox.ad.circuitmindz.com:5001/graphql';
 
   static const qryLanguage = """
       query GetLanguages {
@@ -47,17 +48,37 @@ class HenryGlobal {
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ac odio finibus, pharetra odio in, ornare lectus. Pellentesque eu faucibus justo. Aliquam lobortis nisl vitae ex interdum, ac aliquet quam ultricies. Praesent fringilla tortor et lectus sodales tempus. Nam id hendrerit orci. Etiam eget libero et mi placerat interdum. Sed tempor erat vel mattis gravida. Nunc tempor, massa id volutpat accumsan, purus erat accumsan urna, eu fermentum metus lacus vel odio.";
 }
 
-// variable query
-String qryTranslation = """query getTranslation {
-    Translations {
+String qryLenguwahe = r'''
+query getLanguage {
+  lenguwahe: Languages {
+    Id
+    code
+    description
+    flag
+    lenguwahe_details: Languages_Translations {
       LanguageId
+      code
+      type
       translationText
       description
-      code
       images
-      type
     }
-  }""";
+  }
+}
+''';
+
+// variable query
+String qryTranslation = r"""query getTranslation {
+  Conversion: Translations(where: {isActive: {_eq: true}}) {
+    LanguageId
+    translationText
+    description
+    code
+    images
+    type
+  }
+}
+""";
 
 String qrySettings = """query getSettings {
     Settings {
@@ -67,7 +88,8 @@ String qrySettings = """query getSettings {
     }
   }""";
 
-String qryAccomodationType = r"""query getAccomType($limit: Int!) {
+String qryAccomodationType = r"""
+  query getAccomType($limit: Int!) {
     AccommodationTypes(order_by: {seq: asc}, limit: $limit) {
       Id
       valueMin
@@ -107,7 +129,8 @@ String qryGetRooms = """query GetRooms {
   }
 }""";
 
-String qrySeriesDetails = r"""query getSeriesDetails {
+String qrySeriesDetails = r"""
+query getSeriesDetails {
   SeriesDetails(where: {ModuleId: {_eq: 5}, _and: {isActive: {_eq: true}}}, limit: 1, order_by: {Id: asc}) {
     Id
     SeriesId
@@ -123,36 +146,25 @@ String qrySeriesDetails = r"""query getSeriesDetails {
 }
 """;
 
-String qryAvaiableRooms =
-    r'''query GetRooms($RoomTypeID Int!, $AccommodationTypeId Int!, $endDate1 String!, $startDate String!) {
-  AvailableRooms: Rooms(
+String qryAvaiableRooms = r'''
+query getAvailableRooms($agentID: Int!, $roomTypeID: Int!, 
+  $accommodationTypeID: Int!, $startDate: DateTime!, $endDate: DateTime!) {
+  AvailableRooms(
     where: {
-      bed: {_gte: 1}, 
-      isActive: {_eq: true},
-      RoomTypeId: {_eq: 1},
-      RoomRates: { isActive: {_eq: true}, AgentId: {_eq: 1}, AccommodationTypeId: {_eq: 1}}, 
-      RoomStatus: {isHidden: {_eq: false}}, 
-      _and:{
-        _not: {
-          Rooms_Bookings:{
-            BookingStatusId: {_eq: 1}, 
-            _and: {endDate: {_lt: "2023-04-13"}},
-            _or: [
-              {startDate:{_gte: "2023-04-13"}},
-              {endDate: {_lte: "2023-04-13"}},
-            ],
-            cancelDate:{_is_null: true}
-          }
-        }
-      }
-    }
-    limit: 3
+      agentId: $agentID, 
+      roomTypeId: $roomTypeID, 
+      accommodationTypeId: $accommodationTypeID, 
+      startDate: $startDate, 
+      endDate: $endDate}
   ) {
-    Id
     description
-    code
+    rate
+    serviceCharge
+    photo
+    id
   }
-} ''';
+} 
+''';
 
 String qryRoomTypes = r'''query getRoomTypes {
   RoomTypes {
@@ -197,6 +209,28 @@ query getNationalities($code: String!) {
 }
 ''';
 
+String qryTerminals = r'''query getTerminal {
+  Terminals {
+    isActive
+    code
+    description
+    LocationId
+    macAddress
+    terminalDetails: Terminals_TerminalDetails {
+      value
+      description
+    } 
+  }
+}''';
+
+String qryPaymentType = r'''
+query getPayment {
+  payment: PaymentTypes {
+    description
+    code
+  }
+}''';
+
 // MUTATION AREA (INSERT, UPDATE, DELETE)
 // ----------------------------------------------------------------------------------------------------
 
@@ -214,8 +248,10 @@ mutation hayupsimaster {
 String updateSeries = r''' 
 mutation updateSeriesDetails($ID: Int!, $DocNo: String!, 
     $isActive: Boolean!, $modifiedBy: String!, 
-    $modifiedDate: datetime!) {
-  update_SeriesDetails(where: {Id: {_eq: $ID}, _and: {docNo: {_eq: $DocNo}}}, _set: {isActive: $isActive, modifiedBy: $modifiedBy, modifiedDate: $modifiedDate}) {
+    $modifiedDate: datetime!, $tranDate: datetime!, $reservationDate: datetime!) {
+  update_SeriesDetails(where: {Id: {_eq: $ID}, _and: {docNo: {_eq: $DocNo}}}, 
+  _set: {isActive: $isActive, modifiedBy: $modifiedBy, 
+    modifiedDate: $modifiedDate, tranDate: $tranDate, reservationDate: $reservationDate}) {
     returning {
       Id
       docNo

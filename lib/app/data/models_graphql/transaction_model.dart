@@ -33,29 +33,29 @@ class TransactionModel {
 
 class Data {
   Data({
-    required this.translations,
+    required this.conversion,
   });
 
-  final List<Translation> translations;
+  final List<Conversion> conversion;
 
   Data copyWith({
-    required List<Translation> translations,
+    required List<Conversion> conversion,
   }) =>
       Data(
-        translations: translations,
+        conversion: conversion,
       );
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
-        translations: List<Translation>.from(json["Translations"].map((x) => Translation.fromJson(x))),
+        conversion: List<Conversion>.from(json["Conversion"].map((x) => Conversion.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
-        "Translations": List<dynamic>.from(translations.map((x) => x.toJson())),
+        "Conversion": List<dynamic>.from(conversion.map((x) => x.toJson())),
       };
 }
 
-class Translation {
-  Translation({
+class Conversion {
+  Conversion({
     required this.languageId,
     required this.translationText,
     required this.description,
@@ -65,13 +65,13 @@ class Translation {
   });
 
   final int languageId;
-  final String translationText;
+  late String translationText;
   final String description;
   final String code;
   final String? images;
   final String? type;
 
-  Translation copyWith({
+  Conversion copyWith({
     required int languageId,
     required String translationText,
     required String description,
@@ -79,7 +79,7 @@ class Translation {
     String? images,
     String? type,
   }) =>
-      Translation(
+      Conversion(
         languageId: languageId,
         translationText: translationText,
         description: description,
@@ -88,7 +88,7 @@ class Translation {
         type: type ?? this.type,
       );
 
-  factory Translation.fromJson(Map<String, dynamic> json) => Translation(
+  factory Conversion.fromJson(Map<String, dynamic> json) => Conversion(
         languageId: json["LanguageId"],
         translationText: json["translationText"],
         description: json["description"],

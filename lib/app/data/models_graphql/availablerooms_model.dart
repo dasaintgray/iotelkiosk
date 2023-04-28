@@ -9,11 +9,11 @@ AvailableRoomsModel availableRoomsModelFromJson(String str) => AvailableRoomsMod
 String availableRoomsModelToJson(AvailableRoomsModel data) => json.encode(data.toJson());
 
 class AvailableRoomsModel {
+  Data data;
+
   AvailableRoomsModel({
     required this.data,
   });
-
-  Data data;
 
   factory AvailableRoomsModel.fromJson(Map<String, dynamic> json) => AvailableRoomsModel(
         data: Data.fromJson(json["data"]),
@@ -25,41 +25,49 @@ class AvailableRoomsModel {
 }
 
 class Data {
+  List<AvailableRoom> availableRooms;
+
   Data({
-    required this.rooms,
+    required this.availableRooms,
   });
 
-  List<Room> rooms;
-
   factory Data.fromJson(Map<String, dynamic> json) => Data(
-        rooms: List<Room>.from(json["rooms"].map((x) => Room.fromJson(x))),
+        availableRooms: List<AvailableRoom>.from(json["AvailableRooms"].map((x) => AvailableRoom.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
-        "rooms": List<dynamic>.from(rooms.map((x) => x.toJson())),
+        "AvailableRooms": List<dynamic>.from(availableRooms.map((x) => x.toJson())),
       };
 }
 
-class Room {
-  Room({
-    required this.id,
+class AvailableRoom {
+  String description;
+  double rate;
+  double serviceCharge;
+  String? photo;
+  String id;
+
+  AvailableRoom({
     required this.description,
-    required this.code,
+    required this.rate,
+    required this.serviceCharge,
+    this.photo,
+    required this.id,
   });
 
-  int id;
-  String description;
-  String code;
-
-  factory Room.fromJson(Map<String, dynamic> json) => Room(
-        id: json["Id"],
+  factory AvailableRoom.fromJson(Map<String, dynamic> json) => AvailableRoom(
         description: json["description"],
-        code: json["code"],
+        rate: json["rate"],
+        serviceCharge: json["serviceCharge"],
+        photo: json["photo"],
+        id: json["id"],
       );
 
   Map<String, dynamic> toJson() => {
-        "Id": id,
         "description": description,
-        "code": code,
+        "rate": rate,
+        "serviceCharge": serviceCharge,
+        "photo": photo,
+        "id": id,
       };
 }
