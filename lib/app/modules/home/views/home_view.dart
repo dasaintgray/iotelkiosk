@@ -2,6 +2,7 @@
 
 import 'dart:math' as math;
 
+import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -117,7 +118,7 @@ class HomeView extends GetView<HomeController> {
                               languageID: hc.selecttedLanguageID.value,
                             ),
                             // 4 - DISCLAIMER
-                            menuDisclaimer(orientation),
+                            menuDisclaimer(orientation, context),
 
                             // menuCheckIn(orientation,
                             //     languageID: hc.selecttedLanguageID.value, code: 'SBP', type: 'ITEM'),
@@ -720,7 +721,7 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  menuDisclaimer(Orientation orientation) {
+  menuDisclaimer(Orientation orientation, BuildContext context) {
     return SizedBox(
       height: orientation == Orientation.portrait ? 49.h : 20.h,
       width: 75.w,
@@ -772,6 +773,7 @@ class HomeView extends GetView<HomeController> {
                       : MaterialButton(
                           onPressed: () async {
                             hc.isLoading.value = true;
+                            var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
                             var response = await hc.addTransaction();
                             if (response) {
                               //
@@ -794,7 +796,75 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  menuPayment() {}
+  menuPaymentType(Orientation orientation, {int? languageID, String? code, String? type}) {
+    return Obx(
+      () => SizedBox(
+        height: orientation == Orientation.portrait ? 49.h : 20.h,
+        width: 70.w,
+        child: ListView.builder(
+          padding: const EdgeInsets.all(25.0),
+          itemCount: hc.accommodationTypeList.first.data.accommodationTypes.length,
+          physics: const ClampingScrollPhysics(),
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              height: 10.h,
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 25.w,
+                    top: 35,
+                    right: 10.w,
+                    child: SizedBox(
+                      width: 10.w,
+                      child: Animate(
+                        // effects: const [FadeEffect(), ScaleEffect()],
+                        child: Text(
+                          hc.accommodationTypeList.first.data.accommodationTypes[index].description,
+                          style: TextStyle(
+                            color: HenryColors.darkGreen,
+                            fontSize: 12.sp,
+                          ),
+                        )
+                            .animate()
+                            .fade(duration: HenryGlobal.animationSpeed)
+                            .scale(duration: HenryGlobal.animationSpeed),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 8.w,
+                    right: 8.w,
+                    child: GestureDetector(
+                      onTap: () {
+                        var response = hc.getMenu(languageID: languageID, code: 'DI', type: 'ITEM');
+                        if (response) {
+                          hc.selectedAccommodationType.value =
+                              hc.accommodationTypeList.first.data.accommodationTypes[index].id;
+                          hc.initializeCamera();
+                          hc.menuIndex.value = 4;
+                        }
+                      },
+                      child: SizedBox(
+                        height: 7.h,
+                        child: hc.accommodationTypeList.first.data.accommodationTypes.isNotEmpty
+                            ? Image.asset(
+                                    'assets/menus/hour${hc.accommodationTypeList.first.data.accommodationTypes[index].seq}.png',
+                                    fit: BoxFit.contain)
+                                .animate()
+                                .fade(duration: HenryGlobal.animationSpeed)
+                                .scale(duration: HenryGlobal.animationSpeed)
+                            : null,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
 
   Widget menuGuestInformation(Orientation orientation, {int? languageID, String? code, String? type}) {
     // final GlobalKey<FormState> formKey = GlobalKey<FormState>;
