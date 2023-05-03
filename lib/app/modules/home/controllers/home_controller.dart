@@ -24,6 +24,11 @@ import 'package:timezone/standalone.dart' as tz;
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:translator/translator.dart';
 
+// FFI AND WIN32
+import 'package:ffi/ffi.dart' as fi;
+import 'package:win32/win32.dart';
+import 'dart:ffi' as dartffi;
+
 class HomeController extends GetxController with BaseController {
   DateTime japanNow = DateTime.now();
   DateTime newyorkNow = DateTime.now();
@@ -189,6 +194,44 @@ class HomeController extends GetxController with BaseController {
       return false;
     }
   }
+
+  // FIND THE WINDOW HANDLE USING THE WIN32 AND FFI
+  int? findVideoPlayer({String? pamagat}) {
+    final source = pamagat.toString().toNativeUtf16();
+
+    final hwnd = FindWindowEx(0, 0, source, dartffi.nullptr);
+
+    if (hwnd == 0) {
+      print('cannot find window');
+    } else {
+      return hwnd;
+    }
+    return 0;
+  }
+
+  int enumWindowsProc(int hWnd, int lParam) {
+    // Don't enumerate windows unless they are marked as WS_VISIBLE
+    if (IsWindowVisible(hWnd) == FALSE) return TRUE;
+
+    final length = GetWindowTextLength(hWnd);
+    if (length == 0) {
+      return TRUE;
+    }
+
+    final buffer = wsalloc(length + 1);
+    GetWindowText(hWnd, buffer, length + 1);
+    print('hWnd $hWnd: ${buffer.toDartString()}');
+    free(buffer);
+
+    return TRUE;
+  }
+
+  // void enumerateWindows() {
+  //   final wndProc = dartffi.Pointer.fromFunction<EnumWindowsProc>(enumWindowsProc, 0);
+  //   // dartffi.Pointer.fromFunction<EnumWindowsProc>(enumWindowsProc, 0);
+  //   EnumWindows(wndProc, 0);
+  // }
+  // FIND THE WINDOW HANDLE USING THE WIN32 AND FFI
 
   // INITIALIZING CAMERAS
   // AUTHOR: Henry V. Mempin
