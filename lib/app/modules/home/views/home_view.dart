@@ -2,7 +2,6 @@
 
 import 'dart:math' as math;
 
-import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -246,7 +245,7 @@ class HomeView extends GetView<HomeController> {
                         height: 7.h,
                         child: hc.languageList.isEmpty
                             ? null
-                            : Image.asset(hc.languageList.first.data.languages[index].flag, fit: BoxFit.fill)
+                            : Image.asset(hc.languageList.first.data.languages[index].flag!, fit: BoxFit.fill)
                                 .animate()
                                 .fade(duration: HenryGlobal.animationSpeed)
                                 .scale(duration: HenryGlobal.animationSpeed),
@@ -773,7 +772,7 @@ class HomeView extends GetView<HomeController> {
                       : MaterialButton(
                           onPressed: () async {
                             hc.isLoading.value = true;
-                            var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
+                            // var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
                             var response = await hc.addTransaction();
                             if (response) {
                               //

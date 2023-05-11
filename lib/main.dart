@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart';
 
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 import 'app/routes/app_pages.dart';
 
@@ -14,6 +15,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
 
+  await GetStorage.init();
+
   // VIDEO PLAYER
   DartVLC.initialize();
 
@@ -21,7 +24,7 @@ void main() async {
     // size: Size(1080, 1920),
     fullScreen: true,
     center: true,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     skipTaskbar: false,
     // titleBarStyle: TitleBarStyle.normal,
   );

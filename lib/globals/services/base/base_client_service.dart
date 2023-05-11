@@ -68,7 +68,8 @@ class HenryBaseClient {
   }
 
   // POST
-  Future<dynamic> postRequest(String baseURL, String endpoint, dynamic bodyPayload, {dynamic httpHeaders}) async {
+  Future<dynamic> postRequest(String baseURL, String endpoint, Map<String, String> bodyPayload,
+      {dynamic httpHeaders}) async {
     var uriEndpoint = Uri.parse(baseURL + endpoint);
     var request = http.Request("POST", uriEndpoint);
     request.headers.addAll(httpHeaders);
@@ -83,6 +84,26 @@ class HenryBaseClient {
       throw ApiNotRespondingException('API not responding', uriEndpoint.toString());
     }
   }
+
+  // MULTIPART REQUEST
+  Future<dynamic> makeRequest(String httpMethod, String baseUrl, String endpoint, Map<String, String> formBody,
+      {Map<String, String>? headers}) async {
+    final uriEP = Uri.parse(baseUrl + endpoint);
+    var request = http.MultipartRequest(httpMethod, uriEP);
+
+    request.fields.addAll(formBody);
+
+    try {
+      http.StreamedResponse response =
+          await request.send().timeout(const Duration(seconds: HenryGlobal.receiveTimeOut));
+      return _processStreamedResponse(response);
+    } on SocketException {
+      throw FetchDataException('No Internet Connection', uriEP.toString());
+    } on TimeoutException {
+      throw ApiNotRespondingException('API not responding', uriEP.toString());
+    }
+  }
+
   // UPDATE
   // DELETE
 

@@ -184,16 +184,16 @@ class HomeController extends GetxController with BaseController {
     return result;
   }
 
-  bool checkMonitor() {
-    final monitorData = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+  // bool checkMonitor() {
+  //   final monitorData = MediaQueryData.fromView();
 
-    final bool isMonitor = monitorData.size.shortestSide > 600;
-    if (isMonitor) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+  //   final bool isMonitor = monitorData.size.shortestSide > 600;
+  //   if (isMonitor) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // }
 
   // FIND THE WINDOW HANDLE USING THE WIN32 AND FFI
   int? findVideoPlayer({String? pamagat}) {

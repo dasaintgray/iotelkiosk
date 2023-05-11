@@ -10,6 +10,7 @@ import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
+import 'package:iotelkiosk/app/data/models_rest/userlogin_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/services/base/base_client_service.dart';
@@ -42,6 +43,17 @@ class GlobalProvider extends BaseController {
         .catchError(handleError);
     if (availRoomResponse != null) {
       return roomAvailableModelFromJson(availRoomResponse);
+    } else {
+      return null;
+    }
+  }
+
+  Future<UserLoginModel?> userLogin() async {
+    final response = await HenryBaseClient()
+        .makeRequest('POST', HenryGlobal.hostREST, HenryGlobal.userEP, HenryGlobal.userLogin)
+        .catchError(handleError);
+    if (response != null) {
+      return userLoginModelFromJson(response);
     } else {
       return null;
     }

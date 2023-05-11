@@ -27,8 +27,16 @@ class HenryStorage {
   }
 
   //GLOBAL Method
-  static saveToLS(String tokenValue, {String? titulo = "token"}) {
+  static saveToLS(dynamic tokenValue, {String? titulo = "token"}) {
     return GetStorage().write(titulo!, tokenValue);
+  }
+
+  static saveListToLS(dynamic tokenValue, {String? titulo = 'token'}) {
+    return GetStorage().write(titulo!, tokenValue);
+  }
+
+  static readListFromLS({String? titulo = "token"}) {
+    return GetStorage().read(titulo!);
   }
 
   static readFromLS({String? titulo = "token"}) {

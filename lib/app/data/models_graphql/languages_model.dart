@@ -45,13 +45,13 @@ class Language {
     required this.id,
     required this.description,
     required this.code,
-    required this.flag,
+    this.flag,
   });
 
   final int id;
   final String description;
   final String code;
-  final String flag;
+  String? flag;
 
   factory Language.fromJson(Map<String, dynamic> json) => Language(
         id: json["Id"],

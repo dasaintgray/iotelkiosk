@@ -8,6 +8,10 @@ class HenryGlobal {
   static const int connectionTimeOut = 20;
   static const int sendTimeOut = 20;
 
+  // LOCAL STORAGE
+  static const jwtToken = 'accessToken';
+  static const jwtExpire = 'tokenExpire';
+
   // ANIMATION SPEED
   static Duration animationSpeed = 200.ms;
 
@@ -28,10 +32,15 @@ class HenryGlobal {
   static var graphQlHeaders = {'Content-Type': 'application/json', 'x-hasura-admin-secret': 'iph2020agorah!'};
 
   static var loginBody = {"Username": "immarketplace", "Password": "uw2zkyIlUQJ73LlmaGXz176meEYWo8i7bHa5oWg3H3U="};
+  static var userLogin = {'username': 'admin', 'password': 'admin1'};
 
   // GRAPHQL HOST AND QUERY
-  static const hostURL = "https://gql.circuitmindz.com/v1/graphql";
-  static const sandboxGQL = 'http://sandbox.ad.circuitmindz.com:5001/graphql';
+  // static const hostURL = "https://gql.circuitmindz.com/v1/graphql";
+  static const hostURL = "http://sandbox.ad.circuitmindz.com:5000/graphql";
+  static const hostREST = "http://sandbox.ad.circuitmindz.com:5000";
+  static const sandboxGQL = 'http://sandbox.ad.circuitmindz.com:5000/graphql';
+
+  static const userEP = '/api/users/login';
 
   static const qryLanguage = """
       query GetLanguages {

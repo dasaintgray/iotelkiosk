@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
+import 'package:iotelkiosk/app/data/models_rest/userlogin_model.dart';
 
 import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
+import 'package:iotelkiosk/globals/constant/environment_constant.dart';
+import 'package:iotelkiosk/globals/services/base/base_storage.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 
 class ScreenController extends GetxController with BaseController {
@@ -24,6 +27,7 @@ class ScreenController extends GetxController with BaseController {
   // LIST or OBJECT DATA
   final weatherList = <WeatherModel>[].obs;
   final settingsList = <SettingsModel>[].obs;
+  final userLoginList = <UserLoginModel>[].obs;
 
   final player = Player(
     id: 0,
@@ -32,6 +36,7 @@ class ScreenController extends GetxController with BaseController {
   @override
   void onInit() async {
     super.onInit();
+    await userLogin();
     await getSettings();
     await getWeather();
     mediaOpen();
@@ -101,6 +106,24 @@ class ScreenController extends GetxController with BaseController {
         return true;
       } else {
         isLoading.value = false;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
+  }
+
+  Future<bool> userLogin() async {
+    isLoading.value = true;
+
+    final userresponse = await GlobalProvider().userLogin();
+    try {
+      if (userresponse != null) {
+        userLoginList.add(userresponse);
+        HenryStorage.saveToLS(titulo: HenryGlobal.jwtToken, userresponse.accessToken);
+        HenryStorage.saveToLS(titulo: HenryGlobal.jwtExpire, userresponse.expiresIn);
+        isLoading.value = false;
+        return true;
       }
     } finally {
       isLoading.value = false;
