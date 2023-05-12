@@ -68,7 +68,11 @@ class ScreenController extends GetxController with BaseController {
 
   Future<bool> getSettings() async {
     isLoading.value = true;
-    final settingsResponse = await GlobalProvider().fetchSettings();
+
+    final accessToken = HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
+    final headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'};
+
+    final settingsResponse = await GlobalProvider().fetchSettings(headers: headers);
 
     try {
       if (settingsResponse != null) {

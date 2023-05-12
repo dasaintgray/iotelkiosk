@@ -4,7 +4,7 @@ import 'package:hasura_connect/hasura_connect.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
-import 'package:iotelkiosk/app/data/models_graphql/paymentType_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/payment_type_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
@@ -50,7 +50,7 @@ class GlobalProvider extends BaseController {
 
   Future<UserLoginModel?> userLogin() async {
     final response = await HenryBaseClient()
-        .makeRequest('POST', HenryGlobal.hostREST, HenryGlobal.userEP, HenryGlobal.userLogin)
+        .makeFormRequest('POST', HenryGlobal.hostREST, HenryGlobal.userEP, HenryGlobal.userLogin)
         .catchError(handleError);
     if (response != null) {
       return userLoginModelFromJson(response);
@@ -62,8 +62,28 @@ class GlobalProvider extends BaseController {
   // POST
 
   // GRAPHQL
-  Future<LanguageModel?> fetchLanguages({int? agentID}) async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+
+  Future<SettingsModel?> fetchSettings({required Map<String, String> headers}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
+    final response = await hasuraConnect.query(qrySettings).catchError(handleError);
+    if (response != null) {
+      return settingsModelFromJson(jsonEncode(response));
+    }
+    return null;
+
+    // final payload = '''{"query":"$qrySettings"}''';
+
+    // final response = await HenryBaseClient()
+    //     .requestMethod('POST', HenryGlobal.hostURL, bodyPayload: payload, headers: headers)
+    //     .catchError(handleError);
+    // if (response != null) {
+    //   return settingsModelFromJson(response);
+    // }
+    // return null;
+  }
+
+  Future<LanguageModel?> fetchLanguages({int? agentID, required Map<String, String> headers}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
     final response = await hasuraConnect.query(HenryGlobal.qryLanguage).catchError(handleError);
 
@@ -74,7 +94,12 @@ class GlobalProvider extends BaseController {
   }
 
   Future<AvailableRoomsModel?> fetchAvailableRoomsGraphQL(
-      {int? agentID, int? roomTypeID, int? accommodationTypeID, DateTime? startDate, DateTime? endDate}) async {
+      {int? agentID,
+      int? roomTypeID,
+      int? accommodationTypeID,
+      DateTime? startDate,
+      DateTime? endDate,
+      required Map<String, String> headers}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL);
 
     final params = {
@@ -85,7 +110,8 @@ class GlobalProvider extends BaseController {
       "endDate": endDate?.toIso8601String().substring(0, endDate.toIso8601String().length - 3)
     };
 
-    final response = await hasuraConnect.query(qryAvaiableRooms, variables: params).catchError(handleError);
+    final response =
+        await hasuraConnect.query(qryAvaiableRooms, variables: params, headers: headers).catchError(handleError);
 
     if (response != null) {
       return availableRoomsModelFromJson(jsonEncode(response));
@@ -93,10 +119,10 @@ class GlobalProvider extends BaseController {
     return null;
   }
 
-  Future<TransactionModel?> getTranslation() async {
+  Future<TransactionModel?> getTranslation({required Map<String, String> headers}) async {
     // final qryVariable = {'title': title};
 
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
     final response = await hasuraConnect.query(qryTranslation).catchError(handleError);
 
@@ -106,22 +132,11 @@ class GlobalProvider extends BaseController {
     return null;
   }
 
-  Future<SettingsModel?> fetchSettings() async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
-
-    final response = await hasuraConnect.query(qrySettings).catchError(handleError);
-
-    if (response != null) {
-      return settingsModelFromJson(jsonEncode(response));
-    }
-    return null;
-  }
-
-  Future<AccomTypeModel?> fetchAccommodationType(int? topRecords) async {
+  Future<AccomTypeModel?> fetchAccommodationType(int? topRecords, {required Map<String, String> headers}) async {
     // for declartion of passing parameters
     final params = {'limit': topRecords};
 
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
     final response = await hasuraConnect.query(qryAccomodationType, variables: params).catchError(handleError);
 
@@ -131,8 +146,8 @@ class GlobalProvider extends BaseController {
     return null;
   }
 
-  Future<SeriesDetailsModel?> fetchSeriesDetails() async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+  Future<SeriesDetailsModel?> fetchSeriesDetails({required Map<String, String> headers}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
     final response = await hasuraConnect.query(qrySeriesDetails).catchError(handleError);
 
@@ -144,8 +159,8 @@ class GlobalProvider extends BaseController {
     return null;
   }
 
-  Future<RoomTypesModel?> fetchRoomTypes() async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+  Future<RoomTypesModel?> fetchRoomTypes({required Map<String, String> headers}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
     final response = await hasuraConnect.query(qryRoomTypes).catchError(handleError);
 
@@ -156,8 +171,9 @@ class GlobalProvider extends BaseController {
     return null;
   }
 
-  Future<dynamic> fetchRooms({bool? isInclude = false, bool? includeFragments = false}) async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+  Future<dynamic> fetchRooms(
+      {bool? isInclude = false, bool? includeFragments = false, required Map<String, String> headers}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
     final params = {"isInclude": isInclude, "includeFragments": includeFragments};
 
@@ -170,8 +186,8 @@ class GlobalProvider extends BaseController {
     return null;
   }
 
-  Future<int?> fetchNationalities({String? code}) async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+  Future<int?> fetchNationalities({String? code, required Map<String, String> headers}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
     final params = {"code": code};
 
@@ -185,8 +201,8 @@ class GlobalProvider extends BaseController {
     }
   }
 
-  Future<PaymentTypeModel?> fetchPaymentType() async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+  Future<PaymentTypeModel?> fetchPaymentType({required Map<String, String> headers}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
     final response = await hasuraConnect.query(qryPaymentType).catchError(handleError);
     if (response != null) {

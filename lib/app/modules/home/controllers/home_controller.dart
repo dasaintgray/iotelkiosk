@@ -9,13 +9,15 @@ import 'package:get/get.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
-import 'package:iotelkiosk/app/data/models_graphql/paymentType_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/payment_type_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
+import 'package:iotelkiosk/globals/constant/environment_constant.dart';
+import 'package:iotelkiosk/globals/services/base/base_storage.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 
 import 'package:timezone/data/latest.dart' as tzd;
@@ -83,8 +85,10 @@ class HomeController extends GetxController with BaseController {
   final cameraID = 0.obs;
   late Size previewSize;
 
-  // SERIAL TEST
+  late String globalAccessToken = '';
+  late Map<String, String> globalHeaders;
 
+  // SERIAL TEST
   StreamSubscription<CameraClosingEvent>? errorStreamSubscription;
   StreamSubscription<CameraClosingEvent>? cameraClosingEvent;
 
@@ -100,6 +104,9 @@ class HomeController extends GetxController with BaseController {
   @override
   void onInit() {
     super.onInit();
+    globalAccessToken = HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
+    globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer $globalAccessToken'};
+
     initTimezone();
     startTimer();
     getLanguages();
@@ -348,7 +355,9 @@ class HomeController extends GetxController with BaseController {
 
   Future<bool> getLanguages() async {
     isLoading.value = true;
-    final response = await GlobalProvider().fetchLanguages();
+
+    final response = await GlobalProvider().fetchLanguages(headers: globalHeaders);
+
     try {
       if (response != null) {
         languageList.add(response);
@@ -366,7 +375,8 @@ class HomeController extends GetxController with BaseController {
 
   Future<bool> getTransaction() async {
     isLoading.value = true;
-    final response = await GlobalProvider().getTranslation();
+
+    final response = await GlobalProvider().getTranslation(headers: globalHeaders);
     try {
       if (response != null) {
         transactionList.add(response);
@@ -385,7 +395,7 @@ class HomeController extends GetxController with BaseController {
 
   Future<bool> getAccommodation() async {
     isLoading.value = true;
-    final response = await GlobalProvider().fetchAccommodationType(3);
+    final response = await GlobalProvider().fetchAccommodationType(3, headers: globalHeaders);
     // const inputHenry = 'Acknowledgement';
 
     try {
@@ -408,7 +418,7 @@ class HomeController extends GetxController with BaseController {
   Future<bool> getSeriesDetails() async {
     isLoading.value = true;
 
-    final response = await GlobalProvider().fetchSeriesDetails();
+    final response = await GlobalProvider().fetchSeriesDetails(headers: globalHeaders);
 
     try {
       if (response != null) {
@@ -452,7 +462,7 @@ class HomeController extends GetxController with BaseController {
     final dtnow = DateTime.now();
 
     final response = await GlobalProvider().fetchAvailableRoomsGraphQL(
-        agentID: 1, roomTypeID: 1, accommodationTypeID: 1, startDate: dtnow, endDate: dtnow);
+        agentID: 1, roomTypeID: 1, accommodationTypeID: 1, startDate: dtnow, endDate: dtnow, headers: globalHeaders);
 
     try {
       if (response != null) {
@@ -471,7 +481,8 @@ class HomeController extends GetxController with BaseController {
   Future<bool> getRooms() async {
     isLoading.value = true;
 
-    final responseValue = await GlobalProvider().fetchRooms(isInclude: false, includeFragments: true);
+    final responseValue =
+        await GlobalProvider().fetchRooms(isInclude: false, includeFragments: true, headers: globalHeaders);
 
     try {
       if (responseValue != null) {
@@ -495,7 +506,7 @@ class HomeController extends GetxController with BaseController {
   Future<bool> getPaymentType() async {
     isLoading.value = true;
 
-    final response = await GlobalProvider().fetchPaymentType();
+    final response = await GlobalProvider().fetchPaymentType(headers: globalHeaders);
     try {
       if (response != null) {
         paymentTypeList.add(response);
@@ -511,7 +522,7 @@ class HomeController extends GetxController with BaseController {
   Future<bool> getRoomType() async {
     isLoading.value = true;
 
-    final response = await GlobalProvider().fetchRoomTypes();
+    final response = await GlobalProvider().fetchRoomTypes(headers: globalHeaders);
 
     try {
       if (response != null) {

@@ -13,7 +13,8 @@ class HenryBaseClient {
 
   // final http.Client client = http.Client();
   // GLOBAL HTTP METHOD
-  Future<dynamic> requestMethod(String? httpMethod, String? apiURL, {dynamic headers, dynamic bodyPayload}) async {
+  Future<dynamic> requestMethod(String? httpMethod, String? apiURL,
+      {Map<String, String>? headers, dynamic bodyPayload}) async {
     var uriEndpoint = Uri.parse(apiURL!);
     var request = http.Request(httpMethod!, uriEndpoint);
     request.headers.addAll(headers ?? HenryGlobal.defaultHttpHeaders);
@@ -23,7 +24,7 @@ class HenryBaseClient {
         request.body = "{}";
         break;
       case "POST":
-        request.body = json.encode(bodyPayload);
+        request.body = json.encode(bodyPayload); //json.encode(bodyPayload);
         break;
       case "DELETE":
         break;
@@ -86,7 +87,7 @@ class HenryBaseClient {
   }
 
   // MULTIPART REQUEST
-  Future<dynamic> makeRequest(String httpMethod, String baseUrl, String endpoint, Map<String, String> formBody,
+  Future<dynamic> makeFormRequest(String httpMethod, String baseUrl, String endpoint, Map<String, String> formBody,
       {Map<String, String>? headers}) async {
     final uriEP = Uri.parse(baseUrl + endpoint);
     var request = http.MultipartRequest(httpMethod, uriEP);

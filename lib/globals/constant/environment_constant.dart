@@ -36,7 +36,7 @@ class HenryGlobal {
 
   // GRAPHQL HOST AND QUERY
   // static const hostURL = "https://gql.circuitmindz.com/v1/graphql";
-  static const hostURL = "http://sandbox.ad.circuitmindz.com:5000/graphql";
+  static const hostURL = "https://gql.circuitmindz.com/v1/graphql";
   static const hostREST = "http://sandbox.ad.circuitmindz.com:5000";
   static const sandboxGQL = 'http://sandbox.ad.circuitmindz.com:5000/graphql';
 
@@ -78,7 +78,7 @@ query getLanguage {
 
 // variable query
 String qryTranslation = r"""query getTranslation {
-  Conversion: Translations(where: {isActive: {_eq: true}}) {
+  Conversion: Translations(where: {isActive: true}) {
     LanguageId
     translationText
     description
