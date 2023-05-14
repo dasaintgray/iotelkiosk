@@ -44,7 +44,7 @@ class HenryGlobal {
 
   static const qryLanguage = """
       query GetLanguages {
-      Languages {
+      Languages(sortby: {by: "asc"}) {
         Id
         description
         code
@@ -77,8 +77,9 @@ query getLanguage {
 ''';
 
 // variable query
-String qryTranslation = r"""query getTranslation {
-  Conversion: Translations(where: {isActive: true}) {
+String qryTranslation = r"""
+query getTranslation {
+  Conversion: Translations(where: {isActive: true}, sortby: {by: "asc"}) {
     LanguageId
     translationText
     description
@@ -89,17 +90,19 @@ String qryTranslation = r"""query getTranslation {
 }
 """;
 
-String qrySettings = """query getSettings {
-    Settings {
-      code
-      value
-      description
-    }
-  }""";
+String qrySettings = r"""
+query getSettings {
+  Settings(sortby: {by: "asc"}) {
+    code
+    value
+    description
+  }
+}
+""";
 
 String qryAccomodationType = r"""
   query getAccomType($limit: Int!) {
-    AccommodationTypes(order_by: {seq: asc}, limit: $limit) {
+    AccommodationTypes(sortby: {by: "asc", sort: "seq"}, where: {limit: $limit}) {
       Id
       valueMin
       valueMax
@@ -140,7 +143,10 @@ String qryGetRooms = """query GetRooms {
 
 String qrySeriesDetails = r"""
 query getSeriesDetails {
-  SeriesDetails(where: {ModuleId: {_eq: 5}, _and: {isActive: {_eq: true}}}, limit: 1, order_by: {Id: asc}) {
+  SeriesDetails(
+    where: {ModuleId: 5, isActive: true, limit: 1}
+    sortby: {by: "asc", sort: "Id"}
+  ) {
     Id
     SeriesId
     docNo
@@ -149,8 +155,6 @@ query getSeriesDetails {
     ModuleId
     isActive
     tranDate
-    createdBy
-    modifiedBy
   }
 }
 """;
@@ -175,15 +179,19 @@ query getAvailableRooms($agentID: Int!, $roomTypeID: Int!,
 } 
 ''';
 
-String qryRoomTypes = r'''query getRoomTypes {
-  RoomTypes {
+String qryRoomTypes = r'''
+query getRoomTypes($limit: Int!) {
+  RoomTypes(
+    where: {limit: $limit, isActive: true, LocationId: 1}
+    sortby: {by: "asc", sort: "Id"}
+  ) {
     Id
-    LocationId
     isActive
     code
     description
   }
-}''';
+}
+''';
 
 String qryRooms = r'''
 query getRooms($isInclude: Boolean!, $includeFragments: Boolean!) {
@@ -233,12 +241,15 @@ String qryTerminals = r'''query getTerminal {
 }''';
 
 String qryPaymentType = r'''
-query getPayment {
-  payment: PaymentTypes {
+query GetLanguages {
+  Languages(sortby: {by: "asc"}) {
+    Id
     description
     code
+    flag
   }
-}''';
+}
+''';
 
 // MUTATION AREA (INSERT, UPDATE, DELETE)
 // ----------------------------------------------------------------------------------------------------
@@ -330,29 +341,40 @@ String insertBooking = r'''
 ''';
 
 String insertContacts = r'''
-mutation addContact($code: String!, $firstName: String!, $lastName: String!, $middleName: String!, $prefixID: Int!, $suffixID: Int!, $nationalityID: Int!, $createdDate: datetime!, $createdBy: String!, $genderID: Int!, $discriminator: String!) {
-  insert_People(objects: {
-    code: $code, 
-    fName: $firstName, 
-    lName: $lastName, 
-    mName: $middleName, 
-    PrefixId: $prefixID, 
-    SuffixId: $suffixID, 
-    NationalityId: $nationalityID, 
-    createdDate: $createdDate, 
-    createdBy: $createdBy, 
-    GenderId: $genderID, 
-    Discriminator: $discriminator}
+mutation addContact($code: String!, $firstName: String!, $lastName: String!, $middleName: String!, $prefixID: Int!, $suffixID: Int!, $nationalityID: Int!, $genderID: Int!, $discriminator: String!) {
+  People(
+    mutate: {code: $code, fName: $firstName, lName: $lastName, mName: $middleName, PrefixId: $prefixID, SuffixId: $suffixID, NationalityId: $nationalityID, GenderId: $genderID, Discriminator: $discriminator}
   ) {
-    returning {
-      Id
-      code
-      Name
-    }
-    affected_rows
+    Ids
+    details
   }
 }
 ''';
+
+// String insertContacts = r'''
+// mutation addContact($code: String!, $firstName: String!, $lastName: String!, $middleName: String!, $prefixID: Int!, $suffixID: Int!, $nationalityID: Int!, $createdDate: datetime!, $createdBy: String!, $genderID: Int!, $discriminator: String!) {
+//   insert_People(objects: {
+//     code: $code,
+//     fName: $firstName,
+//     lName: $lastName,
+//     mName: $middleName,
+//     PrefixId: $prefixID,
+//     SuffixId: $suffixID,
+//     NationalityId: $nationalityID,
+//     createdDate: $createdDate,
+//     createdBy: $createdBy,
+//     GenderId: $genderID,
+//     Discriminator: $discriminator}
+//   ) {
+//     returning {
+//       Id
+//       code
+//       Name
+//     }
+//     affected_rows
+//   }
+// }
+// ''';
 
 String addPhotos = r''' 
   mutation addPhoto($ContactID: Int!, $isActive: Boolean!, $Photo: String!, $createdDate: datetime!, $createdBy: String!) {

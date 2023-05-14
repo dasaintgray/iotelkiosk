@@ -42,32 +42,28 @@ class Data {
 
 class RoomType {
   int id;
-  int locationId;
   bool isActive;
-  String description;
   String code;
+  String description;
 
   RoomType({
     required this.id,
-    required this.locationId,
     required this.isActive,
-    required this.description,
     required this.code,
+    required this.description,
   });
 
   factory RoomType.fromJson(Map<String, dynamic> json) => RoomType(
         id: json["Id"],
-        locationId: json["LocationId"],
         isActive: json["isActive"],
-        description: json["description"],
         code: json["code"],
+        description: json["description"],
       );
 
   Map<String, dynamic> toJson() => {
         "Id": id,
-        "LocationId": locationId,
         "isActive": isActive,
-        "description": description,
         "code": code,
+        "description": description,
       };
 }

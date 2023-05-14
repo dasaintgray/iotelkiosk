@@ -26,7 +26,7 @@ dependencies:
   dart_vlc: ^0.4.0
   marquee: ^2.2.3
   flutter_animate: ^4.1.1+1
-  camera_windows: ^0.2.1+5
+  camera_windows: ^0.2.1+6
   flutter_libserialport: ^0.3.0
   translator: ^0.1.7
   win32: ^4.1.3
@@ -44,7 +44,7 @@ dependencies:
   #HTTP COMMUNICATION
   http: ^0.13.5
   hasura_connect: ^4.0.0+4
-  graphql_flutter: ^5.1.2
+  # graphql_flutter: ^5.1.2
 
   #STORAGE
   get_storage: ^2.1.1

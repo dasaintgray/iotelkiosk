@@ -27,8 +27,8 @@ class HenryStorage {
   }
 
   //GLOBAL Method
-  static saveToLS(dynamic tokenValue, {String? titulo = "token"}) {
-    return GetStorage().write(titulo!, tokenValue);
+  static Future<void> saveToLS(dynamic tokenValue, {String? titulo = "token"}) async {
+    return await GetStorage().write(titulo!, tokenValue);
   }
 
   static saveListToLS(dynamic tokenValue, {String? titulo = 'token'}) {
@@ -39,8 +39,8 @@ class HenryStorage {
     return GetStorage().read(titulo!);
   }
 
-  static readFromLS({String? titulo = "token"}) {
-    return GetStorage().read(titulo!);
+  static readFromLS({String? titulo = "token"}) async {
+    return await GetStorage().read(titulo!);
   }
 
   static deleteFromLS({String? titulo = "token"}) {

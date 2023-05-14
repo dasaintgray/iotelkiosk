@@ -2,7 +2,6 @@ import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/home_view.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
@@ -16,7 +15,7 @@ class ScreenView extends GetView<ScreenController> {
 
   // CONTROLLER
   final sc = Get.find<ScreenController>();
-  final hc = Get.find<HomeController>();
+  // final hc = Get.find<HomeController>();
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +27,15 @@ class ScreenView extends GetView<ScreenController> {
       },
     );
 
-    hc.startTimer();
+    // hc.startTimer();
 
     return Sizer(
       builder: (BuildContext context, Orientation orientation, DeviceType deviceType) {
         return GestureDetector(
           onTap: () {
             sc.player.stop();
+            // Get.to(() => HomeView());
+
             Get.to(() => HomeView());
           },
           child: Stack(

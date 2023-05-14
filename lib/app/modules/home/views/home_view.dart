@@ -2,6 +2,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -26,6 +27,7 @@ class HomeView extends GetView<HomeController> {
   final sc = Get.find<ScreenController>();
 
   // final DateTime dtLocalTime = DateTime.now();
+  final imgKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -107,14 +109,14 @@ class HomeView extends GetView<HomeController> {
                             menuLanguage(orientation),
                             // 1
                             menuTransactionTitle(orientation,
-                                languageID: hc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
+                                languageID: sc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
                             // 2
                             menuRoomType(orientation,
-                                languageID: hc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
+                                languageID: sc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
                             // 3 - ACCOMMODATION TYPE - THE DATA IS OUTSIDE THE TRANSLATION
                             menuAccommodationType(
                               orientation,
-                              languageID: hc.selecttedLanguageID.value,
+                              languageID: sc.selecttedLanguageID.value,
                             ),
                             // 4 - DISCLAIMER
                             menuDisclaimer(orientation, context),
@@ -145,7 +147,13 @@ class HomeView extends GetView<HomeController> {
                               children: [
                                 InkWell(
                                   onTap: () {
-                                    hc.getTransaction();
+                                    final accessToken = sc.userLoginList.first.accessToken;
+                                    final headers = {
+                                      'Content-Type': 'application/json',
+                                      'Authorization': 'Bearer $accessToken'
+                                    };
+
+                                    sc.getTransaction(credentialHeaders: headers);
                                     if (hc.menuIndex.value > 2) {
                                       var currentIndex = hc.menuIndex.value--;
                                       hc.menuIndex.value = currentIndex;
@@ -199,7 +207,7 @@ class HomeView extends GetView<HomeController> {
         width: 70.w,
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
-          itemCount: hc.languageList.first.data.languages.length,
+          itemCount: sc.languageList.first.data.languages.length,
           itemBuilder: (BuildContext context, int index) {
             return SizedBox(
               height: 10.h,
@@ -212,7 +220,7 @@ class HomeView extends GetView<HomeController> {
                     child: SizedBox(
                       child: Animate(
                         child: Text(
-                          hc.languageList.first.data.languages[index].description,
+                          sc.languageList.first.data.languages[index].description,
                           style: TextStyle(
                             color: HenryColors.darkGreen,
                             fontSize: 15.sp,
@@ -229,13 +237,13 @@ class HomeView extends GetView<HomeController> {
                     right: 8.w,
                     child: GestureDetector(
                       onTap: () {
-                        int lID = hc.languageList.first.data.languages[index].id;
+                        int lID = sc.languageList.first.data.languages[index].id;
                         String sCode = 'ST';
-                        hc.selecttedLanguageID.value = hc.languageList.first.data.languages[index].id;
-                        hc.selectedLanguageCode.value = hc.languageList.first.data.languages[index].code;
+                        sc.selecttedLanguageID.value = sc.languageList.first.data.languages[index].id;
+                        sc.selectedLanguageCode.value = sc.languageList.first.data.languages[index].code;
 
                         var response =
-                            hc.getMenu(languageID: lID, code: sCode, type: 'ITEM', indexCode: hc.menuIndex.value);
+                            sc.getMenu(languageID: lID, code: sCode, type: 'ITEM', indexCode: hc.menuIndex.value);
                         if (response) {
                           hc.menuIndex.value = 1;
                           debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
@@ -243,9 +251,9 @@ class HomeView extends GetView<HomeController> {
                       },
                       child: SizedBox(
                         height: 7.h,
-                        child: hc.languageList.isEmpty
+                        child: sc.languageList.isEmpty
                             ? null
-                            : Image.asset(hc.languageList.first.data.languages[index].flag!, fit: BoxFit.fill)
+                            : Image.asset(sc.languageList.first.data.languages[index].flag!, fit: BoxFit.fill)
                                 .animate()
                                 .fade(duration: HenryGlobal.animationSpeed)
                                 .scale(duration: HenryGlobal.animationSpeed),
@@ -268,7 +276,7 @@ class HomeView extends GetView<HomeController> {
         width: 70.w,
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
-          itemCount: hc.pageTrans.length,
+          itemCount: sc.pageTrans.length,
           itemBuilder: (BuildContext context, int index) {
             return SizedBox(
               height: 10.h,
@@ -281,7 +289,7 @@ class HomeView extends GetView<HomeController> {
                     child: SizedBox(
                       width: 10.w,
                       child: Text(
-                        hc.pageTrans[index].translationText,
+                        sc.pageTrans[index].translationText,
                         style: TextStyle(
                           color: HenryColors.darkGreen,
                           fontSize: 12.sp,
@@ -297,19 +305,19 @@ class HomeView extends GetView<HomeController> {
                     right: 8.w,
                     child: GestureDetector(
                       onTap: () {
-                        var response = hc.getMenu(
+                        var response = sc.getMenu(
                             languageID: languageID, code: 'SRT', type: 'ITEM', indexCode: hc.menuIndex.value);
                         if (response) {
-                          hc.selectedTransactionType.value = hc.pageTrans[index].code;
+                          sc.selectedTransactionType.value = sc.pageTrans[index].code;
                           hc.menuIndex.value = 2;
                           debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
                         }
                       },
                       child: SizedBox(
                         height: 7.h,
-                        child: hc.pageTrans.isEmpty
+                        child: sc.pageTrans.isEmpty
                             ? null
-                            : Image.asset(hc.pageTrans[index].images!, fit: BoxFit.contain)
+                            : Image.asset(sc.pageTrans[index].images!, fit: BoxFit.contain)
                                 .animate()
                                 .fade(duration: HenryGlobal.animationSpeed)
                                 .scale(duration: HenryGlobal.animationSpeed),
@@ -332,7 +340,7 @@ class HomeView extends GetView<HomeController> {
         width: 70.w,
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
-          itemCount: hc.pageTrans.length,
+          itemCount: sc.pageTrans.length,
           itemBuilder: (BuildContext context, int index) {
             return SizedBox(
               height: 10.h,
@@ -345,7 +353,7 @@ class HomeView extends GetView<HomeController> {
                     child: SizedBox(
                       width: 10.w,
                       child: Text(
-                        hc.pageTrans[index].translationText,
+                        sc.pageTrans[index].translationText,
                         // textAlign: TextAlign.justify,
                         style: TextStyle(color: HenryColors.darkGreen, fontSize: 12.sp, overflow: TextOverflow.fade),
                       ),
@@ -357,14 +365,14 @@ class HomeView extends GetView<HomeController> {
                     child: GestureDetector(
                       onTap: () {
                         var response =
-                            hc.getMenu(languageID: languageID, code: code, type: type, indexCode: hc.menuIndex.value);
+                            sc.getMenu(languageID: languageID, code: code, type: type, indexCode: hc.menuIndex.value);
                         if (response) {
                           switch (index) {
                             case 0:
                               hc.menuIndex.value = 3;
                               break;
                             case 1:
-                              hc.getMenu(languageID: languageID, code: 'SAT', indexCode: hc.menuIndex.value);
+                              sc.getMenu(languageID: languageID, code: 'SAT', indexCode: hc.menuIndex.value);
                               hc.menuIndex.value = 5;
                               break;
                           }
@@ -373,9 +381,9 @@ class HomeView extends GetView<HomeController> {
                       },
                       child: SizedBox(
                         height: 7.h,
-                        child: hc.languageList.isEmpty
+                        child: sc.languageList.isEmpty
                             ? null
-                            : Image.asset(hc.pageTrans[index].images!, fit: BoxFit.contain),
+                            : Image.asset(sc.pageTrans[index].images!, fit: BoxFit.contain),
                       ),
                     ),
                   ),
@@ -395,7 +403,7 @@ class HomeView extends GetView<HomeController> {
         width: 70.w,
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
-          itemCount: hc.pageTrans.length,
+          itemCount: sc.pageTrans.length,
           itemBuilder: (BuildContext context, int index) {
             return SizedBox(
               height: 10.h,
@@ -409,13 +417,13 @@ class HomeView extends GetView<HomeController> {
                       width: 10.w,
                       child: languageID == 1 && index == 0
                           ? Text(
-                              hc.pageTrans[index].translationText,
+                              sc.pageTrans[index].translationText,
                               // textAlign: TextAlign,
                               style:
                                   TextStyle(color: HenryColors.darkGreen, fontSize: 8.sp, overflow: TextOverflow.fade),
                             )
                           : Text(
-                              hc.pageTrans[index].translationText,
+                              sc.pageTrans[index].translationText,
                               // textAlign: TextAlign,
                               style:
                                   TextStyle(color: HenryColors.darkGreen, fontSize: 12.sp, overflow: TextOverflow.fade),
@@ -428,16 +436,16 @@ class HomeView extends GetView<HomeController> {
                     child: GestureDetector(
                       onTap: () {
                         var response =
-                            hc.getMenu(languageID: languageID, code: code, type: type, indexCode: hc.menuIndex.value);
+                            sc.getMenu(languageID: languageID, code: code, type: type, indexCode: hc.menuIndex.value);
                         if (response) {
                           hc.menuIndex.value = 4;
                         }
                       },
                       child: SizedBox(
                         height: 7.h,
-                        child: hc.pageTrans[index].images!.isEmpty
+                        child: sc.pageTrans[index].images!.isEmpty
                             ? null
-                            : Image.asset(hc.pageTrans[index].images!, fit: BoxFit.contain),
+                            : Image.asset(sc.pageTrans[index].images!, fit: BoxFit.contain),
                       ),
                     ),
                   ),
@@ -499,7 +507,7 @@ class HomeView extends GetView<HomeController> {
               width: double.infinity,
               child: ListView.builder(
                 padding: const EdgeInsets.all(25.0),
-                itemCount: hc.pageTrans.length,
+                itemCount: sc.pageTrans.length,
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, index) {
                   return Row(
@@ -522,7 +530,7 @@ class HomeView extends GetView<HomeController> {
                             shadowColor: Colors.black26.withOpacity(0.5),
                           ),
                           child: Text(
-                            hc.pageTrans[index].translationText,
+                            sc.pageTrans[index].translationText,
                             style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
                           ),
                         ),
@@ -548,7 +556,7 @@ class HomeView extends GetView<HomeController> {
         width: 70.w,
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
-          itemCount: hc.pageTrans.length,
+          itemCount: sc.pageTrans.length,
           itemBuilder: (BuildContext context, int index) {
             return SizedBox(
               height: 10.h,
@@ -561,7 +569,7 @@ class HomeView extends GetView<HomeController> {
                     child: SizedBox(
                       width: 10.w,
                       child: Text(
-                        hc.pageTrans[index].translationText,
+                        sc.pageTrans[index].translationText,
                         style: TextStyle(
                           color: HenryColors.darkGreen,
                           fontSize: 12.sp,
@@ -577,18 +585,18 @@ class HomeView extends GetView<HomeController> {
                     right: 8.w,
                     child: GestureDetector(
                       onTap: () {
-                        var response = hc.getMenu(
+                        var response = sc.getMenu(
                             languageID: languageID, code: 'SACT', type: 'ITEM', indexCode: hc.menuIndex.value);
                         if (response) {
                           hc.menuIndex.value = 3;
-                          hc.selectedRoomType.value = hc.pageTrans[index].code;
+                          sc.selectedRoomType.value = sc.pageTrans[index].code;
                         }
                       },
                       child: SizedBox(
                         height: 7.h,
-                        child: hc.languageList.isEmpty
+                        child: sc.languageList.isEmpty
                             ? null
-                            : Image.asset(hc.pageTrans[index].images!, fit: BoxFit.contain)
+                            : Image.asset(sc.pageTrans[index].images!, fit: BoxFit.contain)
                                 .animate()
                                 .fade(duration: HenryGlobal.animationSpeed)
                                 .scale(duration: HenryGlobal.animationSpeed),
@@ -657,7 +665,7 @@ class HomeView extends GetView<HomeController> {
         width: 70.w,
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
-          itemCount: hc.accommodationTypeList.first.data.accommodationTypes.length,
+          itemCount: sc.accommodationTypeList.first.data.accommodationTypes.length,
           physics: const ClampingScrollPhysics(),
           itemBuilder: (BuildContext context, int index) {
             return SizedBox(
@@ -673,7 +681,7 @@ class HomeView extends GetView<HomeController> {
                       child: Animate(
                         // effects: const [FadeEffect(), ScaleEffect()],
                         child: Text(
-                          hc.accommodationTypeList.first.data.accommodationTypes[index].description,
+                          sc.accommodationTypeList.first.data.accommodationTypes[index].description,
                           style: TextStyle(
                             color: HenryColors.darkGreen,
                             fontSize: 12.sp,
@@ -690,19 +698,19 @@ class HomeView extends GetView<HomeController> {
                     right: 8.w,
                     child: GestureDetector(
                       onTap: () {
-                        var response = hc.getMenu(languageID: languageID, code: 'DI', type: 'ITEM');
+                        var response = sc.getMenu(languageID: languageID, code: 'DI', type: 'ITEM');
                         if (response) {
-                          hc.selectedAccommodationType.value =
-                              hc.accommodationTypeList.first.data.accommodationTypes[index].id;
+                          sc.selectedAccommodationType.value =
+                              sc.accommodationTypeList.first.data.accommodationTypes[index].id;
                           hc.initializeCamera();
                           hc.menuIndex.value = 4;
                         }
                       },
                       child: SizedBox(
                         height: 7.h,
-                        child: hc.accommodationTypeList.first.data.accommodationTypes.isNotEmpty
+                        child: sc.accommodationTypeList.first.data.accommodationTypes.isNotEmpty
                             ? Image.asset(
-                                    'assets/menus/hour${hc.accommodationTypeList.first.data.accommodationTypes[index].seq}.png',
+                                    'assets/menus/hour${sc.accommodationTypeList.first.data.accommodationTypes[index].seq}.png',
                                     fit: BoxFit.contain)
                                 .animate()
                                 .fade(duration: HenryGlobal.animationSpeed)
@@ -732,6 +740,7 @@ class HomeView extends GetView<HomeController> {
             height: 20.h,
             width: 60.w,
             child: Transform(
+              key: imgKey,
               alignment: Alignment.center,
               transform: Matrix4.rotationY(math.pi),
               child: CameraPlatform.instance.buildPreview(hc.cameraID.value),
@@ -742,9 +751,9 @@ class HomeView extends GetView<HomeController> {
             width: double.infinity,
           ),
           // DISCLAIMER
-          hc.pageTrans.isNotEmpty
+          sc.pageTrans.isNotEmpty
               ? Text(
-                  hc.pageTrans.first.translationText,
+                  sc.pageTrans.first.translationText,
                   style: TextStyle(
                     color: HenryColors.puti,
                     fontSize: 5.sp,
@@ -755,7 +764,7 @@ class HomeView extends GetView<HomeController> {
             height: 2.h,
             width: double.infinity,
           ),
-          hc.pageTrans.isNotEmpty
+          sc.pageTrans.isNotEmpty
               ? SizedBox(
                   child: hc.isLoading.value
                       ? Column(
@@ -773,7 +782,17 @@ class HomeView extends GetView<HomeController> {
                           onPressed: () async {
                             hc.isLoading.value = true;
                             // var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
-                            var response = await hc.addTransaction();
+                            final handle = imgKey.currentContext?.findAncestorWidgetOfExactType<SizedBox>().hashCode;
+                            if (kDebugMode) {
+                              print('Picture Handle: $handle');
+                            }
+                            final accessToken = sc.userLoginList.first.accessToken;
+                            final headers = {
+                              'Content-Type': 'application/json',
+                              'Authorization': 'Bearer $accessToken'
+                            };
+
+                            var response = await sc.addTransaction(credentialHeaders: headers);
                             if (response) {
                               //
                               hc.isLoading.value = false;
@@ -784,7 +803,7 @@ class HomeView extends GetView<HomeController> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
                           // AGREE BUTTON
                           child: Text(
-                            hc.pageTrans.last.translationText,
+                            sc.pageTrans.last.translationText,
                             style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
                           ),
                         ),
@@ -802,7 +821,7 @@ class HomeView extends GetView<HomeController> {
         width: 70.w,
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
-          itemCount: hc.accommodationTypeList.first.data.accommodationTypes.length,
+          itemCount: sc.accommodationTypeList.first.data.accommodationTypes.length,
           physics: const ClampingScrollPhysics(),
           itemBuilder: (BuildContext context, int index) {
             return SizedBox(
@@ -818,7 +837,7 @@ class HomeView extends GetView<HomeController> {
                       child: Animate(
                         // effects: const [FadeEffect(), ScaleEffect()],
                         child: Text(
-                          hc.accommodationTypeList.first.data.accommodationTypes[index].description,
+                          sc.accommodationTypeList.first.data.accommodationTypes[index].description,
                           style: TextStyle(
                             color: HenryColors.darkGreen,
                             fontSize: 12.sp,
@@ -835,19 +854,19 @@ class HomeView extends GetView<HomeController> {
                     right: 8.w,
                     child: GestureDetector(
                       onTap: () {
-                        var response = hc.getMenu(languageID: languageID, code: 'DI', type: 'ITEM');
+                        var response = sc.getMenu(languageID: languageID, code: 'DI', type: 'ITEM');
                         if (response) {
-                          hc.selectedAccommodationType.value =
-                              hc.accommodationTypeList.first.data.accommodationTypes[index].id;
+                          sc.selectedAccommodationType.value =
+                              sc.accommodationTypeList.first.data.accommodationTypes[index].id;
                           hc.initializeCamera();
                           hc.menuIndex.value = 4;
                         }
                       },
                       child: SizedBox(
                         height: 7.h,
-                        child: hc.accommodationTypeList.first.data.accommodationTypes.isNotEmpty
+                        child: sc.accommodationTypeList.first.data.accommodationTypes.isNotEmpty
                             ? Image.asset(
-                                    'assets/menus/hour${hc.accommodationTypeList.first.data.accommodationTypes[index].seq}.png',
+                                    'assets/menus/hour${sc.accommodationTypeList.first.data.accommodationTypes[index].seq}.png',
                                     fit: BoxFit.contain)
                                 .animate()
                                 .fade(duration: HenryGlobal.animationSpeed)
@@ -873,14 +892,14 @@ class HomeView extends GetView<HomeController> {
         width: 70.w,
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
-          itemCount: hc.pageTrans.length,
+          itemCount: sc.pageTrans.length,
           itemBuilder: (BuildContext context, int index) {
             return SizedBox(
               height: 2.h,
               child: Form(
                 // key: formKey,
                 child: Text(
-                  hc.pageTrans[index].translationText,
+                  sc.pageTrans[index].translationText,
                   style: TextStyle(color: Colors.white, fontSize: 10.sp),
                 ),
               ),
@@ -1070,20 +1089,20 @@ class HomeView extends GetView<HomeController> {
         height: 5.h,
         width: double.infinity,
         child: FlutterCarousel.builder(
-          itemCount: hc.titleTrans.length,
+          itemCount: sc.titleTrans.length,
           itemBuilder: (BuildContext context, int ctr, int realIndex) {
             return SizedBox(
               height: 10.h,
               width: double.infinity,
               child: Center(
                 child: Text(
-                    hc.titleTrans.length == 1 ? hc.titleTrans[0].translationText : hc.titleTrans[ctr].translationText,
+                    sc.titleTrans.length == 1 ? sc.titleTrans[0].translationText : sc.titleTrans[ctr].translationText,
                     style: TextStyle(color: HenryColors.darkGreen, fontSize: 13.sp)),
               ),
             );
           },
           options: CarouselOptions(
-              autoPlay: hc.titleTrans.length == 1 ? false : true,
+              autoPlay: sc.titleTrans.length == 1 ? false : true,
               showIndicator: false,
               reverse: true,
               scrollDirection: Axis.vertical),

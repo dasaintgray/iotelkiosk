@@ -88,6 +88,7 @@ class GlobalProvider extends BaseController {
     final response = await hasuraConnect.query(HenryGlobal.qryLanguage).catchError(handleError);
 
     if (response != null) {
+      hasuraConnect.disconnect();
       return languageModelFromJson(jsonEncode(response));
     }
     return null;
@@ -100,7 +101,7 @@ class GlobalProvider extends BaseController {
       DateTime? startDate,
       DateTime? endDate,
       required Map<String, String> headers}) async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL);
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
     final params = {
       "agentID": agentID,
@@ -127,6 +128,7 @@ class GlobalProvider extends BaseController {
     final response = await hasuraConnect.query(qryTranslation).catchError(handleError);
 
     if (response != null) {
+      hasuraConnect.disconnect();
       return transactionModelFromJson(jsonEncode(response));
     }
     return null;
@@ -159,10 +161,12 @@ class GlobalProvider extends BaseController {
     return null;
   }
 
-  Future<RoomTypesModel?> fetchRoomTypes({required Map<String, String> headers}) async {
+  Future<RoomTypesModel?> fetchRoomTypes({required Map<String, String> headers, required int? limit}) async {
+    final params = {'limit': limit};
+
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
-    final response = await hasuraConnect.query(qryRoomTypes).catchError(handleError);
+    final response = await hasuraConnect.query(qryRoomTypes, variables: params).catchError(handleError);
 
     if (response != null) {
       return roomTypesModelFromJson(jsonEncode(response));
@@ -235,17 +239,16 @@ class GlobalProvider extends BaseController {
       int? prefixID = 1,
       int? suffixID = 1,
       int? nationalityID = 77,
-      DateTime? createdDate,
-      String? createdBy,
       int? genderID = 1,
-      String? discriminitor}) async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+      String? discriminitor,
+      required Map<String, String> headers}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
     // final dtNow = DateTime.now();
-    var ngayon = createdDate?.toIso8601String();
-    if (ngayon != null && ngayon.length >= 5) {
-      ngayon = ngayon.substring(0, ngayon.length - 3);
-    }
+    // var ngayon = createdDate?.toIso8601String();
+    // if (ngayon != null && ngayon.length >= 5) {
+    //   ngayon = ngayon.substring(0, ngayon.length - 3);
+    // }
 
     final addParams = {
       "code": code!,
@@ -255,8 +258,6 @@ class GlobalProvider extends BaseController {
       "prefixID": prefixID!,
       "suffixID": suffixID!,
       "nationalityID": nationalityID!,
-      "createdDate": ngayon,
-      "createdBy": createdBy!,
       "genderID": genderID!,
       "discriminator": discriminitor!
     };
@@ -266,9 +267,10 @@ class GlobalProvider extends BaseController {
 
     var response = await hasuraConnect.mutation(insertContacts, variables: addParams).catchError(handleError);
     if (response != null) {
-      var resultList = (response['data']['insert_People']['returning'] as List);
+      // var resultList = (response['data']['People']['Ids'] as List);
+      var resultList = response['data']['People'];
 
-      int? output = resultList.first['Id'];
+      int? output = resultList;
       return output!;
     } else {
       return 0;

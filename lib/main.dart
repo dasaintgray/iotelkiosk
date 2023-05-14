@@ -20,8 +20,10 @@ void main() async {
   // VIDEO PLAYER
   DartVLC.initialize();
 
+  // await ScreenController().userLogin();
+
   WindowOptions windowOptions = const WindowOptions(
-    // size: Size(1080, 1920),
+    size: Size(1080, 1920),
     fullScreen: true,
     center: true,
     alwaysOnTop: false,

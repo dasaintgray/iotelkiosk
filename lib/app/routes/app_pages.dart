@@ -23,7 +23,10 @@ class AppPages {
     GetPage(
       name: _Paths.SCREEN,
       page: () => ScreenView(),
-      bindings: [ScreenBinding(), HomeBinding()],
+      bindings: [
+        ScreenBinding(),
+        HomeBinding(),
+      ],
     ),
   ];
 }

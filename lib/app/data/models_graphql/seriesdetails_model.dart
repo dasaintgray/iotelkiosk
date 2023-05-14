@@ -50,8 +50,6 @@ class SeriesDetail {
     required this.moduleId,
     required this.isActive,
     required this.tranDate,
-    required this.createdBy,
-    required this.modifiedBy,
   });
 
   int id;
@@ -62,8 +60,6 @@ class SeriesDetail {
   int moduleId;
   bool isActive;
   DateTime tranDate;
-  String createdBy;
-  String modifiedBy;
 
   factory SeriesDetail.fromJson(Map<String, dynamic> json) => SeriesDetail(
         id: json["Id"],
@@ -74,8 +70,6 @@ class SeriesDetail {
         moduleId: json["ModuleId"],
         isActive: json["isActive"],
         tranDate: DateTime.parse(json["tranDate"]),
-        createdBy: json["createdBy"],
-        modifiedBy: json["modifiedBy"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -87,7 +81,5 @@ class SeriesDetail {
         "ModuleId": moduleId,
         "isActive": isActive,
         "tranDate": tranDate.toIso8601String(),
-        "createdBy": createdBy,
-        "modifiedBy": modifiedBy,
       };
 }
