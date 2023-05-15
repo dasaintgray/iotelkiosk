@@ -23,7 +23,9 @@ import '../controllers/home_controller.dart';
 class HomeView extends GetView<HomeController> {
   HomeView({Key? key}) : super(key: key);
 
-  final hc = Get.find<HomeController>();
+  // final hc = Get.find<HomeController>();
+  final hc = Get.put(HomeController());
+
   final sc = Get.find<ScreenController>();
 
   // final DateTime dtLocalTime = DateTime.now();
@@ -35,9 +37,11 @@ class HomeView extends GetView<HomeController> {
       builder: (BuildContext context, Orientation orientation, DeviceType deviceType) {
         return GestureDetector(
           onTap: () {
-            sc.player.play();
-            hc.resetTimer();
-            hc.initTimezone();
+            if (hc.isIdleActive.value) {
+              sc.player.play();
+            }
+            // hc.resetTimer();
+            // hc.initTimezone();
           },
           child: Stack(
             children: [
@@ -118,7 +122,9 @@ class HomeView extends GetView<HomeController> {
                               orientation,
                               languageID: sc.selecttedLanguageID.value,
                             ),
-                            // 4 - DISCLAIMER
+                            // 4 - PAYMENT TYPE
+                            menuPaymentType(orientation),
+                            // 5 - DISCLAIMER
                             menuDisclaimer(orientation, context),
 
                             // menuCheckIn(orientation,

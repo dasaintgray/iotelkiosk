@@ -105,7 +105,7 @@ class ScreenController extends GetxController with BaseController {
   // }
 
   void mediaOpen() {
-    // player.setVolume(0);
+    player.setVolume(0);
     player.open(
       Playlist(
         medias: [

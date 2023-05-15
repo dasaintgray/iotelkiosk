@@ -3,22 +3,20 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
+import 'package:system_idle/system_idle.dart';
 
 import 'package:timezone/data/latest.dart' as tzd;
 import 'package:timezone/standalone.dart' as tz;
 // ignore: depend_on_referenced_packages
 import 'package:camera_platform_interface/camera_platform_interface.dart';
-import 'package:translator/translator.dart';
 
 // FFI AND WIN32
-import 'package:ffi/ffi.dart' as fi;
-import 'package:win32/win32.dart';
-import 'dart:ffi' as dartffi;
 
 class HomeController extends GetxController with BaseController {
   DateTime japanNow = DateTime.now();
@@ -29,11 +27,12 @@ class HomeController extends GetxController with BaseController {
   // LOCAL TIME
   DateTime localTime = DateTime.now();
 
-  late Timer timer;
+  // late Timer timer;
   late final idleTime = 0;
 
   // BOOLEAN
   final isLoading = false.obs;
+  final isIdleActive = false.obs;
 
   // INT
   final menuIndex = 0.obs;
@@ -56,15 +55,15 @@ class HomeController extends GetxController with BaseController {
   // ScreenController screenController = Get.put(ScreenController());
   final ScreenController screenController = Get.find<ScreenController>();
 
-  // TRANSLATOR
-  final translator = GoogleTranslator();
+  final SystemIdle systemIdle = SystemIdle.instance;
 
   @override
   void onInit() async {
     super.onInit();
 
     initTimezone();
-    startTimer();
+    configureSystemIdle();
+    // startTimer();
   }
 
   @override
@@ -81,11 +80,25 @@ class HomeController extends GetxController with BaseController {
     // openSerialPort();
   }
 
-  @override
-  void onClose() {
-    super.onClose();
-    stopTimer();
-    screenController.dispose();
+  // @override
+  // void onClose() {
+  //   super.onClose();
+  //   // stopTimer();
+  //   // screenController.dispose();
+  // }
+
+  void configureSystemIdle() async {
+    await systemIdle.initialize(time: 20);
+
+    systemIdle.onIdleStateChanged.listen((event) {
+      if (kDebugMode) {
+        print('system idle: $event');
+        screenController.player.play(); //play the video
+        menuIndex.value = 0; //default menu index
+        Get.back();
+      }
+      isIdleActive.value = event;
+    });
   }
 
   // SERIAL PORT TEST
@@ -151,37 +164,6 @@ class HomeController extends GetxController with BaseController {
   //     return false;
   //   }
   // }
-
-  // FIND THE WINDOW HANDLE USING THE WIN32 AND FFI
-  int? findVideoPlayer({String? pamagat}) {
-    final source = pamagat.toString().toNativeUtf16();
-
-    final hwnd = FindWindowEx(0, 0, source, dartffi.nullptr);
-
-    if (hwnd == 0) {
-      print('cannot find window');
-    } else {
-      return hwnd;
-    }
-    return 0;
-  }
-
-  int enumWindowsProc(int hWnd, int lParam) {
-    // Don't enumerate windows unless they are marked as WS_VISIBLE
-    if (IsWindowVisible(hWnd) == FALSE) return TRUE;
-
-    final length = GetWindowTextLength(hWnd);
-    if (length == 0) {
-      return TRUE;
-    }
-
-    final buffer = wsalloc(length + 1);
-    GetWindowText(hWnd, buffer, length + 1);
-    print('hWnd $hWnd: ${buffer.toDartString()}');
-    free(buffer);
-
-    return TRUE;
-  }
 
   // void enumerateWindows() {
   //   final wndProc = dartffi.Pointer.fromFunction<EnumWindowsProc>(enumWindowsProc, 0);
@@ -274,32 +256,32 @@ class HomeController extends GetxController with BaseController {
     sydneyNow = tz.TZDateTime.now(sydney);
   }
 
-  void startTimer() {
-    // Start a 5-second timer
-    // timer = Timer(const Duration(seconds: 30), () {
-    //   // Navigate back to the previous screen
-    //   Get.back();
-    // });
+  // void startTimer() {
+  //   // Start a 5-second timer
+  //   // timer = Timer(const Duration(seconds: 30), () {
+  //   //   // Navigate back to the previous screen
+  //   //   Get.back();
+  //   // });
 
-    timer = Timer.periodic(const Duration(minutes: 30), (timer) {
-      initTimezone();
-      screenController.player.play();
-      menuIndex.value = 0;
-      Get.back();
-    });
-  }
+  //   timer = Timer.periodic(const Duration(minutes: 30), (timer) {
+  //     initTimezone();
+  //     screenController.player.play();
+  //     menuIndex.value = 0;
+  //     Get.back();
+  //   });
+  // }
 
-  void stopTimer() {
-    // Cancel the timer if it's still running
-    // ignore: unnecessary_null_comparison
-    if (timer != null && timer.isActive) {
-      timer.cancel();
-    }
-  }
+  // void stopTimer() {
+  //   // Cancel the timer if it's still running
+  //   // ignore: unnecessary_null_comparison
+  //   if (timer != null && timer.isActive) {
+  //     timer.cancel();
+  //   }
+  // }
 
-  void resetTimer() {
-    // Cancel the existing timer and start a new one
-    stopTimer();
-    startTimer();
-  }
+  // void resetTimer() {
+  //   // Cancel the existing timer and start a new one
+  //   stopTimer();
+  //   startTimer();
+  // }
 }
