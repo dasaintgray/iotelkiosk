@@ -186,7 +186,6 @@ class GlobalProvider extends BaseController {
     if (response != null) {
       return response;
     }
-
     return null;
   }
 
@@ -219,7 +218,7 @@ class GlobalProvider extends BaseController {
   //  -----------------------------------------------------------------------------------------------------
   Future<dynamic> fetchGraphQLData(
       {String? documents, Map<String, dynamic>? params, Map<String, String>? headers}) async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: HenryGlobal.graphQlHeaders);
 
     final response = await hasuraConnect.query(documents!, variables: params, headers: headers).catchError(handleError);
     if (response != null) {
@@ -279,7 +278,7 @@ class GlobalProvider extends BaseController {
 
   Future<bool> addContactPhotoes(
       {int? contactID, bool? isActive = true, String? photo, DateTime? createdDate, String? createdBy}) async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: HenryGlobal.graphQlHeaders);
 
     var ngayon = createdDate?.toIso8601String();
     if (ngayon != null && ngayon.length >= 5) {
@@ -306,7 +305,7 @@ class GlobalProvider extends BaseController {
 
   Future<bool?> updateSeriesDetails(
       {int? idNo, String? docNo, bool? isActive, String? modifiedBy, DateTime? modifiedDate}) async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: HenryGlobal.graphQlHeaders);
 
     var ngayon = modifiedDate?.toIso8601String();
     if (ngayon != null && ngayon.length >= 5) {
@@ -352,7 +351,7 @@ class GlobalProvider extends BaseController {
       double? serviceCharge,
       int? bookingStatusId,
       String? docNo}) async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.hostURL, headers: HenryGlobal.graphQlHeaders);
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: HenryGlobal.graphQlHeaders);
 
     final addParams = {
       "isActive": isActive,

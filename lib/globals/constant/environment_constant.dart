@@ -36,9 +36,9 @@ class HenryGlobal {
 
   // GRAPHQL HOST AND QUERY
   // static const hostURL = "https://gql.circuitmindz.com/v1/graphql";
-  static const hostURL = "https://gql.circuitmindz.com/v1/graphql";
+  // static const hostURL = "https://gql.circuitmindz.com/v1/graphql";
   static const hostREST = "http://sandbox.ad.circuitmindz.com:5000";
-  static const sandboxGQL = 'http://sandbox.ad.circuitmindz.com:5000/graphql';
+  static const sandboxGQL = 'https://quickie-gw.ad.circuitmindz.com/graphql';
 
   static const userEP = '/api/users/login';
 
@@ -241,12 +241,13 @@ String qryTerminals = r'''query getTerminal {
 }''';
 
 String qryPaymentType = r'''
-query GetLanguages {
-  Languages(sortby: {by: "asc"}) {
+query getPaymentType {
+  PaymentTypes(sortby: {by: "asc", sort: "Id"}) {
     Id
+    isActive
     description
     code
-    flag
+    isWithDetail
   }
 }
 ''';

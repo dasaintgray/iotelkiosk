@@ -366,9 +366,13 @@ class ScreenController extends GetxController with BaseController {
     isLoading.value = true;
 
     final response = await GlobalProvider().fetchPaymentType(headers: credentialHeaders);
+
     try {
       if (response != null) {
         paymentTypeList.add(response);
+        if (kDebugMode) {
+          print('Payment Type: ${paymentTypeList.first.data.paymentTypes.length}');
+        }
         return true;
       }
     } finally {

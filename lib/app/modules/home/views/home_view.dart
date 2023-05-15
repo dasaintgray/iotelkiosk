@@ -704,11 +704,11 @@ class HomeView extends GetView<HomeController> {
                     right: 8.w,
                     child: GestureDetector(
                       onTap: () {
-                        var response = sc.getMenu(languageID: languageID, code: 'DI', type: 'ITEM');
+                        var response = sc.getMenu(languageID: languageID, code: 'SPM');
                         if (response) {
                           sc.selectedAccommodationType.value =
                               sc.accommodationTypeList.first.data.accommodationTypes[index].id;
-                          hc.initializeCamera();
+                          // hc.initializeCamera();
                           hc.menuIndex.value = 4;
                         }
                       },
@@ -827,7 +827,7 @@ class HomeView extends GetView<HomeController> {
         width: 70.w,
         child: ListView.builder(
           padding: const EdgeInsets.all(25.0),
-          itemCount: sc.accommodationTypeList.first.data.accommodationTypes.length,
+          itemCount: sc.paymentTypeList.first.data.paymentTypes.length,
           physics: const ClampingScrollPhysics(),
           itemBuilder: (BuildContext context, int index) {
             return SizedBox(
@@ -843,7 +843,7 @@ class HomeView extends GetView<HomeController> {
                       child: Animate(
                         // effects: const [FadeEffect(), ScaleEffect()],
                         child: Text(
-                          sc.accommodationTypeList.first.data.accommodationTypes[index].description,
+                          sc.paymentTypeList.first.data.paymentTypes[index].description.toUpperCase(),
                           style: TextStyle(
                             color: HenryColors.darkGreen,
                             fontSize: 12.sp,
@@ -864,16 +864,13 @@ class HomeView extends GetView<HomeController> {
                         if (response) {
                           sc.selectedAccommodationType.value =
                               sc.accommodationTypeList.first.data.accommodationTypes[index].id;
-                          hc.initializeCamera();
-                          hc.menuIndex.value = 4;
+                          hc.menuIndex.value = 5;
                         }
                       },
                       child: SizedBox(
                         height: 7.h,
-                        child: sc.accommodationTypeList.first.data.accommodationTypes.isNotEmpty
-                            ? Image.asset(
-                                    'assets/menus/hour${sc.accommodationTypeList.first.data.accommodationTypes[index].seq}.png',
-                                    fit: BoxFit.contain)
+                        child: sc.paymentTypeList.first.data.paymentTypes.isNotEmpty
+                            ? Image.asset('assets/menus/payment${index + 1}.png', fit: BoxFit.contain)
                                 .animate()
                                 .fade(duration: HenryGlobal.animationSpeed)
                                 .scale(duration: HenryGlobal.animationSpeed)
@@ -888,6 +885,10 @@ class HomeView extends GetView<HomeController> {
         ),
       ),
     );
+  }
+
+  Widget menuInsertPayment() {
+    return SizedBox();
   }
 
   Widget menuGuestInformation(Orientation orientation, {int? languageID, String? code, String? type}) {
