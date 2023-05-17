@@ -888,7 +888,7 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget menuInsertPayment() {
-    return SizedBox();
+    return const SizedBox();
   }
 
   Widget menuGuestInformation(Orientation orientation, {int? languageID, String? code, String? type}) {
