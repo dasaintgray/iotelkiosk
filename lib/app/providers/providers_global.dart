@@ -9,6 +9,7 @@ import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/translation_terms_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/userlogin_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
@@ -210,6 +211,18 @@ class GlobalProvider extends BaseController {
     final response = await hasuraConnect.query(qryPaymentType).catchError(handleError);
     if (response != null) {
       return paymentTypeModelFromJson(jsonEncode(response));
+    }
+    return null;
+  }
+
+  Future<TranslationTermsModel?> fetchTerms({required Map<String, String> headers, required int? langID}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
+
+    final params = {'languageID': langID};
+
+    final response = await hasuraConnect.query(qryTerms, variables: params).catchError(handleError);
+    if (response != null) {
+      return translationTermsModelFromJson(jsonEncode(response));
     }
     return null;
   }

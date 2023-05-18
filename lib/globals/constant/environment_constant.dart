@@ -252,6 +252,13 @@ query getPaymentType {
 }
 ''';
 
+String qryTerms = r'''query getTerms($languageID: Int!) {
+  TranslationTerms(where: {LanguageId: $languageID}) {
+    LanguageId
+    translationText
+  }
+}''';
+
 // MUTATION AREA (INSERT, UPDATE, DELETE)
 // ----------------------------------------------------------------------------------------------------
 

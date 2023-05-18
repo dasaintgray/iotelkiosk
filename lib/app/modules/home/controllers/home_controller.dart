@@ -94,6 +94,7 @@ class HomeController extends GetxController with BaseController {
       if (kDebugMode) {
         print('system idle: $event');
         screenController.player.play(); //play the video
+        screenController.getMenu(code: 'SLMT', type: 'TITLE'); //go back to main selection
         menuIndex.value = 0; //default menu index
         Get.back();
       }

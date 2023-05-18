@@ -77,34 +77,7 @@ class HomeView extends GetView<HomeController> {
                         // child: menuTitle(hc.tlSLList),
                       ),
                       menuTitle(),
-                      // DISPLAYING OF THE MENUS BASE ON INDEX KEY
-                      // Obx(
-                      //   () => ProsteIndexedStack(
-                      //     index: hc.menuIndex.value,
-                      //     children: [
-                      //       // 0
-                      //       IndexedStackChild(child: menuLanguage(orientation)),
-                      //       // 1
-                      //       IndexedStackChild(
-                      //         child: menuTransactionTitle(orientation,
-                      //             languageID: hc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
-                      //       ),
-                      //       // 2
-                      //       IndexedStackChild(
-                      //         child: menuRoomType(orientation,
-                      //             languageID: hc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
-                      //       ),
-                      //       // 3 - ACCOMMODATION TYPE - THE DATA IS OUTSIDE THE TRANSLATION
-                      //       IndexedStackChild(
-                      //         child: menuAccommodationType(orientation, languageID: hc.selecttedLanguageID.value),
-                      //       ),
-                      //       // 4 - DISCLAIMER
-                      //       IndexedStackChild(
-                      //         child: menuDisclaimer(orientation),
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
+
                       Obx(
                         () => IndexedStack(
                           index: hc.menuIndex.value,
@@ -124,7 +97,9 @@ class HomeView extends GetView<HomeController> {
                             ),
                             // 4 - PAYMENT TYPE
                             menuPaymentType(orientation),
-                            // 5 - DISCLAIMER
+                            // 5 - INSERT PAYMENT
+                            menuInsertPayment(orientation),
+                            // 6 - DISCLAIMER
                             menuDisclaimer(orientation, context),
 
                             // menuCheckIn(orientation,
@@ -207,134 +182,127 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget menuLanguage(Orientation orientation) {
-    return Obx(
-      () => SizedBox(
-        height: orientation == Orientation.portrait ? 45.h : 20.h,
-        width: 70.w,
-        child: ListView.builder(
-          padding: const EdgeInsets.all(25.0),
-          itemCount: sc.languageList.first.data.languages.length,
-          itemBuilder: (BuildContext context, int index) {
-            return SizedBox(
-              height: 10.h,
-              child: Stack(
-                children: [
-                  Positioned(
-                    left: 28.w,
-                    top: 25,
-                    // right: 10.w,
-                    child: SizedBox(
-                      child: Animate(
-                        child: Text(
-                          sc.languageList.first.data.languages[index].description,
-                          style: TextStyle(
-                            color: HenryColors.darkGreen,
-                            fontSize: 15.sp,
-                          ),
-                        )
-                            .animate()
-                            .slide(duration: HenryGlobal.animationSpeed)
-                            .scale(duration: HenryGlobal.animationSpeed),
-                      ),
+    return SizedBox(
+      height: orientation == Orientation.portrait ? 45.h : 20.h,
+      width: 75.w,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(25.0),
+        itemCount: sc.languageList.first.data.languages.length,
+        itemBuilder: (BuildContext context, int index) {
+          return SizedBox(
+            height: 10.h,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 28.w,
+                  top: 25,
+                  // right: 10.w,
+                  child: SizedBox(
+                    child: Animate(
+                      child: Text(
+                        sc.languageList.first.data.languages[index].description,
+                        style: TextStyle(
+                          color: HenryColors.darkGreen,
+                          fontSize: 15.sp,
+                        ),
+                      )
+                          .animate()
+                          .slide(duration: HenryGlobal.animationSpeed)
+                          .scale(duration: HenryGlobal.animationSpeed),
                     ),
                   ),
-                  Positioned(
-                    left: 8.w,
-                    right: 8.w,
-                    child: GestureDetector(
-                      onTap: () {
-                        int lID = sc.languageList.first.data.languages[index].id;
-                        String sCode = 'ST';
-                        sc.selecttedLanguageID.value = sc.languageList.first.data.languages[index].id;
-                        sc.selectedLanguageCode.value = sc.languageList.first.data.languages[index].code;
+                ),
+                Positioned(
+                  left: 8.w,
+                  right: 8.w,
+                  child: GestureDetector(
+                    onTap: () {
+                      int lID = sc.languageList.first.data.languages[index].id;
+                      String sCode = 'ST';
+                      sc.selecttedLanguageID.value = sc.languageList.first.data.languages[index].id;
+                      sc.selectedLanguageCode.value = sc.languageList.first.data.languages[index].code;
 
-                        var response =
-                            sc.getMenu(languageID: lID, code: sCode, type: 'ITEM', indexCode: hc.menuIndex.value);
-                        if (response) {
-                          hc.menuIndex.value = 1;
-                          debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
-                        }
-                      },
-                      child: SizedBox(
-                        height: 7.h,
-                        child: sc.languageList.isEmpty
-                            ? null
-                            : Image.asset(sc.languageList.first.data.languages[index].flag!, fit: BoxFit.fill)
-                                .animate()
-                                .fade(duration: HenryGlobal.animationSpeed)
-                                .scale(duration: HenryGlobal.animationSpeed),
-                      ),
+                      var response =
+                          sc.getMenu(languageID: lID, code: sCode, type: 'ITEM', indexCode: hc.menuIndex.value);
+                      if (response) {
+                        hc.menuIndex.value = 1;
+                        debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
+                      }
+                    },
+                    child: SizedBox(
+                      height: 7.h,
+                      child: sc.languageList.isEmpty
+                          ? null
+                          : Image.asset(sc.languageList.first.data.languages[index].flag!, fit: BoxFit.fill)
+                              .animate()
+                              .fade(duration: HenryGlobal.animationSpeed)
+                              .scale(duration: HenryGlobal.animationSpeed),
                     ),
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget menuTransactionTitle(Orientation orientation, {int? languageID, String? code, String? type}) {
-    return Obx(
-      () => SizedBox(
-        height: orientation == Orientation.portrait ? 45.h : 20.h,
-        width: 70.w,
-        child: ListView.builder(
-          padding: const EdgeInsets.all(25.0),
-          itemCount: sc.pageTrans.length,
-          itemBuilder: (BuildContext context, int index) {
-            return SizedBox(
-              height: 10.h,
-              child: Stack(
-                children: [
-                  Positioned(
-                    left: 25.w,
-                    top: 35,
-                    right: 10.w,
-                    child: SizedBox(
-                      width: 10.w,
-                      child: Text(
-                        sc.pageTrans[index].translationText,
-                        style: TextStyle(
-                          color: HenryColors.darkGreen,
-                          fontSize: 12.sp,
-                        ),
-                      )
-                          .animate()
-                          .fade(duration: HenryGlobal.animationSpeed)
-                          .scale(duration: HenryGlobal.animationSpeed),
-                    ),
-                  ),
-                  Positioned(
-                    left: 8.w,
-                    right: 8.w,
-                    child: GestureDetector(
-                      onTap: () {
-                        var response = sc.getMenu(
-                            languageID: languageID, code: 'SRT', type: 'ITEM', indexCode: hc.menuIndex.value);
-                        if (response) {
-                          sc.selectedTransactionType.value = sc.pageTrans[index].code;
-                          hc.menuIndex.value = 2;
-                          debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
-                        }
-                      },
-                      child: SizedBox(
-                        height: 7.h,
-                        child: sc.pageTrans.isEmpty
-                            ? null
-                            : Image.asset(sc.pageTrans[index].images!, fit: BoxFit.contain)
-                                .animate()
-                                .fade(duration: HenryGlobal.animationSpeed)
-                                .scale(duration: HenryGlobal.animationSpeed),
+    return SizedBox(
+      height: orientation == Orientation.portrait ? 45.h : 20.h,
+      width: 75.w,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(25.0),
+        itemCount: sc.pageTrans.length,
+        itemBuilder: (BuildContext context, int index) {
+          return SizedBox(
+            height: 10.h,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 25.w,
+                  top: 35,
+                  right: 10.w,
+                  child: SizedBox(
+                    width: 10.w,
+                    child: Text(
+                      sc.pageTrans[index].translationText,
+                      style: TextStyle(
+                        color: HenryColors.darkGreen,
+                        fontSize: 12.sp,
                       ),
+                    ).animate().fade(duration: HenryGlobal.animationSpeed).scale(duration: HenryGlobal.animationSpeed),
+                  ),
+                ),
+                Positioned(
+                  left: 8.w,
+                  right: 8.w,
+                  child: GestureDetector(
+                    onTap: () {
+                      var response =
+                          sc.getMenu(languageID: languageID, code: 'SRT', type: 'ITEM', indexCode: hc.menuIndex.value);
+                      if (response) {
+                        sc.selectedTransactionType.value = sc.pageTrans[index].code;
+                        hc.menuIndex.value = 2;
+                        debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
+                      }
+                    },
+                    child: SizedBox(
+                      height: 7.h,
+                      child: sc.pageTrans.isEmpty
+                          ? null
+                          : Image.asset(sc.pageTrans[index].images!, fit: BoxFit.contain)
+                              .animate()
+                              .fade(duration: HenryGlobal.animationSpeed)
+                              .scale(duration: HenryGlobal.animationSpeed),
                     ),
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -556,64 +524,68 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget menuRoomType(Orientation orientation, {int? languageID, String? code, String? type}) {
-    return Obx(
-      () => SizedBox(
-        height: orientation == Orientation.portrait ? 45.h : 20.h,
-        width: 70.w,
-        child: ListView.builder(
-          padding: const EdgeInsets.all(25.0),
-          itemCount: sc.pageTrans.length,
-          itemBuilder: (BuildContext context, int index) {
-            return SizedBox(
-              height: 10.h,
-              child: Stack(
-                children: [
-                  Positioned(
-                    left: 25.w,
-                    top: 35,
-                    right: 10.w,
-                    child: SizedBox(
-                      width: 10.w,
-                      child: Text(
-                        sc.pageTrans[index].translationText,
-                        style: TextStyle(
-                          color: HenryColors.darkGreen,
-                          fontSize: 12.sp,
-                        ),
-                      )
-                          .animate()
-                          .fade(duration: HenryGlobal.animationSpeed)
-                          .scale(duration: HenryGlobal.animationSpeed),
-                    ),
-                  ),
-                  Positioned(
-                    left: 8.w,
-                    right: 8.w,
-                    child: GestureDetector(
-                      onTap: () {
-                        var response = sc.getMenu(
-                            languageID: languageID, code: 'SACT', type: 'ITEM', indexCode: hc.menuIndex.value);
-                        if (response) {
-                          hc.menuIndex.value = 3;
-                          sc.selectedRoomType.value = sc.pageTrans[index].code;
-                        }
-                      },
-                      child: SizedBox(
-                        height: 7.h,
-                        child: sc.languageList.isEmpty
-                            ? null
-                            : Image.asset(sc.pageTrans[index].images!, fit: BoxFit.contain)
-                                .animate()
-                                .fade(duration: HenryGlobal.animationSpeed)
-                                .scale(duration: HenryGlobal.animationSpeed),
+    return SizedBox(
+      height: orientation == Orientation.portrait ? 45.h : 20.h,
+      width: 75.w,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(25.0),
+        itemCount: sc.pageTrans.length,
+        itemBuilder: (BuildContext context, int index) {
+          return SizedBox(
+            height: 10.h,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 25.w,
+                  top: 35,
+                  right: 10.w,
+                  child: SizedBox(
+                    width: 10.w,
+                    child: Text(
+                      sc.pageTrans[index].translationText,
+                      style: TextStyle(
+                        color: HenryColors.darkGreen,
+                        fontSize: 12.sp,
                       ),
+                    ).animate().fade(duration: HenryGlobal.animationSpeed).scale(duration: HenryGlobal.animationSpeed),
+                  ),
+                ),
+                Positioned(
+                  left: 8.w,
+                  right: 8.w,
+                  child: GestureDetector(
+                    onTap: () {
+                      sc.selectedRoomType.value = sc.pageTrans[index].description;
+
+                      var response =
+                          sc.getMenu(languageID: languageID, code: 'SACT', type: 'ITEM', indexCode: hc.menuIndex.value);
+                      if (response) {
+                        hc.menuIndex.value = 3;
+
+                        var roomIndex = sc.roomTypeList.first.data.roomTypes
+                            .indexWhere((element) => element.code == sc.selectedRoomType.value);
+                        sc.selectedRoomTypeID.value = sc.roomTypeList.first.data.roomTypes[roomIndex].id;
+
+                        if (kDebugMode) {
+                          print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
+                        }
+                      }
+                    },
+                    child: SizedBox(
+                      height: 7.h,
+                      child: sc.languageList.isEmpty
+                          ? null
+                          : Image.asset(sc.pageTrans[index].images!, fit: BoxFit.contain)
+                              .animate()
+                              .fade(duration: HenryGlobal.animationSpeed)
+                              .scale(duration: HenryGlobal.animationSpeed),
                     ),
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -665,70 +637,268 @@ class HomeView extends GetView<HomeController> {
   }
 
   menuAccommodationType(Orientation orientation, {int? languageID, String? code, String? type}) {
-    return Obx(
-      () => SizedBox(
-        height: orientation == Orientation.portrait ? 49.h : 20.h,
-        width: 70.w,
-        child: ListView.builder(
-          padding: const EdgeInsets.all(25.0),
-          itemCount: sc.accommodationTypeList.first.data.accommodationTypes.length,
-          physics: const ClampingScrollPhysics(),
-          itemBuilder: (BuildContext context, int index) {
-            return SizedBox(
-              height: 10.h,
-              child: Stack(
-                children: [
-                  Positioned(
-                    left: 25.w,
-                    top: 35,
-                    right: 10.w,
+    return SizedBox(
+      height: orientation == Orientation.portrait ? 49.h : 20.h,
+      width: 75.w,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(25.0),
+        itemCount: sc.accommodationTypeList.first.data.accommodationTypes.length,
+        physics: const ClampingScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          return SizedBox(
+            height: 10.h,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 25.w,
+                  top: 35,
+                  right: 10.w,
+                  child: SizedBox(
+                    width: 10.w,
+                    child: Animate(
+                      // effects: const [FadeEffect(), ScaleEffect()],
+                      child: Text(
+                        sc.accommodationTypeList.first.data.accommodationTypes[index].description,
+                        style: TextStyle(
+                          color: HenryColors.darkGreen,
+                          fontSize: 12.sp,
+                        ),
+                      )
+                          .animate()
+                          .fade(duration: HenryGlobal.animationSpeed)
+                          .scale(duration: HenryGlobal.animationSpeed),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 8.w,
+                  right: 8.w,
+                  child: GestureDetector(
+                    onTap: () {
+                      sc.selectedAccommodationType.value =
+                          sc.accommodationTypeList.first.data.accommodationTypes[index].id;
+                      if (kDebugMode) {
+                        print('SELECTED ACCOMMODATION TYPE ID: ${sc.selectedAccommodationType.value}');
+                      }
+
+                      var response = sc.getMenu(languageID: languageID, code: 'SPM');
+                      if (response) {
+                        // hc.initializeCamera();
+                        hc.menuIndex.value = 4; //payment type
+                      }
+                    },
                     child: SizedBox(
-                      width: 10.w,
-                      child: Animate(
-                        // effects: const [FadeEffect(), ScaleEffect()],
-                        child: Text(
-                          sc.accommodationTypeList.first.data.accommodationTypes[index].description,
-                          style: TextStyle(
-                            color: HenryColors.darkGreen,
-                            fontSize: 12.sp,
-                          ),
-                        )
-                            .animate()
-                            .fade(duration: HenryGlobal.animationSpeed)
-                            .scale(duration: HenryGlobal.animationSpeed),
-                      ),
+                      height: 7.h,
+                      child: sc.accommodationTypeList.first.data.accommodationTypes.isNotEmpty
+                          ? Image.asset(
+                                  'assets/menus/hour${sc.accommodationTypeList.first.data.accommodationTypes[index].seq}.png',
+                                  fit: BoxFit.contain)
+                              .animate()
+                              .fade(duration: HenryGlobal.animationSpeed)
+                              .scale(duration: HenryGlobal.animationSpeed)
+                          : null,
                     ),
                   ),
-                  Positioned(
-                    left: 8.w,
-                    right: 8.w,
-                    child: GestureDetector(
-                      onTap: () {
-                        var response = sc.getMenu(languageID: languageID, code: 'SPM');
-                        if (response) {
-                          sc.selectedAccommodationType.value =
-                              sc.accommodationTypeList.first.data.accommodationTypes[index].id;
-                          // hc.initializeCamera();
-                          hc.menuIndex.value = 4;
-                        }
-                      },
-                      child: SizedBox(
-                        height: 7.h,
-                        child: sc.accommodationTypeList.first.data.accommodationTypes.isNotEmpty
-                            ? Image.asset(
-                                    'assets/menus/hour${sc.accommodationTypeList.first.data.accommodationTypes[index].seq}.png',
-                                    fit: BoxFit.contain)
-                                .animate()
-                                .fade(duration: HenryGlobal.animationSpeed)
-                                .scale(duration: HenryGlobal.animationSpeed)
-                            : null,
-                      ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  menuPaymentType(Orientation orientation, {int? languageID, String? code, String? type}) {
+    return SizedBox(
+      height: orientation == Orientation.portrait ? 49.h : 20.h,
+      width: 75.w,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(25.0),
+        itemCount: sc.paymentTypeList.first.data.paymentTypes.length,
+        physics: const ClampingScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          return SizedBox(
+            height: 10.h,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 25.w,
+                  top: 35,
+                  right: 10.w,
+                  child: SizedBox(
+                    width: 10.w,
+                    child: Animate(
+                      // effects: const [FadeEffect(), ScaleEffect()],
+                      child: Text(
+                        sc.paymentTypeList.first.data.paymentTypes[index].description.toUpperCase(),
+                        style: TextStyle(
+                          color: HenryColors.darkGreen,
+                          fontSize: 12.sp,
+                        ),
+                      )
+                          .animate()
+                          .fade(duration: HenryGlobal.animationSpeed)
+                          .scale(duration: HenryGlobal.animationSpeed),
                     ),
                   ),
-                ],
+                ),
+                Positioned(
+                  left: 8.w,
+                  right: 8.w,
+                  child: GestureDetector(
+                    onTap: () async {
+                      // query the get available Rooms
+                      final accessToken = sc.userLoginList.first.accessToken;
+                      final headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'};
+
+                      await sc.getAvailableRoomsGraphQL(
+                          credentialHeaders: headers,
+                          roomTYPEID: sc.selectedRoomTypeID.value,
+                          accommodationTYPEID: sc.selectedAccommodationType.value);
+
+                      sc.getMenu(languageID: languageID, code: 'IP', type: 'TITLE');
+
+                      // DIRECT TO MENU INDEX 5 - PAYMENT TYPE, BASE ON THE SELECRED ROOM AND ACCOMMODATION
+                      hc.menuIndex.value = 5;
+
+                      // var response = sc.getMenu(languageID: languageID, code: 'DI', type: 'ITEM');
+                      // if (response) {
+                      //   hc.menuIndex.value = 5;
+                      // }
+                    },
+                    child: SizedBox(
+                      height: 7.h,
+                      child: sc.paymentTypeList.first.data.paymentTypes.isNotEmpty
+                          ? Image.asset('assets/menus/payment${index + 1}.png', fit: BoxFit.contain)
+                              .animate()
+                              .fade(duration: HenryGlobal.animationSpeed)
+                              .scale(duration: HenryGlobal.animationSpeed)
+                          : null,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget menuInsertPayment(Orientation orientation) {
+    return SizedBox(
+      height: orientation == Orientation.portrait ? 49.h : 20.h,
+      width: 75.w,
+      child: Container(
+        margin: const EdgeInsets.all(20.0),
+        height: 20.h,
+        width: 20.w,
+        decoration: const BoxDecoration(
+            color: Colors.black54,
+            gradient: LinearGradient(
+                colors: [Colors.black, HenryColors.grey],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                tileMode: TileMode.decal),
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(100.0),
+              bottomRight: Radius.circular(20.0),
+              topLeft: Radius.circular(20.0),
+              bottomLeft: Radius.circular(100.0),
+            ),
+            boxShadow: [BoxShadow(color: Colors.black54, offset: Offset(15, 15), blurRadius: 10)]),
+        child: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Center(
+                  child: Text(
+                    'CASH',
+                    style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                  ),
+                ),
               ),
-            );
-          },
+              const Divider(
+                color: HenryColors.puti,
+                thickness: 2,
+              ),
+              Expanded(
+                flex: 8,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 2.h,
+                      width: double.infinity,
+                    ),
+                    Text(
+                      'CARD DEPOSIT : PHP ${sc.availRoomList[sc.preSelectedRoomID.value].serviceCharge.toStringAsFixed(2)}',
+                      style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                    ),
+                    Text(
+                      'ROOM RATE : PHP ${sc.availRoomList[sc.preSelectedRoomID.value].rate.toStringAsFixed(2)}',
+                      style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                    ),
+                    Text(
+                      'AMOUNT DUE : PHP ${sc.totalAmountDue.toStringAsFixed(2)}',
+                      style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                    ),
+                    SizedBox(
+                      height: 2.h,
+                      width: double.infinity,
+                    ),
+                    Container(
+                      height: 13.h,
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        color: HenryColors.darkGreen,
+                        gradient: LinearGradient(
+                            colors: [HenryColors.darkGreen, Colors.white],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            tileMode: TileMode.clamp),
+                        borderRadius: BorderRadius.only(topLeft: Radius.circular(60), topRight: Radius.circular(60)),
+                      ),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              'AMOUNT RECEIVED:',
+                              style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: MaterialButton(
+                    onPressed: () async {
+                      hc.menuIndex.value = 6;
+                    },
+                    color: HenryColors.darkGreen,
+                    padding: const EdgeInsets.all(30),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
+                    // AGREE BUTTON
+                    child: Text(
+                      '   Confirm   ',
+                      style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -742,14 +912,17 @@ class HomeView extends GetView<HomeController> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            height: 20.h,
-            width: 60.w,
-            child: Transform(
-              key: imgKey,
-              alignment: Alignment.center,
-              transform: Matrix4.rotationY(math.pi),
-              child: CameraPlatform.instance.buildPreview(hc.cameraID.value),
+          Visibility(
+            visible: false,
+            child: SizedBox(
+              height: 20.h,
+              width: 60.w,
+              child: Transform(
+                key: imgKey,
+                alignment: Alignment.center,
+                transform: Matrix4.rotationY(math.pi),
+                child: CameraPlatform.instance.buildPreview(hc.cameraID.value),
+              ),
             ),
           ),
           SizedBox(
@@ -757,12 +930,18 @@ class HomeView extends GetView<HomeController> {
             width: double.infinity,
           ),
           // DISCLAIMER
-          sc.pageTrans.isNotEmpty
-              ? Text(
-                  sc.pageTrans.first.translationText,
-                  style: TextStyle(
-                    color: HenryColors.puti,
-                    fontSize: 5.sp,
+          sc.translationTermsList.first.data.translationTerms.isNotEmpty
+              ? SizedBox(
+                  height: 40.h,
+                  child: SingleChildScrollView(
+                    controller: sc.scrollController,
+                    child: Text(
+                      sc.translationTermsList.first.data.translationTerms.first.translationText,
+                      style: TextStyle(
+                        color: HenryColors.puti,
+                        fontSize: 5.sp,
+                      ),
+                    ),
                   ),
                 )
               : const SizedBox(),
@@ -770,7 +949,7 @@ class HomeView extends GetView<HomeController> {
             height: 2.h,
             width: double.infinity,
           ),
-          sc.pageTrans.isNotEmpty
+          sc.translationTermsList.first.data.translationTerms.isNotEmpty
               ? SizedBox(
                   child: hc.isLoading.value
                       ? Column(
@@ -784,33 +963,36 @@ class HomeView extends GetView<HomeController> {
                             )
                           ],
                         )
-                      : MaterialButton(
-                          onPressed: () async {
-                            hc.isLoading.value = true;
-                            // var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
-                            final handle = imgKey.currentContext?.findAncestorWidgetOfExactType<SizedBox>().hashCode;
-                            if (kDebugMode) {
-                              print('Picture Handle: $handle');
-                            }
-                            final accessToken = sc.userLoginList.first.accessToken;
-                            final headers = {
-                              'Content-Type': 'application/json',
-                              'Authorization': 'Bearer $accessToken'
-                            };
+                      : Visibility(
+                          visible: sc.isBottom.value,
+                          child: MaterialButton(
+                            onPressed: () async {
+                              hc.isLoading.value = true;
+                              // var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
+                              final handle = imgKey.currentContext?.findAncestorWidgetOfExactType<SizedBox>().hashCode;
+                              if (kDebugMode) {
+                                print('Picture Handle: $handle');
+                              }
+                              final accessToken = sc.userLoginList.first.accessToken;
+                              final headers = {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer $accessToken'
+                              };
 
-                            var response = await sc.addTransaction(credentialHeaders: headers);
-                            if (response) {
-                              //
-                              hc.isLoading.value = false;
-                            }
-                          },
-                          color: HenryColors.darkGreen,
-                          padding: const EdgeInsets.all(30),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
-                          // AGREE BUTTON
-                          child: Text(
-                            sc.pageTrans.last.translationText,
-                            style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                              var response = await sc.addTransaction(credentialHeaders: headers);
+                              if (response) {
+                                //
+                                hc.isLoading.value = false;
+                              }
+                            },
+                            color: HenryColors.darkGreen,
+                            padding: const EdgeInsets.all(30),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
+                            // AGREE BUTTON
+                            child: Text(
+                              'Agree',
+                              style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                            ),
                           ),
                         ),
                 )
@@ -818,77 +1000,6 @@ class HomeView extends GetView<HomeController> {
         ],
       ),
     );
-  }
-
-  menuPaymentType(Orientation orientation, {int? languageID, String? code, String? type}) {
-    return Obx(
-      () => SizedBox(
-        height: orientation == Orientation.portrait ? 49.h : 20.h,
-        width: 70.w,
-        child: ListView.builder(
-          padding: const EdgeInsets.all(25.0),
-          itemCount: sc.paymentTypeList.first.data.paymentTypes.length,
-          physics: const ClampingScrollPhysics(),
-          itemBuilder: (BuildContext context, int index) {
-            return SizedBox(
-              height: 10.h,
-              child: Stack(
-                children: [
-                  Positioned(
-                    left: 25.w,
-                    top: 35,
-                    right: 10.w,
-                    child: SizedBox(
-                      width: 10.w,
-                      child: Animate(
-                        // effects: const [FadeEffect(), ScaleEffect()],
-                        child: Text(
-                          sc.paymentTypeList.first.data.paymentTypes[index].description.toUpperCase(),
-                          style: TextStyle(
-                            color: HenryColors.darkGreen,
-                            fontSize: 12.sp,
-                          ),
-                        )
-                            .animate()
-                            .fade(duration: HenryGlobal.animationSpeed)
-                            .scale(duration: HenryGlobal.animationSpeed),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 8.w,
-                    right: 8.w,
-                    child: GestureDetector(
-                      onTap: () {
-                        var response = sc.getMenu(languageID: languageID, code: 'DI', type: 'ITEM');
-                        if (response) {
-                          sc.selectedAccommodationType.value =
-                              sc.accommodationTypeList.first.data.accommodationTypes[index].id;
-                          hc.menuIndex.value = 5;
-                        }
-                      },
-                      child: SizedBox(
-                        height: 7.h,
-                        child: sc.paymentTypeList.first.data.paymentTypes.isNotEmpty
-                            ? Image.asset('assets/menus/payment${index + 1}.png', fit: BoxFit.contain)
-                                .animate()
-                                .fade(duration: HenryGlobal.animationSpeed)
-                                .scale(duration: HenryGlobal.animationSpeed)
-                            : null,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget menuInsertPayment() {
-    return const SizedBox();
   }
 
   Widget menuGuestInformation(Orientation orientation, {int? languageID, String? code, String? type}) {
@@ -938,11 +1049,11 @@ class HomeView extends GetView<HomeController> {
                       children: [
                         Text(
                           DateFormat("EEEE").format(hc.localTime),
-                          style: TextStyle(color: HenryColors.puti, fontSize: 4.sp),
+                          style: TextStyle(color: HenryColors.puti, fontSize: 6.sp),
                         ),
                         Text(
                           DateFormat("MMMM, dd, y").format(hc.localTime),
-                          style: TextStyle(color: HenryColors.puti, fontSize: 4.sp),
+                          style: TextStyle(color: HenryColors.puti, fontSize: 6.sp),
                         ),
                         const Divider(
                           color: HenryColors.puti,
@@ -957,7 +1068,7 @@ class HomeView extends GetView<HomeController> {
                             isLive: true,
                             useClockSkin: false,
                             showSeconds: false,
-                            textScaleFactor: 1,
+                            textScaleFactor: 1.5,
                             digitalClockTextColor: HenryColors.darkGreen,
                           ),
                         ),
@@ -966,7 +1077,7 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ),
                 SizedBox(
-                  width: 65.w,
+                  width: 55.w,
                 ),
                 Expanded(
                   flex: 2,
@@ -976,8 +1087,8 @@ class HomeView extends GetView<HomeController> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Row(
-                          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Image.network(
                               sc.imgUrl.value,
@@ -991,16 +1102,11 @@ class HomeView extends GetView<HomeController> {
                               children: [
                                 Text(
                                   '${sc.weatherList.first.current.tempC.toStringAsFixed(0)}° C',
-                                  style: TextStyle(color: HenryColors.puti, fontSize: 5.sp),
+                                  style: TextStyle(color: HenryColors.puti, fontSize: 6.sp),
                                 ),
                                 Text(
                                   '${sc.weatherList.first.current.tempF.toStringAsFixed(0)}° F',
-                                  style: TextStyle(color: HenryColors.puti, fontSize: 5.sp),
-                                ),
-                                Text(
-                                  sc.weatherList.first.current.condition.text,
-                                  style: TextStyle(
-                                      color: HenryColors.puti, fontSize: 3.sp, overflow: TextOverflow.ellipsis),
+                                  style: TextStyle(color: HenryColors.puti, fontSize: 6.sp),
                                 ),
                               ],
                             ),
@@ -1009,6 +1115,10 @@ class HomeView extends GetView<HomeController> {
                         const Divider(
                           color: HenryColors.puti,
                           thickness: 3,
+                        ),
+                        Text(
+                          sc.weatherList.first.current.condition.text,
+                          style: TextStyle(color: HenryColors.puti, fontSize: 4.sp, overflow: TextOverflow.ellipsis),
                         ),
                         Text('${sc.weatherList.first.location.name}, ${sc.weatherList.first.location.country}',
                             style: TextStyle(color: HenryColors.puti, fontSize: 3.sp))
@@ -1054,7 +1164,7 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
               HenryClock(
-                locationOfTime: 'Seoul',
+                locationOfTime: 'Korea',
                 locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
                 dateTime: hc.seoulNow,
                 isLive: true,

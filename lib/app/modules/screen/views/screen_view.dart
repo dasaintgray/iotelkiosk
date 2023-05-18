@@ -155,7 +155,7 @@ class ScreenView extends GetView<ScreenController> {
                                       width: 100,
                                     ),
                                     Column(
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
                                         Text(
@@ -166,12 +166,12 @@ class ScreenView extends GetView<ScreenController> {
                                           '${sc.weatherList.first.current.tempF.toStringAsFixed(0)}° F',
                                           style: TextStyle(color: HenryColors.puti, fontSize: 5.sp),
                                         ),
-                                        Text(sc.weatherList.first.current.condition.text,
-                                            style: TextStyle(color: HenryColors.puti, fontSize: 3.sp)),
                                       ],
                                     ),
                                   ],
                                 ),
+                                Text(sc.weatherList.first.current.condition.text,
+                                    style: TextStyle(color: HenryColors.puti, fontSize: 3.sp)),
                                 Text('${sc.weatherList.first.location.name}, ${sc.weatherList.first.location.country}',
                                     style: TextStyle(color: HenryColors.puti, fontSize: 3.sp))
                               ],

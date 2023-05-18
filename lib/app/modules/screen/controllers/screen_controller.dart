@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
@@ -12,6 +14,7 @@ import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/translation_terms_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/userlogin_model.dart';
 
@@ -27,6 +30,7 @@ class ScreenController extends GetxController with BaseController {
 
   // BOOLEAN
   final isLoading = false.obs;
+  final isBottom = false.obs;
 
   // STRING
   final imgUrl = ''.obs;
@@ -49,6 +53,7 @@ class ScreenController extends GetxController with BaseController {
   final roomTypeList = <RoomTypesModel>[].obs;
   final paymentTypeList = <PaymentTypeModel>[].obs;
   final availableRoomList = <AvailableRoomsModel>[].obs;
+  final translationTermsList = <TranslationTermsModel>[].obs;
 
   final roomsList = [].obs; //DYNAMIC KASI PABABAGO ANG OUTPUT
   final resultList = [].obs;
@@ -59,13 +64,21 @@ class ScreenController extends GetxController with BaseController {
   final selectedLanguageCode = 'en'.obs;
   final selectedTransactionType = ''.obs;
   final selectedRoomType = ''.obs;
-  final selectedAccommodationType = 0.obs;
+  final selectedRoomTypeID = 1.obs;
+  final selectedAccommodationType = 1.obs;
   final selectedNationalities = 77.obs;
+  final selectedPaymentType = 0.obs;
+  final preSelectedRoomID = 0.obs;
+  final totalAmountDue = 0.0.obs;
 
   // MODEL LIST
   final pageTrans = <Conversion>[].obs;
   final titleTrans = <Conversion>[].obs;
   final btnMessage = <Conversion>[].obs;
+  final availRoomList = <AvailableRoom>[].obs;
+
+  // SCROLL CONTROLLER
+  final scrollController = ScrollController();
 
   final player = Player(
     id: 0,
@@ -91,13 +104,26 @@ class ScreenController extends GetxController with BaseController {
     await getSeriesDetails(credentialHeaders: headers);
     await getRoomType(credentialHeaders: headers);
     await getPaymentType(credentialHeaders: headers);
-    await getAvailableRoomsGraphQL(credentialHeaders: headers);
+
+    await getAvailableRoomsGraphQL(
+        credentialHeaders: headers,
+        roomTYPEID: selectedRoomTypeID.value,
+        accommodationTYPEID: selectedAccommodationType.value);
+
+    await getTerms(credentialHeaders: headers, languageID: 6);
   }
 
-  // @override
-  // void onReady() async {
-  //   super.onReady();
-  // }
+  @override
+  void onReady() async {
+    super.onReady();
+    scrollController.addListener(
+      () {
+        if (scrollController.position.atEdge) {
+          isBottom.value = scrollController.position.pixels == 0 ? false : true;
+        }
+      },
+    );
+  }
 
   // @override
   // void onClose() {
@@ -109,12 +135,26 @@ class ScreenController extends GetxController with BaseController {
     player.open(
       Playlist(
         medias: [
-          Media.asset('assets/background/iotel.mp4'),
           Media.asset('assets/background/iOtelWalkin.mp4'),
+          Media.asset('assets/background/iotel.mp4'),
         ],
       ),
       autoStart: true,
     );
+  }
+
+  int pickRoom() {
+    final random = Random();
+
+    if (availRoomList.isNotEmpty) {
+      for (var i = availRoomList.length - 1; i > 0; i++) {
+        var n = random.nextInt(i + 1);
+        if (n != 0) {
+          return n;
+        }
+      }
+    }
+    return 0;
   }
 
   Future<bool> getSettings() async {
@@ -308,15 +348,18 @@ class ScreenController extends GetxController with BaseController {
     return false;
   }
 
-  Future<bool?> getAvailableRoomsGraphQL({required Map<String, String> credentialHeaders}) async {
+  Future<bool?> getAvailableRoomsGraphQL(
+      {required Map<String, String> credentialHeaders,
+      required int? roomTYPEID,
+      required int? accommodationTYPEID}) async {
     isLoading.value = true;
 
     final dtnow = DateTime.now();
 
     final response = await GlobalProvider().fetchAvailableRoomsGraphQL(
         agentID: 1,
-        roomTypeID: 1,
-        accommodationTypeID: 1,
+        roomTypeID: roomTYPEID,
+        accommodationTypeID: accommodationTYPEID == 0 ? 1 : accommodationTYPEID,
         startDate: dtnow,
         endDate: dtnow,
         headers: credentialHeaders);
@@ -325,6 +368,20 @@ class ScreenController extends GetxController with BaseController {
       if (response != null) {
         availableRoomList.add(response);
         availableRoomList.shuffle();
+
+        availRoomList.addAll(availableRoomList.first.data.availableRooms.toList());
+        preSelectedRoomID.value = pickRoom();
+
+        if (preSelectedRoomID.value != 0) {
+          totalAmountDue.value =
+              availRoomList[preSelectedRoomID.value].rate + availRoomList[preSelectedRoomID.value].serviceCharge;
+        }
+
+        if (kDebugMode) {
+          print('Available Room Orig: ${availableRoomList.first.data.availableRooms.length}');
+          print('Available Room Shuffle: ${availRoomList.length}');
+        }
+
         return true;
       } else {
         isLoading.value = false;
@@ -397,6 +454,28 @@ class ScreenController extends GetxController with BaseController {
     }
     return false;
   }
+
+  // TRANSLATION TERMS
+  Future<bool> getTerms({required Map<String, String> credentialHeaders, int? languageID}) async {
+    isLoading.value = true;
+
+    final response = await GlobalProvider().fetchTerms(headers: credentialHeaders, langID: languageID);
+
+    try {
+      if (response != null) {
+        translationTermsList.add(response);
+        if (kDebugMode) {
+          print('Total Terms: ${translationTermsList.first.data.translationTerms.length}');
+        }
+        return true;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
+  }
+
+  //  MUTATION AREA
 
   Future addTransaction({required Map<String, String> credentialHeaders}) async {
     isLoading.value = true;
