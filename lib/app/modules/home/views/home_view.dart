@@ -135,9 +135,10 @@ class HomeView extends GetView<HomeController> {
                                     };
 
                                     sc.getTransaction(credentialHeaders: headers);
-                                    if (hc.menuIndex.value > 2) {
-                                      var currentIndex = hc.menuIndex.value--;
-                                      hc.menuIndex.value = currentIndex;
+
+                                    if (hc.menuIndex.value > 1) {
+                                      hc.currentIndex.value = hc.menuIndex.value--;
+                                      hc.menuIndex.value = hc.currentIndex.value;
                                     } else {
                                       hc.disposeCamera();
                                       hc.menuIndex.value = 0;
@@ -226,6 +227,8 @@ class HomeView extends GetView<HomeController> {
                           sc.getMenu(languageID: lID, code: sCode, type: 'ITEM', indexCode: hc.menuIndex.value);
                       if (response) {
                         hc.menuIndex.value = 1;
+                        hc.currentIndex.value = hc.menuIndex.value;
+                        hc.previousIndex.value = hc.menuIndex.value - 1;
                         debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
                       }
                     },
@@ -285,6 +288,8 @@ class HomeView extends GetView<HomeController> {
                       if (response) {
                         sc.selectedTransactionType.value = sc.pageTrans[index].code;
                         hc.menuIndex.value = 2;
+                        hc.currentIndex.value = hc.menuIndex.value;
+                        hc.previousIndex.value = hc.menuIndex.value - 1;
                         debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
                       }
                     },
@@ -785,6 +790,7 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  // INSERT PAYMENT
   Widget menuInsertPayment(Orientation orientation) {
     return SizedBox(
       height: orientation == Orientation.portrait ? 49.h : 20.h,

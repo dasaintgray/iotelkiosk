@@ -37,6 +37,7 @@ class HomeController extends GetxController with BaseController {
   // INT
   final menuIndex = 0.obs;
   final currentIndex = 0.obs;
+  final previousIndex = 0.obs;
 
   // CAMERA GLOBAL VARIABLES
   final cameraInfo = 'Unkown'.obs;
