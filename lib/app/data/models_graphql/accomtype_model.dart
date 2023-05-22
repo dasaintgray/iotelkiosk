@@ -49,6 +49,7 @@ class AccommodationType {
     required this.description,
     required this.code,
     required this.seq,
+    this.translatedText,
   });
 
   int id;
@@ -57,6 +58,7 @@ class AccommodationType {
   String description;
   String code;
   int seq;
+  late String? translatedText;
 
   factory AccommodationType.fromJson(Map<String, dynamic> json) => AccommodationType(
         id: json["Id"],
@@ -65,6 +67,7 @@ class AccommodationType {
         description: json["description"],
         code: json["code"],
         seq: json["seq"],
+        translatedText: json["translatedText"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -74,5 +77,6 @@ class AccommodationType {
         "description": description,
         "code": code,
         "seq": seq,
+        "translatedText": translatedText
       };
 }

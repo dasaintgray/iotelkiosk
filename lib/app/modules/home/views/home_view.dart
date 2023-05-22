@@ -8,6 +8,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:iotelkiosk/app/modules/home/views/transaction_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
@@ -40,8 +41,6 @@ class HomeView extends GetView<HomeController> {
             if (hc.isIdleActive.value) {
               sc.player.play();
             }
-            // hc.resetTimer();
-            // hc.initTimezone();
           },
           child: Stack(
             children: [
@@ -71,51 +70,54 @@ class HomeView extends GetView<HomeController> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       clockAndWeather(),
+
                       SizedBox(
                         height: orientation == Orientation.portrait ? 12.h : 1.h,
                         width: double.infinity,
-                        // child: menuTitle(hc.tlSLList),
                       ),
+
                       menuTitle(),
 
-                      Obx(
-                        () => IndexedStack(
-                          index: hc.menuIndex.value,
-                          children: [
-                            // 0
-                            menuLanguage(orientation),
-                            // 1
-                            menuTransactionTitle(orientation,
-                                languageID: sc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
-                            // 2
-                            menuRoomType(orientation,
-                                languageID: sc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
-                            // 3 - ACCOMMODATION TYPE - THE DATA IS OUTSIDE THE TRANSLATION
-                            menuAccommodationType(
-                              orientation,
-                              languageID: sc.selecttedLanguageID.value,
-                            ),
-                            // 4 - PAYMENT TYPE
-                            menuPaymentType(orientation),
-                            // 5 - INSERT PAYMENT
-                            menuInsertPayment(orientation),
-                            // 6 - DISCLAIMER
-                            menuDisclaimer(orientation, context),
+                      menuLanguage(orientation), //eto lang nag nagbabago
 
-                            // menuCheckIn(orientation,
-                            //     languageID: hc.selecttedLanguageID.value, code: 'SBP', type: 'ITEM'),
-                            // menuBookingProcess(orientation,
-                            //     languageID: hc.selecttedLanguageID.value, code: 'PIBN', type: 'BUTTON'),
-                            // menuInputBookingNumber(orientation,
-                            //     languageID: hc.selecttedLanguageID.value, code: '', type: ''),
-                            // menuSelectArrivalTime(orientation,
-                            //     languageID: hc.selecttedLanguageID.value, code: '', type: ''),
-                            // menuGuestInformation(orientation,
-                            //     languageID: hc.selecttedLanguageID.value, code: 'GI', type: 'ITEM'),
-                            // 8 - ACCOMMODATION TYPE - THE DATA IS OUTSIDE THE TRANSLATION
-                          ],
-                        ),
-                      ),
+                      // Obx(
+                      //   () => IndexedStack(
+                      //     key: UniqueKey(),
+                      //     index: hc.menuIndex.value,
+                      //     children: [
+                      //       // 0
+                      //       menuLanguage(orientation),
+                      //       // 1
+                      //       menuTransactionTitle(orientation,
+                      //           languageID: sc.selecttedLanguageID.value, code: 'SRT', type: 'ITEM'),
+                      //       // 2
+                      //       menuRoomType(orientation, languageID: sc.selecttedLanguageID.value),
+                      //       // 3 - ACCOMMODATION TYPE - THE DATA IS OUTSIDE THE TRANSLATION
+                      //       menuAccommodationType(
+                      //         orientation,
+                      //         languageID: sc.selecttedLanguageID.value,
+                      //       ),
+                      //       // 4 - PAYMENT TYPE
+                      //       menuPaymentType(orientation),
+                      //       // 5 - INSERT PAYMENT
+                      //       menuInsertPayment(orientation),
+                      //       // 6 - DISCLAIMER
+                      //       menuDisclaimer(orientation, context),
+
+                      //       // menuCheckIn(orientation,
+                      //       //     languageID: hc.selecttedLanguageID.value, code: 'SBP', type: 'ITEM'),
+                      //       // menuBookingProcess(orientation,
+                      //       //     languageID: hc.selecttedLanguageID.value, code: 'PIBN', type: 'BUTTON'),
+                      //       // menuInputBookingNumber(orientation,
+                      //       //     languageID: hc.selecttedLanguageID.value, code: '', type: ''),
+                      //       // menuSelectArrivalTime(orientation,
+                      //       //     languageID: hc.selecttedLanguageID.value, code: '', type: ''),
+                      //       // menuGuestInformation(orientation,
+                      //       //     languageID: hc.selecttedLanguageID.value, code: 'GI', type: 'ITEM'),
+                      //       // 8 - ACCOMMODATION TYPE - THE DATA IS OUTSIDE THE TRANSLATION
+                      //     ],
+                      //   ),
+                      // ),
 
                       Obx(
                         () => Visibility(
@@ -126,19 +128,10 @@ class HomeView extends GetView<HomeController> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                InkWell(
+                                GestureDetector(
                                   onTap: () {
-                                    final accessToken = sc.userLoginList.first.accessToken;
-                                    final headers = {
-                                      'Content-Type': 'application/json',
-                                      'Authorization': 'Bearer $accessToken'
-                                    };
-
-                                    sc.getTransaction(credentialHeaders: headers);
-
                                     if (hc.menuIndex.value > 1) {
-                                      hc.currentIndex.value = hc.menuIndex.value--;
-                                      hc.menuIndex.value = hc.currentIndex.value;
+                                      hc.menuIndex.value--;
                                     } else {
                                       hc.disposeCamera();
                                       hc.menuIndex.value = 0;
@@ -152,21 +145,12 @@ class HomeView extends GetView<HomeController> {
                                 const SizedBox(
                                   width: 50,
                                 ),
-                                // GestureDetector(
-                                //   onTap: () {
-                                //     // hc.getMenu(languageID: 0, code: 'SLMT', type: 'TITLE');
-                                //     // Get.back();
-                                //   },
-                                //   child: Image.asset(
-                                //     'assets/menus/forward-arrow.png',
-                                //     fit: BoxFit.cover,
-                                //   ),
-                                // ),
                               ],
                             ),
                           ),
                         ),
                       ),
+
                       // SizedBox(
                       //   height: 5.h,
                       //   width: double.infinity,
@@ -226,10 +210,10 @@ class HomeView extends GetView<HomeController> {
                       var response =
                           sc.getMenu(languageID: lID, code: sCode, type: 'ITEM', indexCode: hc.menuIndex.value);
                       if (response) {
-                        hc.menuIndex.value = 1;
-                        hc.currentIndex.value = hc.menuIndex.value;
-                        hc.previousIndex.value = hc.menuIndex.value - 1;
-                        debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
+                        // hc.menuIndex.value = 1;
+                        // hc.menuIndex.value++;
+                        Get.to(() => TransactionView());
+                        // debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
                       }
                     },
                     child: SizedBox(
@@ -282,15 +266,22 @@ class HomeView extends GetView<HomeController> {
                   left: 8.w,
                   right: 8.w,
                   child: GestureDetector(
-                    onTap: () {
-                      var response =
-                          sc.getMenu(languageID: languageID, code: 'SRT', type: 'ITEM', indexCode: hc.menuIndex.value);
-                      if (response) {
-                        sc.selectedTransactionType.value = sc.pageTrans[index].code;
-                        hc.menuIndex.value = 2;
-                        hc.currentIndex.value = hc.menuIndex.value;
-                        hc.previousIndex.value = hc.menuIndex.value - 1;
-                        debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
+                    onTap: () async {
+                      // var response =
+                      //     sc.getMenu(languageID: languageID, code: 'SRT', type: 'ITEM', indexCode: hc.menuIndex.value);
+                      // if (response) {
+                      //   sc.selectedTransactionType.value = sc.pageTrans[index].code;
+                      //   hc.menuIndex.value++;
+                      //   if (kDebugMode) {
+                      //     print('selected transaction: ${sc.selectedTransactionType.value}');
+                      //   }
+                      // }
+                      sc.isLoading.value = true;
+                      sc.selectedTransactionType.value = sc.pageTrans[index].code;
+                      hc.menuIndex.value++;
+                      sc.isLoading.value = false;
+                      if (kDebugMode) {
+                        print('selected transaction: ${sc.selectedTransactionType.value}');
                       }
                     },
                     child: SizedBox(
@@ -529,13 +520,32 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget menuRoomType(Orientation orientation, {int? languageID, String? code, String? type}) {
+    final langCode = sc.languageList.first.data.languages.where((element) => element.id == languageID);
+    // bool isTranslate = langCode.first.code.toLowerCase() != sc.defaultLanguageCode.value.toLowerCase();
+
     return SizedBox(
       height: orientation == Orientation.portrait ? 45.h : 20.h,
       width: 75.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),
-        itemCount: sc.pageTrans.length,
+        itemCount: sc.roomTypeList.first.data.roomTypes.length,
         itemBuilder: (BuildContext context, int index) {
+          var imageFilename = 'assets/menus/${sc.roomTypeList.first.data.roomTypes[index].code.toLowerCase()}.png';
+
+          hc.translator
+              .translate(sc.roomTypeList.first.data.roomTypes[index].description, to: langCode.first.code.toLowerCase())
+              .then((value) {
+            hc.roomTypeTranslatedText.value = value.text;
+            if (kDebugMode) {
+              print(hc.roomTypeTranslatedText.value);
+            }
+            sc.roomTypeList.refresh();
+          });
+
+          if (kDebugMode) {
+            print(imageFilename);
+          }
+
           return SizedBox(
             height: 10.h,
             child: Stack(
@@ -547,7 +557,7 @@ class HomeView extends GetView<HomeController> {
                   child: SizedBox(
                     width: 10.w,
                     child: Text(
-                      sc.pageTrans[index].translationText,
+                      hc.roomTypeTranslatedText.value,
                       style: TextStyle(
                         color: HenryColors.darkGreen,
                         fontSize: 12.sp,
@@ -560,27 +570,29 @@ class HomeView extends GetView<HomeController> {
                   right: 8.w,
                   child: GestureDetector(
                     onTap: () {
-                      sc.selectedRoomType.value = sc.pageTrans[index].description;
-
-                      var response =
-                          sc.getMenu(languageID: languageID, code: 'SACT', type: 'ITEM', indexCode: hc.menuIndex.value);
-                      if (response) {
-                        hc.menuIndex.value = 3;
-
-                        var roomIndex = sc.roomTypeList.first.data.roomTypes
-                            .indexWhere((element) => element.code == sc.selectedRoomType.value);
-                        sc.selectedRoomTypeID.value = sc.roomTypeList.first.data.roomTypes[roomIndex].id;
-
-                        if (kDebugMode) {
-                          print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
-                        }
+                      sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
+                      if (kDebugMode) {
+                        print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
                       }
+                      hc.menuIndex.value++;
+                      // var response =
+                      //     sc.getMenu(languageID: languageID, code: 'SACT', type: 'ITEM', indexCode: hc.menuIndex.value);
+                      // if (response) {
+                      //   // var roomIndex = sc.roomTypeList.first.data.roomTypes
+                      //   //     .indexWhere((element) => element.code == sc.selectedRoomType.value);
+                      //   sc.selectedRoomTypeID.value = sc.roomTypeList.first.data.roomTypes[index].id;
+
+                      //   if (kDebugMode) {
+                      //     print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
+                      //   }
+                      //   hc.menuIndex.value++;
+                      // }
                     },
                     child: SizedBox(
                       height: 7.h,
-                      child: sc.languageList.isEmpty
+                      child: sc.roomTypeList.first.data.roomTypes.isEmpty
                           ? null
-                          : Image.asset(sc.pageTrans[index].images!, fit: BoxFit.contain)
+                          : Image.asset(imageFilename, fit: BoxFit.contain)
                               .animate()
                               .fade(duration: HenryGlobal.animationSpeed)
                               .scale(duration: HenryGlobal.animationSpeed),
@@ -641,7 +653,15 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  menuAccommodationType(Orientation orientation, {int? languageID, String? code, String? type}) {
+  Widget menuAccommodationType(Orientation orientation, {int? languageID, String? code, String? type}) {
+    final langCode = sc.languageList.first.data.languages.where((element) => element.id == languageID);
+
+    bool isTranslate = langCode.first.code.toLowerCase() != sc.defaultLanguageCode.value.toLowerCase();
+    if (kDebugMode) {
+      print('is translated: $isTranslate');
+    }
+    // sc.isLoading.value = true;
+
     return SizedBox(
       height: orientation == Orientation.portrait ? 49.h : 20.h,
       width: 75.w,
@@ -660,18 +680,16 @@ class HomeView extends GetView<HomeController> {
                   right: 10.w,
                   child: SizedBox(
                     width: 10.w,
-                    child: Animate(
-                      // effects: const [FadeEffect(), ScaleEffect()],
-                      child: Text(
-                        sc.accommodationTypeList.first.data.accommodationTypes[index].description,
-                        style: TextStyle(
-                          color: HenryColors.darkGreen,
-                          fontSize: 12.sp,
-                        ),
-                      )
-                          .animate()
-                          .fade(duration: HenryGlobal.animationSpeed)
-                          .scale(duration: HenryGlobal.animationSpeed),
+                    child: Text(
+                      isTranslate
+                          ? sc.accommodationTypeList.first.data.accommodationTypes[index].description
+                          : sc.accommodationTypeList.first.data.accommodationTypes[index].translatedText == null
+                              ? sc.accommodationTypeList.first.data.accommodationTypes[index].description
+                              : sc.accommodationTypeList.first.data.accommodationTypes[index].translatedText!,
+                      style: TextStyle(
+                        color: HenryColors.darkGreen,
+                        fontSize: 12.sp,
+                      ),
                     ),
                   ),
                 ),
@@ -682,15 +700,16 @@ class HomeView extends GetView<HomeController> {
                     onTap: () {
                       sc.selectedAccommodationType.value =
                           sc.accommodationTypeList.first.data.accommodationTypes[index].id;
+
                       if (kDebugMode) {
                         print('SELECTED ACCOMMODATION TYPE ID: ${sc.selectedAccommodationType.value}');
                       }
-
                       var response = sc.getMenu(languageID: languageID, code: 'SPM');
                       if (response) {
                         // hc.initializeCamera();
-                        hc.menuIndex.value = 4; //payment type
+                        // hc.menuIndex.value = 4; //payment type
                       }
+                      hc.menuIndex.value++;
                     },
                     child: SizedBox(
                       height: 7.h,
@@ -713,7 +732,7 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  menuPaymentType(Orientation orientation, {int? languageID, String? code, String? type}) {
+  Widget menuPaymentType(Orientation orientation, {int? languageID, String? code, String? type}) {
     return SizedBox(
       height: orientation == Orientation.portrait ? 49.h : 20.h,
       width: 75.w,
@@ -764,7 +783,8 @@ class HomeView extends GetView<HomeController> {
                       sc.getMenu(languageID: languageID, code: 'IP', type: 'TITLE');
 
                       // DIRECT TO MENU INDEX 5 - PAYMENT TYPE, BASE ON THE SELECRED ROOM AND ACCOMMODATION
-                      hc.menuIndex.value = 5;
+                      // hc.menuIndex.value = 5;
+                      hc.menuIndex.value++;
 
                       // var response = sc.getMenu(languageID: languageID, code: 'DI', type: 'ITEM');
                       // if (response) {
@@ -910,7 +930,7 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  menuDisclaimer(Orientation orientation, BuildContext context) {
+  Widget menuDisclaimer(Orientation orientation, BuildContext context) {
     return SizedBox(
       height: orientation == Orientation.portrait ? 49.h : 20.h,
       width: 75.w,
@@ -1083,10 +1103,11 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ),
                 SizedBox(
+                  height: 2.h,
                   width: 55.w,
                 ),
                 Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: SizedBox(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,

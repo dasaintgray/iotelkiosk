@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
+import 'package:iotelkiosk/app/routes/app_pages.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 import 'package:system_idle/system_idle.dart';
 
@@ -15,6 +16,7 @@ import 'package:timezone/data/latest.dart' as tzd;
 import 'package:timezone/standalone.dart' as tz;
 // ignore: depend_on_referenced_packages
 import 'package:camera_platform_interface/camera_platform_interface.dart';
+import 'package:translator/translator.dart';
 
 // FFI AND WIN32
 
@@ -33,11 +35,12 @@ class HomeController extends GetxController with BaseController {
   // BOOLEAN
   final isLoading = false.obs;
   final isIdleActive = false.obs;
+  final isMenuLanguageVisible = true.obs;
+  final isMenuTransactionVisible = true.obs;
+  final roomTypeTranslatedText = ''.obs;
 
   // INT
   final menuIndex = 0.obs;
-  final currentIndex = 0.obs;
-  final previousIndex = 0.obs;
 
   // CAMERA GLOBAL VARIABLES
   final cameraInfo = 'Unkown'.obs;
@@ -45,6 +48,11 @@ class HomeController extends GetxController with BaseController {
   final isInitialized = false.obs;
   final cameraID = 0.obs;
   late Size previewSize;
+
+  final accessToken = ''.obs;
+  late final Map<String, String> globalHeaders;
+
+  // LIST
 
   // SERIAL TEST
   StreamSubscription<CameraClosingEvent>? errorStreamSubscription;
@@ -58,6 +66,8 @@ class HomeController extends GetxController with BaseController {
 
   final SystemIdle systemIdle = SystemIdle.instance;
 
+  final translator = GoogleTranslator();
+
   @override
   void onInit() async {
     super.onInit();
@@ -65,13 +75,19 @@ class HomeController extends GetxController with BaseController {
     initTimezone();
     configureSystemIdle();
     // startTimer();
+
+    if (screenController.userLoginList.isNotEmpty) {
+      accessToken.value = screenController.userLoginList.first.accessToken;
+      globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer ${accessToken.value}'};
+    }
+    // await getTerms(credentialHeaders: headers, languageID: 6);
   }
 
   @override
   void onReady() async {
     // ignore: unnecessary_overrides
     super.onReady();
-    getCamera();
+    await getCamera();
 
     // globalAccessToken = HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
     // globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer $globalAccessToken'};
@@ -88,17 +104,30 @@ class HomeController extends GetxController with BaseController {
   //   // screenController.dispose();
   // }
 
+  Future<String?> convertText(
+      {required String? sourceText, required String? fromLangCode, required String? toLanguageCode}) async {
+    String textString;
+
+    if (sourceText != null) {
+      var textConverted = await translator.translate(sourceText, from: fromLangCode!, to: toLanguageCode!);
+      textString = textConverted.text;
+      return textString;
+    }
+    return null;
+  }
+
   void configureSystemIdle() async {
     await systemIdle.initialize(time: 20);
 
     systemIdle.onIdleStateChanged.listen((event) {
       if (kDebugMode) {
         print('system idle: $event');
-        screenController.player.play(); //play the video
-        screenController.getMenu(code: 'SLMT', type: 'TITLE'); //go back to main selection
-        menuIndex.value = 0; //default menu index
-        Get.back();
       }
+      screenController.player.play(); //play the video
+      screenController.getMenu(code: 'SLMT', type: 'TITLE'); //go back to main selection
+      menuIndex.value = 0; //default menu index
+      // Get.back();
+      Get.offAndToNamed(Routes.SCREEN);
       isIdleActive.value = event;
     });
   }

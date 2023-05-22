@@ -45,12 +45,14 @@ class RoomType {
   bool isActive;
   String code;
   String description;
+  late String? translatedText;
 
   RoomType({
     required this.id,
     required this.isActive,
     required this.code,
     required this.description,
+    this.translatedText,
   });
 
   factory RoomType.fromJson(Map<String, dynamic> json) => RoomType(
@@ -58,6 +60,7 @@ class RoomType {
         isActive: json["isActive"],
         code: json["code"],
         description: json["description"],
+        translatedText: json["translatedText"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -65,5 +68,6 @@ class RoomType {
         "isActive": isActive,
         "code": code,
         "description": description,
+        "translatedText": translatedText,
       };
 }
