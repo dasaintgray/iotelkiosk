@@ -26,42 +26,52 @@ class ScreenView extends GetView<ScreenController> {
         }
       },
     );
-
     // hc.startTimer();
 
     return Sizer(
       builder: (BuildContext context, Orientation orientation, DeviceType deviceType) {
         return GestureDetector(
           onTap: () {
-            sc.player.stop();
-            // Get.to(() => HomeView());
-
-            Get.to(() => HomeView());
+            if (!sc.isLoading.value) {
+              sc.player.stop();
+              Get.to(() => HomeView());
+            }
           },
           child: Stack(
             children: [
-              // BACKGROUND
-              // Positioned(
-              //   child: Container(
-              //     decoration: const BoxDecoration(
-              //       image: DecorationImage(
-              //         image: AssetImage('assets/background/main.png'),
-              //         fit: BoxFit.fill,
-              //         alignment: Alignment.topLeft,
-              //       ),
-              //     ),
-              //   ),
-              // ),
-
               // VIDEOS
-              Positioned(
-                child: Video(
-                  player: sc.player,
-                  showControls: false,
-                  filterQuality: FilterQuality.high,
-                ),
+              Obx(
+                () => sc.isLoading.value
+                    ? Positioned(
+                        top: 40.h,
+                        left: 25.sp,
+                        right: 25.sp,
+                        bottom: 40.h,
+                        child: SizedBox(
+                          child: Center(
+                            child: Column(
+                              children: [
+                                const CircularProgressIndicator.adaptive(
+                                  backgroundColor: HenryColors.puti,
+                                ),
+                                DefaultTextStyle(
+                                  style: TextStyle(color: HenryColors.puti, fontSize: 15.sp),
+                                  child: const Text('Loading video, please wait...'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    : Positioned(
+                        child: Video(
+                          fit: BoxFit.fill,
+                          player: sc.player,
+                          showControls: false,
+                          filterQuality: FilterQuality.high,
+                        ),
+                      ),
               ),
-
               // IOTEL LOGO
               Positioned(
                 top: 20.sp,
@@ -144,7 +154,6 @@ class ScreenView extends GetView<ScreenController> {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Row(
-                                  // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [

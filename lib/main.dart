@@ -55,6 +55,7 @@ void main() async {
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
       themeMode: ThemeMode.light,
+      defaultTransition: Transition.cupertino,
       theme: ThemeData(
         useMaterial3: true,
         fontFamily: 'ProductSans',

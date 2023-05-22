@@ -24,6 +24,7 @@ import 'package:iotelkiosk/app/providers/providers_global.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/services/base/base_storage.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
+import 'package:translator/translator.dart';
 
 class ScreenController extends GetxController with BaseController {
   // VARIABLE DECLARTION WITH OBSERVABLE CAPABILITY;
@@ -59,7 +60,6 @@ class ScreenController extends GetxController with BaseController {
   final resultList = [].obs;
 
   // TRANSACTION VARIABLE
-
   final selecttedLanguageID = 1.obs;
   final selectedLanguageCode = 'en'.obs;
   final selectedTransactionType = ''.obs;
@@ -80,6 +80,8 @@ class ScreenController extends GetxController with BaseController {
   // SCROLL CONTROLLER
   final scrollController = ScrollController();
 
+  final translator = GoogleTranslator();
+
   final player = Player(
     id: 0,
   );
@@ -89,6 +91,7 @@ class ScreenController extends GetxController with BaseController {
   @override
   void onInit() async {
     super.onInit();
+
     await userLogin();
     await getSettings();
     await getWeather();
@@ -100,9 +103,17 @@ class ScreenController extends GetxController with BaseController {
 
     await getLanguages(credentialHeaders: headers);
     await getTransaction(credentialHeaders: headers);
-    await getAccommodation(credentialHeaders: headers);
+    await getRoomType(credentialHeaders: headers, languageCode: selectedLanguageCode.value);
     await getSeriesDetails(credentialHeaders: headers);
-    await getRoomType(credentialHeaders: headers);
+
+    // CHECK THE LANGUAGE CODE
+    // if (languageList.first.data.languages.isNotEmpty) {
+    //   var langCode = languageList.first.data.languages.where((element) => element.id == selecttedLanguageID.value);
+    // }
+
+    String langcode = selectedLanguageCode.value;
+
+    await getAccommodation(credentialHeaders: headers, languageCode: langcode);
     await getPaymentType(credentialHeaders: headers);
 
     await getAvailableRoomsGraphQL(
@@ -110,7 +121,7 @@ class ScreenController extends GetxController with BaseController {
         roomTYPEID: selectedRoomTypeID.value,
         accommodationTYPEID: selectedAccommodationType.value);
 
-    await getTerms(credentialHeaders: headers, languageID: 6);
+    await getTerms(credentialHeaders: headers, languageID: selecttedLanguageID.value);
   }
 
   @override
@@ -131,12 +142,14 @@ class ScreenController extends GetxController with BaseController {
   // }
 
   void mediaOpen() {
-    player.setVolume(0);
+    if (kDebugMode) {
+      player.setVolume(0);
+    }
     player.open(
       Playlist(
         medias: [
-          Media.asset('assets/background/iOtelWalkin.mp4'),
           Media.asset('assets/background/iotel.mp4'),
+          Media.asset('assets/background/iOtelWalkin.mp4'),
         ],
       ),
       autoStart: true,
@@ -275,8 +288,8 @@ class ScreenController extends GetxController with BaseController {
     return false;
   }
 
-  Future<bool> getAccommodation({required Map<String, String> credentialHeaders}) async {
-    isLoading.value = true;
+  Future<bool> getAccommodation({required Map<String, String> credentialHeaders, required String? languageCode}) async {
+    // isLoading.value = true;
 
     final response = await GlobalProvider().fetchAccommodationType(3, headers: credentialHeaders);
     // const inputHenry = 'Acknowledgement';
@@ -288,6 +301,18 @@ class ScreenController extends GetxController with BaseController {
 
         accommodationTypeList.add(response);
 
+        if (accommodationTypeList.first.data.accommodationTypes.isNotEmpty) {
+          var record = accommodationTypeList.first.data.accommodationTypes.length;
+          for (var ctr = 0; ctr < record; ctr++) {
+            var textTranslated = await translator.translate(
+                accommodationTypeList.first.data.accommodationTypes[ctr].description,
+                from: defaultLanguageCode.value.toLowerCase(),
+                to: languageCode!);
+            accommodationTypeList.first.data.accommodationTypes[ctr].translatedText = textTranslated.text;
+          }
+          accommodationTypeList.refresh();
+        }
+
         if (kDebugMode) {
           print('TOTAL ACCOMMODATION: ${accommodationTypeList.first.data.accommodationTypes.length}');
         }
@@ -295,7 +320,7 @@ class ScreenController extends GetxController with BaseController {
         return true;
       }
     } finally {
-      isLoading.value = false;
+      // isLoading.value = false;
     }
     return false;
   }
@@ -439,34 +464,25 @@ class ScreenController extends GetxController with BaseController {
   }
 
   // ROOM TYPE
-  Future<bool> getRoomType({required Map<String, String> credentialHeaders}) async {
-    isLoading.value = true;
+  Future<bool> getRoomType({required Map<String, String> credentialHeaders, required String? languageCode}) async {
+    // isLoading.value = true;
 
     final response = await GlobalProvider().fetchRoomTypes(headers: credentialHeaders, limit: 2);
 
     try {
       if (response != null) {
         roomTypeList.add(response);
-        return true;
-      }
-    } finally {
-      isLoading.value = false;
-    }
-    return false;
-  }
 
-  // TRANSLATION TERMS
-  Future<bool> getTerms({required Map<String, String> credentialHeaders, int? languageID}) async {
-    isLoading.value = true;
-
-    final response = await GlobalProvider().fetchTerms(headers: credentialHeaders, langID: languageID);
-
-    try {
-      if (response != null) {
-        translationTermsList.add(response);
-        if (kDebugMode) {
-          print('Total Terms: ${translationTermsList.first.data.translationTerms.length}');
+        if (roomTypeList.first.data.roomTypes.isNotEmpty) {
+          var record = roomTypeList.first.data.roomTypes.length;
+          for (var ctr = 0; ctr < record; ctr++) {
+            var textTranslated = await translator.translate(roomTypeList.first.data.roomTypes[ctr].description,
+                from: defaultLanguageCode.value.toLowerCase(), to: languageCode!);
+            roomTypeList.first.data.roomTypes[ctr].translatedText = textTranslated.text;
+          }
+          roomTypeList.refresh();
         }
+
         return true;
       }
     } finally {
@@ -523,6 +539,26 @@ class ScreenController extends GetxController with BaseController {
     } else {
       return false;
     }
+  }
+
+  // TRANSLATION TERMS
+  Future<bool> getTerms({required Map<String, String> credentialHeaders, int? languageID}) async {
+    isLoading.value = true;
+
+    final response = await GlobalProvider().fetchTerms(headers: credentialHeaders, langID: languageID);
+
+    try {
+      if (response != null) {
+        translationTermsList.add(response);
+        if (kDebugMode) {
+          print('Total Terms: ${translationTermsList.first.data.translationTerms.length}');
+        }
+        return true;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
   }
 
   // ---------------------------------------------------------------------------------------------------------

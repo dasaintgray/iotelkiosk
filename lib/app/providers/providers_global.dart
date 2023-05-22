@@ -138,7 +138,6 @@ class GlobalProvider extends BaseController {
   Future<AccomTypeModel?> fetchAccommodationType(int? topRecords, {required Map<String, String> headers}) async {
     // for declartion of passing parameters
     final params = {'limit': topRecords};
-
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
     final response = await hasuraConnect.query(qryAccomodationType, variables: params).catchError(handleError);
@@ -151,28 +150,21 @@ class GlobalProvider extends BaseController {
 
   Future<SeriesDetailsModel?> fetchSeriesDetails({required Map<String, String> headers}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
-
     final response = await hasuraConnect.query(qrySeriesDetails).catchError(handleError);
-
     if (response != null) {
       // return seriesDetailsModelFromJson(response);
       return SeriesDetailsModel.fromJson(response);
     }
-
     return null;
   }
 
   Future<RoomTypesModel?> fetchRoomTypes({required Map<String, String> headers, required int? limit}) async {
     final params = {'limit': limit};
-
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
-
     final response = await hasuraConnect.query(qryRoomTypes, variables: params).catchError(handleError);
-
     if (response != null) {
       return roomTypesModelFromJson(jsonEncode(response));
     }
-
     return null;
   }
 

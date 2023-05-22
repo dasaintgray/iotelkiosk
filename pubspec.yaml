@@ -1,7 +1,7 @@
 name: iotelkiosk
 version: 1.0.0+1
 publish_to: none
-description: A new Flutter project.
+description: A Kiosk application written in Flutter and Dart, this will be use in a Hotel for easy transaction, this kiosk is connected via PMS, Property Management System with the integration on hardware like Printer, Card Issuance, etc.
 environment: 
   sdk: '>=2.19.0 <3.0.0'
 
@@ -31,13 +31,12 @@ dependencies:
   marquee: ^2.2.3
   flutter_animate: ^4.1.1+1
   camera_windows: ^0.2.1+6
+  translator: ^0.1.7
   # ffi: ^1.0.0
   # win32: ^5.0.0
   
   # proste_indexed_stack: ^0.2.4
-
   #local_session_timeout: ^2.2.0  //for local activity checkier
-  
   # expandable_page_view: ^1.0.17
 
   #FORMATTING and DATE
@@ -46,7 +45,6 @@ dependencies:
   #HTTP COMMUNICATION
   http: ^0.13.5
   hasura_connect: ^4.0.0+4
-  # graphql_flutter: ^5.1.2
 
   #STORAGE
   get_storage: ^2.1.1
