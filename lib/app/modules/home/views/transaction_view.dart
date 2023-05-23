@@ -13,6 +13,7 @@ import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/henryclock_widget.dart';
+import 'package:iotelkiosk/globals/widgets/weather_clock_widget.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter_carousel_widget/flutter_carousel_widget.dart';
 import 'package:virtual_keyboard_multi_language/virtual_keyboard_multi_language.dart';
@@ -71,7 +72,30 @@ class TransactionView extends GetView<HomeController> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      clockAndWeather(),
+                      // clockAndWeather(),
+                      SizedBox(
+                        height: 20.h,
+                        width: double.infinity,
+                        child: WeatherAndClock(
+                          localTime: hc.localTime,
+                          localTimeLocation: 'Philipppines',
+                          degreeC: sc.weatherList.first.current.tempC.toStringAsFixed(0),
+                          degreeF: sc.weatherList.first.current.tempF.toStringAsFixed(0),
+                          weatherCondition: sc.weatherList.first.current.condition.text,
+                          localWeatherLocation: sc.weatherList.first.location.name,
+                          localWeatherCountry: sc.weatherList.first.location.country,
+                          countryOneTime: hc.japanNow,
+                          countryOneLocation: 'Japan',
+                          countryTwoTime: hc.newyorkNow,
+                          countryTwoLocation: 'New York',
+                          countryThreeTime: hc.seoulNow,
+                          countryThreeLocation: 'Seoul',
+                          countryFourTime: hc.sydneyNow,
+                          countryFourLocation: 'Sydney',
+                          weatherImage: sc.imgUrl.value,
+                          textStyle: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                        ),
+                      ),
 
                       SizedBox(
                         height: orientation == Orientation.portrait ? 12.h : 1.h,
@@ -113,11 +137,6 @@ class TransactionView extends GetView<HomeController> {
                           ),
                         ),
                       ),
-
-                      // SizedBox(
-                      //   height: 5.h,
-                      //   width: double.infinity,
-                      // ),
                     ],
                   ),
                 ),

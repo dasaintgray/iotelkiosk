@@ -125,9 +125,10 @@ class HomeController extends GetxController with BaseController {
       }
       screenController.player.play(); //play the video
       screenController.getMenu(code: 'SLMT', type: 'TITLE'); //go back to main selection
-      menuIndex.value = 0; //default menu index
+      // menuIndex.value = 0; //default menu index
       // Get.back();
-      Get.offAndToNamed(Routes.SCREEN);
+      // Get.offAndToNamed(Routes.SCREEN);
+      Get.toNamed(Routes.SCREEN);
       isIdleActive.value = event;
     });
   }

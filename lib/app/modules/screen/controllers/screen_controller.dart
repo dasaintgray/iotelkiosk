@@ -92,36 +92,38 @@ class ScreenController extends GetxController with BaseController {
   void onInit() async {
     super.onInit();
 
+    hostname.value = Platform.localHostname;
+
     await userLogin();
     await getSettings();
     await getWeather();
     mediaOpen();
-    hostname.value = Platform.localHostname;
 
     final accessToken = userLoginList.first.accessToken;
     final headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'};
 
     await getLanguages(credentialHeaders: headers);
     await getTransaction(credentialHeaders: headers);
-    await getRoomType(credentialHeaders: headers, languageCode: selectedLanguageCode.value);
-    await getSeriesDetails(credentialHeaders: headers);
 
-    // CHECK THE LANGUAGE CODE
-    // if (languageList.first.data.languages.isNotEmpty) {
-    //   var langCode = languageList.first.data.languages.where((element) => element.id == selecttedLanguageID.value);
-    // }
+    // await getRoomType(credentialHeaders: headers, languageCode: selectedLanguageCode.value);
+    // await getSeriesDetails(credentialHeaders: headers);
 
-    String langcode = selectedLanguageCode.value;
+    // // CHECK THE LANGUAGE CODE
+    // // if (languageList.first.data.languages.isNotEmpty) {
+    // //   var langCode = languageList.first.data.languages.where((element) => element.id == selecttedLanguageID.value);
+    // // }
 
-    await getAccommodation(credentialHeaders: headers, languageCode: langcode);
-    await getPaymentType(credentialHeaders: headers);
+    // String langcode = selectedLanguageCode.value;
 
-    await getAvailableRoomsGraphQL(
-        credentialHeaders: headers,
-        roomTYPEID: selectedRoomTypeID.value,
-        accommodationTYPEID: selectedAccommodationType.value);
+    // await getAccommodation(credentialHeaders: headers, languageCode: langcode);
+    // await getPaymentType(credentialHeaders: headers);
 
-    await getTerms(credentialHeaders: headers, languageID: selecttedLanguageID.value);
+    // await getAvailableRoomsGraphQL(
+    //     credentialHeaders: headers,
+    //     roomTYPEID: selectedRoomTypeID.value,
+    //     accommodationTYPEID: selectedAccommodationType.value);
+
+    // await getTerms(credentialHeaders: headers, languageID: selecttedLanguageID.value);
   }
 
   @override
@@ -465,7 +467,7 @@ class ScreenController extends GetxController with BaseController {
 
   // ROOM TYPE
   Future<bool> getRoomType({required Map<String, String> credentialHeaders, required String? languageCode}) async {
-    // isLoading.value = true;
+    isLoading.value = true;
 
     final response = await GlobalProvider().fetchRoomTypes(headers: credentialHeaders, limit: 2);
 
