@@ -46,6 +46,7 @@ class PaymentType {
   String description;
   String code;
   bool isWithDetail;
+  late String? translatedText;
 
   PaymentType({
     required this.id,
@@ -53,6 +54,7 @@ class PaymentType {
     required this.description,
     required this.code,
     required this.isWithDetail,
+    this.translatedText,
   });
 
   factory PaymentType.fromJson(Map<String, dynamic> json) => PaymentType(
@@ -61,6 +63,7 @@ class PaymentType {
         description: json["description"],
         code: json["code"],
         isWithDetail: json["isWithDetail"],
+        translatedText: json["translatedText"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -69,5 +72,6 @@ class PaymentType {
         "description": description,
         "code": code,
         "isWithDetail": isWithDetail,
+        "translatedText": translatedText
       };
 }

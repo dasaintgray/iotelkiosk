@@ -8,10 +8,11 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:iotelkiosk/app/modules/home/views/checkin_view.dart';
+import 'package:iotelkiosk/app/modules/home/views/roomtype_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
+import 'package:iotelkiosk/globals/widgets/carousel_title_widget.dart';
 import 'package:iotelkiosk/globals/widgets/henryclock_widget.dart';
 import 'package:iotelkiosk/globals/widgets/weather_clock_widget.dart';
 import 'package:sizer/sizer.dart';
@@ -25,8 +26,8 @@ import '../controllers/home_controller.dart';
 class TransactionView extends GetView<HomeController> {
   TransactionView({Key? key}) : super(key: key);
 
-  // final hc = Get.find<HomeController>();
-  final hc = Get.put(HomeController());
+  final hc = Get.find<HomeController>();
+  // final hc = Get.put(HomeController());
 
   final sc = Get.find<ScreenController>();
 
@@ -102,39 +103,38 @@ class TransactionView extends GetView<HomeController> {
                         width: double.infinity,
                       ),
 
-                      menuTitle(),
+                      // menuTitle(),
+                      SizedBox(
+                        height: 5.h,
+                        width: double.infinity,
+                        child: CarouselTitle(
+                          titleTrans: sc.titleTrans,
+                          textStyle: TextStyle(color: HenryColors.darkGreen, fontSize: 15.sp),
+                        ),
+                      ),
 
                       menuTransactionTitle(orientation, languageID: sc.selecttedLanguageID.value),
 
-                      Obx(
-                        () => Visibility(
-                          visible: hc.menuIndex.value != 0,
-                          child: SizedBox(
-                            height: orientation == Orientation.portrait ? 10.h : 2.h,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    if (hc.menuIndex.value > 1) {
-                                      hc.menuIndex.value--;
-                                    } else {
-                                      hc.disposeCamera();
-                                      hc.menuIndex.value = 0;
-                                    }
-                                  },
-                                  child: Image.asset(
-                                    'assets/menus/back-arrow.png',
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 50,
-                                ),
-                              ],
+                      SizedBox(
+                        height: orientation == Orientation.portrait ? 10.h : 2.h,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                sc.getMenu(code: 'SLMT');
+                                Get.back();
+                              },
+                              child: Image.asset(
+                                'assets/menus/back-arrow.png',
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                          ),
+                            const SizedBox(
+                              width: 50,
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -234,13 +234,28 @@ class TransactionView extends GetView<HomeController> {
                   right: 10.w,
                   child: SizedBox(
                     width: 10.w,
-                    child: Text(
-                      sc.pageTrans[index].translationText,
-                      style: TextStyle(
-                        color: HenryColors.darkGreen,
-                        fontSize: 12.sp,
-                      ),
-                    ).animate().fade(duration: HenryGlobal.animationSpeed).scale(duration: HenryGlobal.animationSpeed),
+                    child: sc.isLoading.value
+                        ? Center(
+                            child: Column(
+                              children: [
+                                const CircularProgressIndicator.adaptive(),
+                                Text(
+                                  'Loading, please wait..',
+                                  style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                                )
+                              ],
+                            ),
+                          )
+                        : Text(
+                            sc.pageTrans[index].translationText,
+                            style: TextStyle(
+                              color: HenryColors.darkGreen,
+                              fontSize: 12.sp,
+                            ),
+                          )
+                            .animate()
+                            .fade(duration: HenryGlobal.animationSpeed)
+                            .scale(duration: HenryGlobal.animationSpeed),
                   ),
                 ),
                 Positioned(
@@ -249,15 +264,35 @@ class TransactionView extends GetView<HomeController> {
                   child: GestureDetector(
                     onTap: () async {
                       sc.isLoading.value = true;
+                      // sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SRT');
                       var response = await sc.getRoomType(
                           credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
+
                       if (response) {
                         sc.isLoading.value = false;
-                        sc.selectedTransactionType.value = sc.pageTrans[index].code;
+                        sc.selectedTransactionType.value = sc.pageTrans[index].translationText;
+
+                        sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SRT');
+
                         if (kDebugMode) {
-                          print('selected transaction: ${sc.selectedTransactionType.value}');
+                          print('SELECTED TRANSACTION: ${sc.selectedTransactionType.value}');
                         }
-                        Get.to(() => CheckinView());
+                        switch (index) {
+                          case 0: //CHECK IN
+                            {
+                              Get.to(() => RoomTypeView());
+                            }
+                            break;
+                          case 1: //CHECK OUT
+                            {
+                              Center(
+                                child: Text(
+                                  'Under Development',
+                                  style: TextStyle(color: HenryColors.puti, fontSize: 15.sp),
+                                ),
+                              );
+                            }
+                        }
                       }
                     },
                     child: SizedBox(
@@ -674,11 +709,11 @@ class TransactionView extends GetView<HomeController> {
                   right: 8.w,
                   child: GestureDetector(
                     onTap: () {
-                      sc.selectedAccommodationType.value =
+                      sc.selectedAccommodationTypeID.value =
                           sc.accommodationTypeList.first.data.accommodationTypes[index].id;
 
                       if (kDebugMode) {
-                        print('SELECTED ACCOMMODATION TYPE ID: ${sc.selectedAccommodationType.value}');
+                        print('SELECTED ACCOMMODATION TYPE ID: ${sc.selectedAccommodationTypeID.value}');
                       }
                       var response = sc.getMenu(languageID: languageID, code: 'SPM');
                       if (response) {
@@ -754,7 +789,7 @@ class TransactionView extends GetView<HomeController> {
                       await sc.getAvailableRoomsGraphQL(
                           credentialHeaders: headers,
                           roomTYPEID: sc.selectedRoomTypeID.value,
-                          accommodationTYPEID: sc.selectedAccommodationType.value);
+                          accommodationTYPEID: sc.selectedAccommodationTypeID.value);
 
                       sc.getMenu(languageID: languageID, code: 'IP', type: 'TITLE');
 

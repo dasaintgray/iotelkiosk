@@ -95,6 +95,7 @@ class HomeView extends GetView<HomeController> {
                           textStyle: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
                         ),
                       ),
+
                       // SPACE
                       SizedBox(
                         height: orientation == Orientation.portrait ? 12.h : 1.h,
@@ -152,37 +153,37 @@ class HomeView extends GetView<HomeController> {
                       //   ),
                       // ),
 
-                      Obx(
-                        () => Visibility(
-                          visible: hc.menuIndex.value != 0,
-                          child: SizedBox(
-                            height: orientation == Orientation.portrait ? 10.h : 2.h,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    if (hc.menuIndex.value > 1) {
-                                      hc.menuIndex.value--;
-                                    } else {
-                                      hc.disposeCamera();
-                                      hc.menuIndex.value = 0;
-                                    }
-                                  },
-                                  child: Image.asset(
-                                    'assets/menus/back-arrow.png',
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 50,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                      // Obx(
+                      //   () => Visibility(
+                      //     visible: hc.menuIndex.value != 0,
+                      //     child: SizedBox(
+                      //       height: orientation == Orientation.portrait ? 10.h : 2.h,
+                      //       child: Row(
+                      //         mainAxisAlignment: MainAxisAlignment.center,
+                      //         crossAxisAlignment: CrossAxisAlignment.center,
+                      //         children: [
+                      //           GestureDetector(
+                      //             onTap: () {
+                      //               if (hc.menuIndex.value > 1) {
+                      //                 hc.menuIndex.value--;
+                      //               } else {
+                      //                 hc.disposeCamera();
+                      //                 hc.menuIndex.value = 0;
+                      //               }
+                      //             },
+                      //             child: Image.asset(
+                      //               'assets/menus/back-arrow.png',
+                      //               fit: BoxFit.cover,
+                      //             ),
+                      //           ),
+                      //           const SizedBox(
+                      //             width: 50,
+                      //           ),
+                      //         ],
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
@@ -212,16 +213,18 @@ class HomeView extends GetView<HomeController> {
                   // right: 10.w,
                   child: SizedBox(
                     child: Animate(
-                      child: Text(
-                        sc.languageList.first.data.languages[index].description,
-                        style: TextStyle(
-                          color: HenryColors.darkGreen,
-                          fontSize: 15.sp,
-                        ),
-                      )
-                          .animate()
-                          .slide(duration: HenryGlobal.animationSpeed)
-                          .scale(duration: HenryGlobal.animationSpeed),
+                      child: Center(
+                        child: Text(
+                          sc.languageList.first.data.languages[index].description,
+                          style: TextStyle(
+                            color: HenryColors.darkGreen,
+                            fontSize: 15.sp,
+                          ),
+                        )
+                            .animate()
+                            .slide(duration: HenryGlobal.animationSpeed)
+                            .scale(duration: HenryGlobal.animationSpeed),
+                      ),
                     ),
                   ),
                 ),
@@ -235,11 +238,11 @@ class HomeView extends GetView<HomeController> {
                       sc.selecttedLanguageID.value = sc.languageList.first.data.languages[index].id;
                       sc.selectedLanguageCode.value = sc.languageList.first.data.languages[index].code;
 
-                      var response =
-                          sc.getMenu(languageID: lID, code: sCode, type: 'ITEM', indexCode: hc.menuIndex.value);
+                      var response = sc.getMenu(languageID: lID, code: sCode, type: 'ITEM');
                       if (response) {
                         // hc.menuIndex.value = 1;
                         // hc.menuIndex.value++;
+                        if (kDebugMode) print('SELECTED LANGUAGE CODE ${sc.selectedLanguageCode.value}');
                         Get.to(() => TransactionView());
                         // debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
                       }
@@ -726,11 +729,11 @@ class HomeView extends GetView<HomeController> {
                   right: 8.w,
                   child: GestureDetector(
                     onTap: () {
-                      sc.selectedAccommodationType.value =
+                      sc.selectedAccommodationTypeID.value =
                           sc.accommodationTypeList.first.data.accommodationTypes[index].id;
 
                       if (kDebugMode) {
-                        print('SELECTED ACCOMMODATION TYPE ID: ${sc.selectedAccommodationType.value}');
+                        print('SELECTED ACCOMMODATION TYPE ID: ${sc.selectedAccommodationTypeID.value}');
                       }
                       var response = sc.getMenu(languageID: languageID, code: 'SPM');
                       if (response) {
@@ -806,7 +809,7 @@ class HomeView extends GetView<HomeController> {
                       await sc.getAvailableRoomsGraphQL(
                           credentialHeaders: headers,
                           roomTYPEID: sc.selectedRoomTypeID.value,
-                          accommodationTYPEID: sc.selectedAccommodationType.value);
+                          accommodationTYPEID: sc.selectedAccommodationTypeID.value);
 
                       sc.getMenu(languageID: languageID, code: 'IP', type: 'TITLE');
 

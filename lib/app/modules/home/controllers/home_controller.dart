@@ -97,12 +97,12 @@ class HomeController extends GetxController with BaseController {
     // openSerialPort();
   }
 
-  // @override
-  // void onClose() {
-  //   super.onClose();
-  //   // stopTimer();
-  //   // screenController.dispose();
-  // }
+  @override
+  void onClose() {
+    super.onClose();
+    // stopTimer();
+    screenController.dispose();
+  }
 
   Future<String?> convertText(
       {required String? sourceText, required String? fromLangCode, required String? toLanguageCode}) async {
@@ -117,7 +117,7 @@ class HomeController extends GetxController with BaseController {
   }
 
   void configureSystemIdle() async {
-    await systemIdle.initialize(time: 20);
+    await systemIdle.initialize(time: 30);
 
     systemIdle.onIdleStateChanged.listen((event) {
       if (kDebugMode) {

@@ -1,8 +1,6 @@
-import 'dart:io';
-
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_acrylic/flutter_acrylic.dart';
+// import 'package:flutter_acrylic/flutter_acrylic.dart';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -13,14 +11,12 @@ import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
-
   await GetStorage.init();
 
   // VIDEO PLAYER
   DartVLC.initialize();
 
-  // await ScreenController().userLogin();
+  await windowManager.ensureInitialized();
 
   WindowOptions windowOptions = const WindowOptions(
     size: Size(1080, 1920),
@@ -30,6 +26,7 @@ void main() async {
     skipTaskbar: false,
     // titleBarStyle: TitleBarStyle.normal,
   );
+
   windowManager.waitUntilReadyToShow(
     windowOptions,
     () async {
@@ -40,13 +37,13 @@ void main() async {
   );
 
   // aero mode
-  if (Platform.isWindows) {
-    // await Window.setEffect(
-    //   effect: WindowEffect.acrylic,
-    //   color: const Color.fromARGB(255, 8, 59, 100).withOpacity(0.6),
-    // );
-    await Window.initialize();
-  }
+  // if (Platform.isWindows) {
+  //   // await Window.setEffect(
+  //   //   effect: WindowEffect.acrylic,
+  //   //   color: const Color.fromARGB(255, 8, 59, 100).withOpacity(0.6),
+  //   // );
+  //   // await Window.initialize();
+  // }
 
   runApp(
     GetMaterialApp(

@@ -5,7 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   camera_windows
   dart_vlc
-  flutter_acrylic
+  flutter_libserialport
   screen_retriever
   window_manager
 )

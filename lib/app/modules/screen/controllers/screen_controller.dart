@@ -1,11 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_libserialport/flutter_libserialport.dart';
+import 'package:iotelkiosk/globals/constant/led_constant.dart';
+import 'package:serial_port_win32/serial_port_win32.dart' as winsp;
 import 'package:get/get.dart';
+import 'package:hex/hex.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
@@ -65,9 +70,9 @@ class ScreenController extends GetxController with BaseController {
   final selectedTransactionType = ''.obs;
   final selectedRoomType = ''.obs;
   final selectedRoomTypeID = 1.obs;
-  final selectedAccommodationType = 1.obs;
+  final selectedAccommodationTypeID = 1.obs;
   final selectedNationalities = 77.obs;
-  final selectedPaymentType = 0.obs;
+  final selectedPaymentTypeCode = ''.obs;
   final preSelectedRoomID = 0.obs;
   final totalAmountDue = 0.0.obs;
 
@@ -77,16 +82,24 @@ class ScreenController extends GetxController with BaseController {
   final btnMessage = <Conversion>[].obs;
   final availRoomList = <AvailableRoom>[].obs;
 
-  // SCROLL CONTROLLER
+  // OTHER LIST
+  final serialReadList = [];
+
+  // OTHERS
+  final translator = GoogleTranslator();
+
+  // CONTROLLERS
   final scrollController = ScrollController();
 
-  final translator = GoogleTranslator();
+  // LISTENING
 
   final player = Player(
     id: 0,
   );
 
   // GLOBAL
+  // var ports = <String>[];
+  // late SerialPort port;
 
   @override
   void onInit() async {
@@ -94,10 +107,18 @@ class ScreenController extends GetxController with BaseController {
 
     hostname.value = Platform.localHostname;
 
-    await userLogin();
-    await getSettings();
-    await getWeather();
+    // getPorts();
+    getBDOOpen();
+    // getMoneydispenser();
+    // cardDispenser();
+    // openLED();
+    openLEDLibserial(ledLocationAndStatus: LedOperation.topLEFTLEDOFF);
+
     mediaOpen();
+
+    await userLogin();
+    await getWeather();
+    await getSettings();
 
     final accessToken = userLoginList.first.accessToken;
     final headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'};
@@ -127,7 +148,7 @@ class ScreenController extends GetxController with BaseController {
   }
 
   @override
-  void onReady() async {
+  void onReady() {
     super.onReady();
     scrollController.addListener(
       () {
@@ -138,10 +159,256 @@ class ScreenController extends GetxController with BaseController {
     );
   }
 
-  // @override
-  // void onClose() {
-  //   super.onClose();
+  @override
+  void onClose() {
+    super.onClose();
+    scrollController.dispose();
+    // port.close();
+  }
+
+  //=================================================================================================
+  // void getPorts() {
+  //   final List<PortInfo> portInfoList = SerialPort.getPortsWithFullMessages();
+  //   ports = SerialPort.getAvailablePorts();
+  //   String data = '';
+  //   const buffer =
+  //       '06, 02,03,88,36,30,30,30,30,30,30,30,30,30,31,31,32,30,30,30,30,1C,30,32,00,40,41,50,50,52,4F,56,45,44,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,1C,30,31,00,06,32,30,31,31,34,39,1C,36,35,00,06,30,30,30,30,30,31,1C,44,30,00,69,4D,4F,56,45,35,30,30,30,20,50,52,4F,44,55,43,54,49,4F,4E,20,54,45,53,42,44,4F,20,50,4F,53,20,4C,41,42,20,20,20,20,20,20,20,20,20,20,20,20,4D,41,4E,44,41,4C,55,59,4F,4E,47,20,43,49,54,59,20,20,20,20,20,20,20,1C,31,36,00,08,56,33,33,39,39,30,30,31,1C,44,31,00,15,30,30,30,30,30,39,31,38,33,36,39,30,32,32,31,1C,44,32,00,10,56,49,53,41,20,20,20,20,20,20,1C,33,30,00,16,34,31,38,33,35,39,30,30,30,30,30,30,39,31,30,35,1C,33,31,00,04,2A,2A,2A,2A,1C,35,30,00,06,30,30,30,38,30,30,1C,30,33,00,06,32,33,30,34,30,34,1C,30,34,00,06,31,34,30,32,35,31,1C,44,33,00,12,33,30,39,34,32,31,37,37,31,36,30,32,1C,44,34,00,02,30,31,1C,44,35,00,26,53,59,53,54,45,53,43,41,52,44,20,35,2F,50,53,20,20,20,20,20,20,20,20,20,20,20,1C,45,46,00,16,41,30,30,30,30,30,30,30,30,33,31,30,31,30,20,20,1C,45,47,00,16,56,69,73,61,20,43,72,65,64,69,74,20,20,20,20,20,1C,45,48,00,16,46,37,30,45,32,35,37,44,32,38,35,31,31,30,45,44,1C,03,A4';
+  //   var sendCommand =
+  //       '02 00 35 36 30 30 30 30 30 30 30 30 30 31 30 32 30 30 30 30 1C 34 30 00 12 30 30 30 30 30 30 30 30 31 30 30 30 1C 03 14';
+  //   var sendByte = '02003536303030303030303030313032303030301C343000123030303030303030313030301C0314';
+  //   sendCommand = sendCommand.replaceAll(' ', '');
+  //   Uint8List bytes = Uint8List.fromList(HEX.decode(sendByte));
+  //   if (kDebugMode) {
+  //     print(portInfoList);
+  //     print(ports);
+  //   }
+  //   if (ports.isNotEmpty) {
+  //     port = SerialPort(ports[0], openNow: false, ReadIntervalTimeout: 1, ReadTotalTimeoutConstant: 2);
+  //     port.openWithSettings(BaudRate: 9600, Parity: 0);
+  //     // port.open();
+  //     if (kDebugMode) print('Port Open: ${port.isOpened}');
+  //     port.writeBytesFromUint8List(bytes);
+  //     while (port.isOpened) {
+  //       // port.readBytesOnListen(8, (value) {
+  //       //   data = String.fromCharCodes(value);
+  //       //   if (kDebugMode) print(DateTime.now());
+  //       //   if (kDebugMode) print(data);
+  //       //   port.close();
+  //       // });
+  //       port.readBytesOnListen(1, (value) {
+  //         print(value);
+  //         port.close();
+  //       });
+  //     }
+  //     // port.close();
+  //   }
   // }
+
+  void getBDOOpen() {
+    final serialPort = SerialPort.availablePorts;
+    final portConfig = SerialPortConfig();
+    final port = SerialPort(serialPort.first);
+
+    portConfig.baudRate = 9600;
+    portConfig.parity = SerialPortParity.none;
+
+    if (port.isOpen) port.close();
+
+    if (!port.openReadWrite()) {
+      if (kDebugMode) print(SerialPort.lastError);
+      // exit(-1);
+    } else {
+      if (kDebugMode) print('Successfully connected to ${port.name}');
+    }
+
+    var sendByte = '02003536303030303030303030313032303030301C343000123030303030303030313030301C0314';
+    // var sendByteTransaction =
+    //     '02 00 35 36 30 30 30 30 30 30 30 30 30 31 30 32 30 30 30 30 1C 34 49 00 12 30 30 30 30 30 30 30 30 31 30 30 30 1C 03 14';
+    Uint8List bytes = Uint8List.fromList(HEX.decode(sendByte));
+    port.write(bytes); //pagsusulat
+
+    int readBuffer = 256;
+
+    while (port.isOpen) {
+      Uint8List bytesRead = port.read(readBuffer, timeout: 10);
+      if (bytesRead.isNotEmpty) {
+        // var hexString = HEX.encode(bytesRead);
+        // print(hexString);
+
+        // serialReadList.add(bytesRead);
+        serialReadList.add(List<int>.from(bytesRead));
+
+        var totalLength = serialReadList.length;
+        if (totalLength == 165) {
+          port.close();
+        }
+        // print(totalLength);
+      }
+    }
+
+    for (var i = 0; i < serialReadList.length; i++) {
+      if (i >= 21) {
+        var data = List<int>.from(serialReadList[i]);
+        if (kDebugMode) {
+          print(String.fromCharCode(data.first));
+        }
+      }
+    }
+    // Uint8List convertBytes = Uint8List.fromList([serialReadList]);
+    // int values = convertBytes.buffer.asByteData().getUint32(21, Endian.big);
+    // print(values);
+  }
+
+  void getMoneydispenser() {
+    final serialPort = SerialPort.availablePorts;
+    final portConfig = SerialPortConfig();
+    final port = SerialPort(serialPort.first);
+
+    portConfig.baudRate = 9600;
+    portConfig.parity = SerialPortParity.none;
+    // portConfig.bits = 1;
+    // portConfig.stopBits = 2;
+
+    if (!port.openReadWrite()) {
+      if (kDebugMode) print(SerialPort.lastError);
+      exit(-1);
+    }
+
+    //'7F 80 01 21 C5 82' // GET DATASET VERSION;
+    // var pollHex = '7F 00 01 07 11 88';
+    // var enableHEX = '7F 80 01 0A 3F 82';
+    // var disableHEX = '7F 00 01 09 36 08';
+    // var initializingHEX = '7F 80 01 07 12 02';
+    var hostProtocolVersionHEX = '7F 00 02 06 08 1B 94';
+
+    // Uint8List bytesEnable = Uint8List.fromList(HEX.decode(enableHEX));
+    // Uint8List bytesDisable = Uint8List.fromList(HEX.decode(disableHEX));
+    // Uint8List bytesPoll = Uint8List.fromList(HEX.decode(pollHex));
+    Uint8List bytesInitialize = Uint8List.fromList(HEX.decode(hostProtocolVersionHEX));
+
+    // port.write(bytesDisable, timeout: 30);
+    // port.write(bytesEnable, timeout: 30);
+    // port.write(bytesPoll, timeout: 30);
+    port.write(bytesInitialize);
+
+    if (kDebugMode) print('${port.name} is open');
+
+    int readBuffer = 512;
+    // var asciiList = [];
+
+    while (port.isOpen) {
+      Uint8List bytesRead = port.read(readBuffer, timeout: 60);
+
+      // if (kDebugMode) {
+      //   print('BYTES READ: $bytesRead');
+      //   // for (var i = 0; i < bytesRead.length; i++) {
+      //   //   // print(String.fromCharCode(bytesRead[i]));
+      //   //   asciiList.add(String.fromCharCode(bytesRead[i]));
+      //   // }
+      //   var asciiTable = String.fromCharCodes(bytesRead);
+      //   print('ASCII: $asciiTable');
+      // }
+
+      if (bytesRead.isNotEmpty) {
+        if (kDebugMode) print('BYTES READ DECIMAL: $bytesRead');
+        if (kDebugMode) print('BYTES READ HEX: ${HEX.encode(bytesRead).toUpperCase()}');
+        var asciiTable = String.fromCharCodes(bytesRead);
+        if (kDebugMode) print('ASCII: $asciiTable');
+      }
+
+      if (bytesRead.isEmpty) {
+        port.close();
+      }
+    }
+  }
+
+  void cardDispenser() {
+    final serialPort = SerialPort.availablePorts;
+    final portConfig = SerialPortConfig();
+    final port = SerialPort(serialPort.first);
+
+    portConfig.baudRate = 9600;
+    // portConfig.parity = SerialPortParity.none;
+    // portConfig.bits = 1;
+    // portConfig.stopBits = 1;
+
+    if (!port.openReadWrite()) {
+      if (kDebugMode) print(SerialPort.lastError);
+      // exit(-1);
+    }
+
+    var sendCmd = '02 00 00 00 02 52 46 03 00';
+    Uint8List byteAP = Uint8List.fromList(HEX.decode(sendCmd));
+
+    port.write(byteAP);
+
+    if (kDebugMode) print('${port.name} is open');
+
+    int readBuffer = 512;
+
+    while (port.isOpen) {
+      Uint8List bytesRead = port.read(readBuffer, timeout: 60);
+
+      if (bytesRead.isNotEmpty) {
+        if (kDebugMode) print('BYTES READ DECIMAL: $bytesRead');
+        if (kDebugMode) print('BYTES READ HEX: ${HEX.encode(bytesRead).toUpperCase()}');
+        var asciiTable = String.fromCharCodes(bytesRead);
+        if (kDebugMode) print('ASCII: $asciiTable');
+      }
+
+      if (bytesRead.isEmpty) {
+        port.close();
+      }
+    }
+  }
+
+  void openLED() {
+    final serialPort = winsp.SerialPort.getAvailablePorts();
+    final port = winsp.SerialPort(serialPort.first, BaudRate: 9600);
+
+    if (port.isOpened) {
+      port.close();
+    } else {
+      if (kDebugMode) print('Connected to: ${port.portName}');
+    }
+
+    port.open();
+
+    var sendCom = 'O(00,01,0)E';
+    port.writeBytesFromString(sendCom);
+    if (port.isOpened) {
+      port.close();
+      // exit(-1);
+    }
+  }
+
+  void openLEDLibserial({String ledLocationAndStatus = ''}) {
+    final serialPort = SerialPort.availablePorts;
+    final portConfig = SerialPortConfig();
+    final port = SerialPort(serialPort.first);
+    portConfig.baudRate = 9600;
+
+    if (port.isOpen) {
+      port.close();
+    } else {
+      if (kDebugMode) print('Connected to: ${port.name}');
+    }
+
+    port.openWrite();
+
+    // Encode the string using a specific encoding (e.g., ASCII)
+    List<int> encodedBytes = ascii.encode(ledLocationAndStatus);
+
+    // Create a Uint8List from the encoded bytes
+    Uint8List uint8List = Uint8List.fromList(encodedBytes);
+
+    port.write(uint8List);
+
+    if (port.isOpen) {
+      port.close();
+      // exit(-1);
+    }
+  }
 
   void mediaOpen() {
     if (kDebugMode) {
@@ -160,7 +427,6 @@ class ScreenController extends GetxController with BaseController {
 
   int pickRoom() {
     final random = Random();
-
     if (availRoomList.isNotEmpty) {
       for (var i = availRoomList.length - 1; i > 0; i++) {
         var n = random.nextInt(i + 1);
@@ -303,7 +569,8 @@ class ScreenController extends GetxController with BaseController {
 
         accommodationTypeList.add(response);
 
-        if (accommodationTypeList.first.data.accommodationTypes.isNotEmpty) {
+        if (accommodationTypeList.first.data.accommodationTypes.isNotEmpty &&
+            languageCode != defaultLanguageCode.value.toLowerCase()) {
           var record = accommodationTypeList.first.data.accommodationTypes.length;
           for (var ctr = 0; ctr < record; ctr++) {
             var textTranslated = await translator.translate(
@@ -446,7 +713,7 @@ class ScreenController extends GetxController with BaseController {
   }
 
   // PAYMENT TYPE
-  Future<bool> getPaymentType({required Map<String, String> credentialHeaders}) async {
+  Future<bool> getPaymentType({required Map<String, String> credentialHeaders, required String? languageCode}) async {
     isLoading.value = true;
 
     final response = await GlobalProvider().fetchPaymentType(headers: credentialHeaders);
@@ -454,6 +721,17 @@ class ScreenController extends GetxController with BaseController {
     try {
       if (response != null) {
         paymentTypeList.add(response);
+
+        if (paymentTypeList.first.data.paymentTypes.isNotEmpty &&
+            languageCode != defaultLanguageCode.value.toLowerCase()) {
+          for (var ctr = 0; ctr < paymentTypeList.first.data.paymentTypes.length; ctr++) {
+            var textTranslated = await translator.translate(paymentTypeList.first.data.paymentTypes[ctr].description,
+                from: defaultLanguageCode.value.toLowerCase(), to: languageCode!.toLowerCase());
+            paymentTypeList.first.data.paymentTypes[ctr].translatedText = textTranslated.text;
+          }
+          paymentTypeList.refresh();
+        }
+
         if (kDebugMode) {
           print('Payment Type: ${paymentTypeList.first.data.paymentTypes.length}');
         }
@@ -475,7 +753,7 @@ class ScreenController extends GetxController with BaseController {
       if (response != null) {
         roomTypeList.add(response);
 
-        if (roomTypeList.first.data.roomTypes.isNotEmpty) {
+        if (roomTypeList.first.data.roomTypes.isNotEmpty && languageCode != defaultLanguageCode.value.toLowerCase()) {
           var record = roomTypeList.first.data.roomTypes.length;
           for (var ctr = 0; ctr < record; ctr++) {
             var textTranslated = await translator.translate(roomTypeList.first.data.roomTypes[ctr].description,
@@ -563,6 +841,17 @@ class ScreenController extends GetxController with BaseController {
     return false;
   }
 
+  String translateText({required String sourceText, required String fromLang, required String toLang}) {
+    translator.translate(sourceText, from: fromLang, to: toLang).then((value) {
+      if (value.text.isNotEmpty) {
+        return value.text;
+      } else {
+        return '';
+      }
+    });
+    return '';
+  }
+
   // ---------------------------------------------------------------------------------------------------------
   bool getMenu({int? languageID, String? code, String? type, int? indexCode}) {
     pageTrans.clear();
@@ -571,12 +860,12 @@ class ScreenController extends GetxController with BaseController {
       // TITLE
       if (type == "TITLE") {
         titleTrans.addAll(
-            transactionList[0].data.conversion.where((element) => element.code == code && element.type == 'TITLE'));
+            transactionList[0].data.conversion.where((element) => element.code == code && element.type == type));
       } else {
         titleTrans.addAll(transactionList[0]
             .data
             .conversion
-            .where((element) => element.languageId == languageID && element.code == code && element.type == 'TITLE'));
+            .where((element) => element.languageId == languageID && element.code == code && element.type == type));
         // titleTrans.addAll(
         //     transactionList[0].data.conversion.where((element) => element.code == code && element.type == 'TITLE'));
       }
@@ -609,7 +898,7 @@ class ScreenController extends GetxController with BaseController {
       //   pageTrans[ctr].translationText = valueString.toString();
       // }
       if (kDebugMode) {
-        print('TOTAL MENU ITEMS ($code : $type) : ${pageTrans.length} : INDEX: $indexCode');
+        print('MENU ITEMS (code: $code | type: $type) : TOTAL RECORD: ${pageTrans.length} : INDEX: $indexCode');
       }
 
       return true;
@@ -618,5 +907,6 @@ class ScreenController extends GetxController with BaseController {
     }
     // return true;
   }
-  // ---------------------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------------------------
 }
