@@ -83,7 +83,7 @@ class ScreenController extends GetxController with BaseController {
   final availRoomList = <AvailableRoom>[].obs;
 
   // OTHER LIST
-  final serialReadList = [];
+  final List<int> serialReadList = [];
 
   // OTHERS
   final translator = GoogleTranslator();
@@ -112,7 +112,7 @@ class ScreenController extends GetxController with BaseController {
     // getMoneydispenser();
     // cardDispenser();
     // openLED();
-    openLEDLibserial(ledLocationAndStatus: LedOperation.topLEFTLEDOFF);
+    // openLEDLibserial(ledLocationAndStatus: LedOperation.bottomRIGHTLEDOFF);
 
     mediaOpen();
 
@@ -205,9 +205,9 @@ class ScreenController extends GetxController with BaseController {
   // }
 
   void getBDOOpen() {
-    final serialPort = SerialPort.availablePorts;
+    // final serialPort = SerialPort.availablePorts;
     final portConfig = SerialPortConfig();
-    final port = SerialPort(serialPort.first);
+    final port = SerialPort("COM1");
 
     portConfig.baudRate = 9600;
     portConfig.parity = SerialPortParity.none;
@@ -226,37 +226,98 @@ class ScreenController extends GetxController with BaseController {
     //     '02 00 35 36 30 30 30 30 30 30 30 30 30 31 30 32 30 30 30 30 1C 34 49 00 12 30 30 30 30 30 30 30 30 31 30 30 30 1C 03 14';
     Uint8List bytes = Uint8List.fromList(HEX.decode(sendByte));
     port.write(bytes); //pagsusulat
-
-    int readBuffer = 256;
+    int readBuffer = 1;
 
     while (port.isOpen) {
-      Uint8List bytesRead = port.read(readBuffer, timeout: 10);
+      Uint8List bytesRead = port.read(readBuffer, timeout: 30);
       if (bytesRead.isNotEmpty) {
-        // var hexString = HEX.encode(bytesRead);
-        // print(hexString);
-
-        // serialReadList.add(bytesRead);
-        serialReadList.add(List<int>.from(bytesRead));
-
-        var totalLength = serialReadList.length;
-        if (totalLength == 165) {
+        serialReadList.add(bytesRead.first);
+        if (bytesRead.first == 3) {
+          if (kDebugMode) print('Closing port ${port.name}');
           port.close();
         }
-        // print(totalLength);
+        // var totalLength = serialReadList.length;
+        // if (totalLength >= 165) {
+        //   if (kDebugMode) print('Closing port ${port.name}');
+        //   port.close();
+        // }
       }
     }
 
-    for (var i = 0; i < serialReadList.length; i++) {
-      if (i >= 21) {
-        var data = List<int>.from(serialReadList[i]);
-        if (kDebugMode) {
-          print(String.fromCharCode(data.first));
+    if (kDebugMode) print(serialReadList);
+
+    if (kDebugMode) print(String.fromCharCodes(serialReadList));
+    if (serialReadList.first == 6) {
+      List<int> dataReceived = serialReadList;
+      if (kDebugMode) print('Processing start, please wait');
+      dataReceived = dataReceived.sublist(1);
+      String stx = dataReceived.first.toRadixString(16);
+      if (kDebugMode) print('STX: $stx');
+      // Second read simulation
+      String ll1 = dataReceived[1].toRadixString(16);
+      String ll2 = dataReceived[2].toRadixString(16);
+      String llll = ll1 + ll2;
+
+      // Second read verification
+      int llllDataInt = int.parse(llll, radix: 16);
+      List<int> llllDataList = dataReceived.sublist(1, 3);
+      if (kDebugMode) print('LLLL: $llll');
+
+      // Third read simulation
+      int offset = 3;
+      int messageDataLengthWithOffset = offset + llllDataInt;
+
+      List<int> messageDataList = dataReceived.sublist(offset, messageDataLengthWithOffset);
+
+      // Integer to hex string conversion
+      String etx = dataReceived[3 + llllDataInt].toRadixString(16);
+      String lrc = dataReceived[3 + llllDataInt + 1].toRadixString(16);
+
+      if (kDebugMode) print('ETX: $etx');
+      if (kDebugMode) print('LRC: $lrc');
+
+      List<int> etxList = dataReceived.sublist(messageDataLengthWithOffset, messageDataLengthWithOffset + 1);
+      // List<int> lrcList = dataReceived.sublist(messageDataLengthWithOffset + 1, messageDataLengthWithOffset + 2);
+
+      // Third read verification
+      if (etx == '3') {
+        int lrcValue = 0;
+        List<int> lrcCheck = llllDataList + messageDataList + etxList;
+
+        for (int b in lrcCheck) {
+          lrcValue ^= b;
         }
+
+        int lrcReceived = int.parse(lrc, radix: 16);
+
+        if (lrcReceived == lrcValue) {
+          if (kDebugMode) print("LRC CORRECT!");
+          // List<int> transportHeaders = messageDataList.sublist(0, 10);
+          // List<int> presentationHeaders = messageDataList.sublist(10, 18);
+          // List<int> fields = messageDataList.sublist(18);
+
+          // List<List<int>> messageDataFields = fields. (0x1C); // For conversion ng loop
+          int fieldCount = 0;
+          // List<int> field = [];
+          // for (field in fields) {
+          //   fieldCount += 1;
+          //   // print("DATA $fieldCount - ${field.sublist(0, 2).toString()} "'${String.fromCharCodes(field.sublist(4))}'");
+          //   if (kDebugMode)
+          //     print('DATA $fieldCount - ${field.sublist(0, 2).toString()} ${String.fromCharCodes(fields.sublist(4))}');
+          // }
+        } else {
+          if (kDebugMode) print("LRC ERROR!");
+        }
+      } else {
+        if (kDebugMode) print("STX unread!");
       }
+
+      // for (var i = 0; i < dataReceived.length; i++) {
+      //   if (i >= 21) {
+      //     // if (kDebugMode) print(ascii.decode(serialReadList[i]));
+      //   }
+      // }
     }
-    // Uint8List convertBytes = Uint8List.fromList([serialReadList]);
-    // int values = convertBytes.buffer.asByteData().getUint32(21, Endian.big);
-    // print(values);
   }
 
   void getMoneydispenser() {
@@ -383,10 +444,11 @@ class ScreenController extends GetxController with BaseController {
   }
 
   void openLEDLibserial({String ledLocationAndStatus = ''}) {
-    final serialPort = SerialPort.availablePorts;
+    // final serialPort = SerialPort.availablePorts;
     final portConfig = SerialPortConfig();
-    final port = SerialPort(serialPort.first);
+    final port = SerialPort("COM2");
     portConfig.baudRate = 9600;
+    portConfig.parity = SerialPortParity.none;
 
     if (port.isOpen) {
       port.close();
