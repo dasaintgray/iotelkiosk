@@ -1,3 +1,4 @@
 {
-    "dart.sdkPath": "D:\\programming\\flutter\\bin\\cache\\dart-sdk"
+    "dart.sdkPath": "D:\\programming\\flutter\\bin\\cache\\dart-sdk",
+    "debug.inlineValues": "on"
 }

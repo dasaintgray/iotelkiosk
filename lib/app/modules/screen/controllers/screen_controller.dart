@@ -7,7 +7,6 @@ import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
-import 'package:iotelkiosk/globals/constant/led_constant.dart';
 import 'package:serial_port_win32/serial_port_win32.dart' as winsp;
 import 'package:get/get.dart';
 import 'package:hex/hex.dart';
@@ -83,7 +82,7 @@ class ScreenController extends GetxController with BaseController {
   final availRoomList = <AvailableRoom>[].obs;
 
   // OTHER LIST
-  final List<int> serialReadList = [];
+  List<int> serialReadList = [];
 
   // OTHERS
   final translator = GoogleTranslator();
@@ -209,11 +208,14 @@ class ScreenController extends GetxController with BaseController {
     final portConfig = SerialPortConfig();
     final port = SerialPort("COM1");
 
+    List<String> responseCodeList = ['0000', '0101', 'NDND', 'EDED', 'ENEN', 'TOTO', 'NANA'];
+
     portConfig.baudRate = 9600;
     portConfig.parity = SerialPortParity.none;
 
     if (port.isOpen) port.close();
 
+    // OPENING THE PORT
     if (!port.openReadWrite()) {
       if (kDebugMode) print(SerialPort.lastError);
       // exit(-1);
@@ -221,102 +223,293 @@ class ScreenController extends GetxController with BaseController {
       if (kDebugMode) print('Successfully connected to ${port.name}');
     }
 
-    var sendByte = '02003536303030303030303030313032303030301C343000123030303030303030313030301C0314';
-    // var sendByteTransaction =
-    //     '02 00 35 36 30 30 30 30 30 30 30 30 30 31 30 32 30 30 30 30 1C 34 49 00 12 30 30 30 30 30 30 30 30 31 30 30 30 1C 03 14';
-    Uint8List bytes = Uint8List.fromList(HEX.decode(sendByte));
-    port.write(bytes); //pagsusulat
-    int readBuffer = 1;
+    // var sendByte = '02003536303030303030303030313032303030301C343000123030303030303030313030301C0314';
+    // Uint8List bytes = Uint8List.fromList(HEX.decode(sendByte));
+    // port.write(bytes); //pagsusulat
+    // int readBuffer = 1;
 
-    while (port.isOpen) {
-      Uint8List bytesRead = port.read(readBuffer, timeout: 30);
-      if (bytesRead.isNotEmpty) {
-        serialReadList.add(bytesRead.first);
-        if (bytesRead.first == 3) {
-          if (kDebugMode) print('Closing port ${port.name}');
-          port.close();
-        }
-        // var totalLength = serialReadList.length;
-        // if (totalLength >= 165) {
-        //   if (kDebugMode) print('Closing port ${port.name}');
-        //   port.close();
-        // }
-      }
-    }
+    // while (port.isOpen) {
+    //   Uint8List bytesRead = port.read(readBuffer, timeout: 30);
+    //   if (bytesRead.isNotEmpty) {
+    //     serialReadList.add(bytesRead.first);
+    //     var totalLength = serialReadList.length;
+    //     if (totalLength >= 165) {
+    //       if (kDebugMode) print('Closing port ${port.name}');
+    //       port.close();
+    //     }
+    //   }
+    // }
 
-    if (kDebugMode) print(serialReadList);
+    const data =
+        '06 02 03 88 36 30 30 30 30 30 30 30 30 30 31 31 32 30 30 30 30 1C 30 32 00 40 41 50 50 52 4F 56 45 44 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 1C 30 31 00 06 32 30 31 31 34 39 1C 36 35 00 06 30 30 30 30 30 31 1C 44 30 00 69 4D 4F 56 45 35 30 30 30 20 50 52 4F 44 55 43 54 49 4F 4E 20 54 45 53 42 44 4F 20 50 4F 53 20 4C 41 42 20 20 20 20 20 20 20 20 20 20 20 20 4D 41 4E 44 41 4C 55 59 4F 4E 47 20 43 49 54 59 20 20 20 20 20 20 20 1C 31 36 00 08 56 33 33 39 39 30 30 31 1C 44 31 00 15 30 30 30 30 30 39 31 38 33 36 39 30 32 32 31 1C 44 32 00 10 56 49 53 41 20 20 20 20 20 20 1C 33 30 00 16 34 31 38 33 35 39 30 30 30 30 30 30 39 31 30 35 1C 33 31 00 04 2A 2A 2A 2A 1C 35 30 00 06 30 30 30 38 30 30 1C 30 33 00 06 32 33 30 34 30 34 1C 30 34 00 06 31 34 30 32 35 31 1C 44 33 00 12 33 30 39 34 32 31 37 37 31 36 30 32 1C 44 34 00 02 30 31 1C 44 35 00 26 53 59 53 54 45 53 43 41 52 44 20 35 2F 50 53 20 20 20 20 20 20 20 20 20 20 20 1C 45 46 00 16 41 30 30 30 30 30 30 30 30 33 31 30 31 30 20 20 1C 45 47 00 16 56 69 73 61 20 43 72 65 64 69 74 20 20 20 20 20 1C 45 48 00 16 46 37 30 45 32 35 37 44 32 38 35 31 31 30 45 44 1C 03 A4';
 
-    if (kDebugMode) print(String.fromCharCodes(serialReadList));
+    const byteArray = [
+      6,
+      2,
+      1,
+      89,
+      54,
+      48,
+      48,
+      48,
+      48,
+      48,
+      48,
+      48,
+      48,
+      48,
+      49,
+      49,
+      50,
+      48,
+      78,
+      65,
+      48,
+      28,
+      48,
+      50,
+      0,
+      64,
+      77,
+      85,
+      83,
+      84,
+      32,
+      83,
+      69,
+      84,
+      84,
+      76,
+      69,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      28,
+      68,
+      48,
+      0,
+      105,
+      69,
+      67,
+      82,
+      32,
+      84,
+      101,
+      115,
+      116,
+      32,
+      84,
+      101,
+      114,
+      109,
+      105,
+      110,
+      97,
+      108,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      73,
+      111,
+      116,
+      101,
+      108,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      28,
+      48,
+      51,
+      0,
+      6,
+      50,
+      51,
+      48,
+      54,
+      48,
+      53,
+      28,
+      48,
+      52,
+      0,
+      6,
+      48,
+      48,
+      48,
+      48,
+      48,
+      48,
+      28,
+      3,
+      27
+    ];
+
+    serialReadList.addAll(HEX.decode(data));
+    // serialReadList.addAll(byteArray);
+
+    // if (kDebugMode) print(serialReadList);
+    // if (kDebugMode) print(String.fromCharCodes(serialReadList));
     if (serialReadList.first == 6) {
-      List<int> dataReceived = serialReadList;
-      if (kDebugMode) print('Processing start, please wait');
-      dataReceived = dataReceived.sublist(1);
-      String stx = dataReceived.first.toRadixString(16);
-      if (kDebugMode) print('STX: $stx');
-      // Second read simulation
-      String ll1 = dataReceived[1].toRadixString(16);
-      String ll2 = dataReceived[2].toRadixString(16);
-      String llll = ll1 + ll2;
+      serialReadList = serialReadList.sublist(1);
+      if (serialReadList.first == 2) {
+        // FIRST READ
+        if (kDebugMode) print('STX: ${serialReadList.first.toRadixString(16)}');
+        // 2ND READ
+        String sLL1 = serialReadList[1].toRadixString(16);
+        String sLL2 = serialReadList[2].toRadixString(16);
+        String sLLLL = sLL1 + sLL2;
 
-      // Second read verification
-      int llllDataInt = int.parse(llll, radix: 16);
-      List<int> llllDataList = dataReceived.sublist(1, 3);
-      if (kDebugMode) print('LLLL: $llll');
+        // 2nd read verification
+        int sLLLData = int.parse(sLLLL);
+        List<int> sllllDatalist = serialReadList.sublist(1, 3);
 
-      // Third read simulation
-      int offset = 3;
-      int messageDataLengthWithOffset = offset + llllDataInt;
+        if (kDebugMode) print('LLLL: $sLL1$sLL2 ');
 
-      List<int> messageDataList = dataReceived.sublist(offset, messageDataLengthWithOffset);
+        var offset = 3;
+        var messageDataLengthWithOffset = offset + int.parse(sLLLL);
+        var messageDataList = serialReadList.sublist(3, messageDataLengthWithOffset);
+        // if (kDebugMode) print('MESSAGE DATA LIST : $messageDataList');
+        var sETX = serialReadList[3 + sLLLData].toRadixString(16);
+        var sLRC = serialReadList[3 + sLLLData + 1].toRadixString(16);
+        if (kDebugMode) print('ETX: $sETX');
+        if (kDebugMode) print('LRC: $sLRC');
 
-      // Integer to hex string conversion
-      String etx = dataReceived[3 + llllDataInt].toRadixString(16);
-      String lrc = dataReceived[3 + llllDataInt + 1].toRadixString(16);
+        var etxList = serialReadList.sublist(messageDataLengthWithOffset, messageDataLengthWithOffset + 1);
+        var lrcList = serialReadList.sublist(messageDataLengthWithOffset + 1, messageDataLengthWithOffset + 2);
+        if (kDebugMode) print('ETX LIST: $etxList');
+        if (kDebugMode) print('LRC LIST: $lrcList');
 
-      if (kDebugMode) print('ETX: $etx');
-      if (kDebugMode) print('LRC: $lrc');
+        if (sETX == '3') {
+          var lrc = 0;
 
-      List<int> etxList = dataReceived.sublist(messageDataLengthWithOffset, messageDataLengthWithOffset + 1);
-      // List<int> lrcList = dataReceived.sublist(messageDataLengthWithOffset + 1, messageDataLengthWithOffset + 2);
+          var lrcCheck = sllllDatalist + messageDataList + etxList;
+          if (kDebugMode) print('LRC TOTAL: ${lrcCheck.length}}');
 
-      // Third read verification
-      if (etx == '3') {
-        int lrcValue = 0;
-        List<int> lrcCheck = llllDataList + messageDataList + etxList;
+          for (int mainCtr in lrcCheck) {
+            lrc ^= mainCtr;
+            var responseCode = '';
 
-        for (int b in lrcCheck) {
-          lrcValue ^= b;
-        }
+            var lrcReceived = int.parse(lrc.toRadixString(16), radix: 16);
 
-        int lrcReceived = int.parse(lrc, radix: 16);
+            if (lrcReceived == lrc) {
+              if (kDebugMode) print('LRC CORRECT');
+              // var transportHeader = messageDataList.sublist(0, 10);
+              var presentationHeader = messageDataList.sublist(10, 18);
+              var presentationHeaderList = presentationHeader.sublist(4, 6);
 
-        if (lrcReceived == lrcValue) {
-          if (kDebugMode) print("LRC CORRECT!");
-          // List<int> transportHeaders = messageDataList.sublist(0, 10);
-          // List<int> presentationHeaders = messageDataList.sublist(10, 18);
-          // List<int> fields = messageDataList.sublist(18);
+              for (var x in presentationHeaderList) {
+                x++;
+                if (kDebugMode) print(x);
 
-          // List<List<int>> messageDataFields = fields. (0x1C); // For conversion ng loop
-          int fieldCount = 0;
-          // List<int> field = [];
-          // for (field in fields) {
-          //   fieldCount += 1;
-          //   // print("DATA $fieldCount - ${field.sublist(0, 2).toString()} "'${String.fromCharCodes(field.sublist(4))}'");
-          //   if (kDebugMode)
-          //     print('DATA $fieldCount - ${field.sublist(0, 2).toString()} ${String.fromCharCodes(fields.sublist(4))}');
-          // }
+                responseCode += ascii.decode(presentationHeaderList);
+
+                // if (responseCode == "NANA") break;
+                var res = responseCodeList.where((element) => element == responseCode);
+                if (res.isNotEmpty) {
+                  break;
+                }
+
+                if (kDebugMode) print('RESPONSE CODE: $responseCode');
+                var fields = HEX.encode(messageDataList.sublist(18, messageDataList.length - 1));
+
+                var messageDataFields = fields.split('1c');
+                // List<int> msgDataFields = messageDataFields.map((e) => int.parse(e)).toList();
+
+                for (var ctr = 0; ctr < messageDataFields.length; ctr++) {
+                  Uint8List fn = Uint8List.fromList(HEX.decode(messageDataFields[ctr]));
+                  // Uint8List fv = Uint8List.fromList(HEX.decode(messageDataFields[ctr]));
+                  String fieldName = String.fromCharCodes(fn);
+                  // String fieldValue = String.fromCharCodes(fn);
+
+                  if (kDebugMode) {
+                    print(
+                        "DATA $ctr : ${fieldName.substring(0, 2).trim()} : ${fieldName.replaceRange(0, 4, '').trim()}");
+                  }
+                }
+              }
+              if (kDebugMode) print('LRC: $lrc : MAIN CTR: $mainCtr');
+            } else {
+              if (kDebugMode) print('LRC ERROR');
+            }
+            // if (responseCode == "NANA") break;
+            var res = responseCodeList.where((element) => element == responseCode);
+            if (res.isNotEmpty) {
+              break;
+            }
+          }
         } else {
-          if (kDebugMode) print("LRC ERROR!");
+          if (kDebugMode) print('STX UNREAD');
         }
-      } else {
-        if (kDebugMode) print("STX unread!");
       }
-
-      // for (var i = 0; i < dataReceived.length; i++) {
-      //   if (i >= 21) {
-      //     // if (kDebugMode) print(ascii.decode(serialReadList[i]));
-      //   }
-      // }
+    } else {
+      if (kDebugMode) print('Acknowledged code not received');
     }
   }
 
