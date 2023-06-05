@@ -490,7 +490,7 @@ class ScreenController extends GetxController with BaseController {
 
                   if (kDebugMode) {
                     print(
-                        "DATA $ctr : ${fieldName.substring(0, 2).trim()} : ${fieldName.replaceRange(0, 4, '').trim()}");
+                        "DATA $ctr : ${fieldName.substring(0, 2).trim()} : ${fieldName.replaceRange(0, 4, '').replaceAll('       ', ' ')}");
                   }
                 }
               }
