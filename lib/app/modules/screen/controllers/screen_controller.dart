@@ -212,7 +212,6 @@ class ScreenController extends GetxController with BaseController {
 
     portConfig.baudRate = 9600;
     portConfig.parity = SerialPortParity.none;
-
     if (port.isOpen) port.close();
 
     // OPENING THE PORT
@@ -223,198 +222,38 @@ class ScreenController extends GetxController with BaseController {
       if (kDebugMode) print('Successfully connected to ${port.name}');
     }
 
-    // var sendByte = '02003536303030303030303030313032303030301C343000123030303030303030313030301C0314';
-    // Uint8List bytes = Uint8List.fromList(HEX.decode(sendByte));
-    // port.write(bytes); //pagsusulat
-    // int readBuffer = 1;
+    var sendByte =
+        '02 00 35 36 30 30 30 30 30 30 30 30 30 31 30 32 30 30 30 30 1C 34 30 00 12 30 30 30 30 30 30 30 30 30 30 31 30 1C 03 14';
 
-    // while (port.isOpen) {
-    //   Uint8List bytesRead = port.read(readBuffer, timeout: 30);
-    //   if (bytesRead.isNotEmpty) {
-    //     serialReadList.add(bytesRead.first);
-    //     var totalLength = serialReadList.length;
-    //     if (totalLength >= 165) {
-    //       if (kDebugMode) print('Closing port ${port.name}');
-    //       port.close();
-    //     }
-    //   }
-    // }
+    var sale = '1';
+    var formatSale = sale.padLeft(12, '0');
 
-    const data =
-        '06 02 03 88 36 30 30 30 30 30 30 30 30 30 31 31 32 30 30 30 30 1C 30 32 00 40 41 50 50 52 4F 56 45 44 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 1C 30 31 00 06 32 30 31 31 34 39 1C 36 35 00 06 30 30 30 30 30 31 1C 44 30 00 69 4D 4F 56 45 35 30 30 30 20 50 52 4F 44 55 43 54 49 4F 4E 20 54 45 53 42 44 4F 20 50 4F 53 20 4C 41 42 20 20 20 20 20 20 20 20 20 20 20 20 4D 41 4E 44 41 4C 55 59 4F 4E 47 20 43 49 54 59 20 20 20 20 20 20 20 1C 31 36 00 08 56 33 33 39 39 30 30 31 1C 44 31 00 15 30 30 30 30 30 39 31 38 33 36 39 30 32 32 31 1C 44 32 00 10 56 49 53 41 20 20 20 20 20 20 1C 33 30 00 16 34 31 38 33 35 39 30 30 30 30 30 30 39 31 30 35 1C 33 31 00 04 2A 2A 2A 2A 1C 35 30 00 06 30 30 30 38 30 30 1C 30 33 00 06 32 33 30 34 30 34 1C 30 34 00 06 31 34 30 32 35 31 1C 44 33 00 12 33 30 39 34 32 31 37 37 31 36 30 32 1C 44 34 00 02 30 31 1C 44 35 00 26 53 59 53 54 45 53 43 41 52 44 20 35 2F 50 53 20 20 20 20 20 20 20 20 20 20 20 1C 45 46 00 16 41 30 30 30 30 30 30 30 30 33 31 30 31 30 20 20 1C 45 47 00 16 56 69 73 61 20 43 72 65 64 69 74 20 20 20 20 20 1C 45 48 00 16 46 37 30 45 32 35 37 44 32 38 35 31 31 30 45 44 1C 03 A4';
+    if (kDebugMode) print(HEX.decode(sale));
+    // print(ascii.decode(HEX.decode(sale)));
+    print(ascii.encode('20'));
+    // port.close();
 
-    const byteArray = [
-      6,
-      2,
-      1,
-      89,
-      54,
-      48,
-      48,
-      48,
-      48,
-      48,
-      48,
-      48,
-      48,
-      48,
-      49,
-      49,
-      50,
-      48,
-      78,
-      65,
-      48,
-      28,
-      48,
-      50,
-      0,
-      64,
-      77,
-      85,
-      83,
-      84,
-      32,
-      83,
-      69,
-      84,
-      84,
-      76,
-      69,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      28,
-      68,
-      48,
-      0,
-      105,
-      69,
-      67,
-      82,
-      32,
-      84,
-      101,
-      115,
-      116,
-      32,
-      84,
-      101,
-      114,
-      109,
-      105,
-      110,
-      97,
-      108,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      73,
-      111,
-      116,
-      101,
-      108,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      32,
-      28,
-      48,
-      51,
-      0,
-      6,
-      50,
-      51,
-      48,
-      54,
-      48,
-      53,
-      28,
-      48,
-      52,
-      0,
-      6,
-      48,
-      48,
-      48,
-      48,
-      48,
-      48,
-      28,
-      3,
-      27
-    ];
+    Uint8List bytesToWrite = Uint8List.fromList(HEX.decode(sendByte));
+    if (kDebugMode) print(bytesToWrite);
+    port.write(bytesToWrite, timeout: 30); //pagsusulat
+    int readBuffer = 1;
 
-    serialReadList.addAll(HEX.decode(data));
+    while (port.isOpen) {
+      Uint8List bytesRead = port.read(readBuffer, timeout: 30);
+      if (bytesRead.isNotEmpty) {
+        serialReadList.add(bytesRead.first);
+        var totalLength = serialReadList.length;
+        if (totalLength >= 165) {
+          if (kDebugMode) print('Closing port ${port.name}');
+          port.close();
+        }
+      }
+    }
+
+    // serialReadList.addAll(HEX.decode(data));
     // serialReadList.addAll(byteArray);
 
-    // if (kDebugMode) print(serialReadList);
+    if (kDebugMode) print(serialReadList);
     // if (kDebugMode) print(String.fromCharCodes(serialReadList));
     if (serialReadList.first == 6) {
       serialReadList = serialReadList.sublist(1);
@@ -514,35 +353,27 @@ class ScreenController extends GetxController with BaseController {
   }
 
   void getMoneydispenser() {
-    final serialPort = SerialPort.availablePorts;
+    // final serialPort = SerialPort.availablePorts;
     final portConfig = SerialPortConfig();
-    final port = SerialPort(serialPort.first);
+    final port = SerialPort("COM1");
 
     portConfig.baudRate = 9600;
     portConfig.parity = SerialPortParity.none;
-    // portConfig.bits = 1;
-    // portConfig.stopBits = 2;
+    portConfig.bits = 8;
+    portConfig.stopBits = 2;
 
     if (!port.openReadWrite()) {
       if (kDebugMode) print(SerialPort.lastError);
       exit(-1);
     }
 
-    //'7F 80 01 21 C5 82' // GET DATASET VERSION;
-    // var pollHex = '7F 00 01 07 11 88';
-    // var enableHEX = '7F 80 01 0A 3F 82';
-    // var disableHEX = '7F 00 01 09 36 08';
-    // var initializingHEX = '7F 80 01 07 12 02';
-    var hostProtocolVersionHEX = '7F 00 02 06 08 1B 94';
+    var stx = '7F';
+    var bezel = '1101';
 
-    // Uint8List bytesEnable = Uint8List.fromList(HEX.decode(enableHEX));
-    // Uint8List bytesDisable = Uint8List.fromList(HEX.decode(disableHEX));
-    // Uint8List bytesPoll = Uint8List.fromList(HEX.decode(pollHex));
-    Uint8List bytesInitialize = Uint8List.fromList(HEX.decode(hostProtocolVersionHEX));
+    Uint8List bytesInitialize = Uint8List.fromList(HEX.decode(bezel));
+    Uint8List stxInit = Uint8List.fromList(HEX.decode(stx));
 
-    // port.write(bytesDisable, timeout: 30);
-    // port.write(bytesEnable, timeout: 30);
-    // port.write(bytesPoll, timeout: 30);
+    port.write(stxInit);
     port.write(bytesInitialize);
 
     if (kDebugMode) print('${port.name} is open');
@@ -570,9 +401,10 @@ class ScreenController extends GetxController with BaseController {
         if (kDebugMode) print('ASCII: $asciiTable');
       }
 
-      if (bytesRead.isEmpty) {
-        port.close();
-      }
+      // if (bytesRead.isEmpty) {
+      //   port.close();
+      //   if (kDebugMode) print('Port is close');
+      // }
     }
   }
 
@@ -664,6 +496,10 @@ class ScreenController extends GetxController with BaseController {
       // exit(-1);
     }
   }
+
+  // -----------------------------------------------------------------------------------------
+
+  // -----------------------------------------------------------------------------------------
 
   void mediaOpen() {
     if (kDebugMode) {
