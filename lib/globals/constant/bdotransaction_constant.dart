@@ -24,12 +24,18 @@ class BDOResponseCode {
 class BDOMessageData {
   // NOTE: THE VALUE IS IN HEX FORMAT
   static const String sSTX = '02';
-  static const String sTransportHeaderType = '36 30';
-  static const String sTransportDestination = '30 30 30 30';
-  static const String sTransportSource = '30 30 30 30';
+  static const String sETX = '03';
+  static const String sTransportHeaderType = '3630';
+  static const String sTransportDestination = '30303030';
+  static const String sTransportSource = '30303030';
   static const String sFormatVersion = '31';
-  static const String sRequestRespondeIndicator = '30';
-  static const String sResponseCode = '30 30';
-  static const String sMoreIndicator = '30';
-  static const String sFieldSeparator = 'IC';
+  static const String sRequestRespondeIndicator0 = '30';
+  static const String sRequestRespondeIndicator1 = '31';
+  static const String sRequestRespondeIndicator2 = '32';
+  static const String sResponseCode = '3030';
+  static const String sMoreIndicator0 = '30';
+  static const String sMoreIndicator1 = '31';
+  static const String sFieldSeparator = '1C';
+  static const String sTransactionAmount = '3430';
+  static const String sFieldLength = '0012';
 }

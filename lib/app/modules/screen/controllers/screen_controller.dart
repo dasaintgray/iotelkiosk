@@ -7,6 +7,7 @@ import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
+import 'package:iotelkiosk/globals/constant/bdotransaction_constant.dart';
 import 'package:serial_port_win32/serial_port_win32.dart' as winsp;
 import 'package:get/get.dart';
 import 'package:hex/hex.dart';
@@ -107,7 +108,10 @@ class ScreenController extends GetxController with BaseController {
     hostname.value = Platform.localHostname;
 
     // getPorts();
-    getBDOOpen();
+    getBDOOpen(
+        transactionCode: BDOTransaction.sSale,
+        pricePerRoom: '1',
+        messageResponseIndicator: BDOMessageData.sRequestRespondeIndicator0);
     // getMoneydispenser();
     // cardDispenser();
     // openLED();
@@ -203,11 +207,11 @@ class ScreenController extends GetxController with BaseController {
   //   }
   // }
 
-  void getBDOOpen() {
+  void getBDOOpen(
+      {required String transactionCode, required String pricePerRoom, required String messageResponseIndicator}) {
     // final serialPort = SerialPort.availablePorts;
     final portConfig = SerialPortConfig();
     final port = SerialPort("COM1");
-
     List<String> responseCodeList = ['0000', '0101', 'NDND', 'EDED', 'ENEN', 'TOTO', 'NANA'];
 
     portConfig.baudRate = 9600;
@@ -222,38 +226,91 @@ class ScreenController extends GetxController with BaseController {
       if (kDebugMode) print('Successfully connected to ${port.name}');
     }
 
-    var sendByte =
-        '02 00 35 36 30 30 30 30 30 30 30 30 30 31 30 32 30 30 30 30 1C 34 30 00 12 30 30 30 30 30 30 30 30 30 30 31 30 1C 03 14';
+    //other method
+    // List<int> bytes = utf8.encode(ppr);
+    // bytes.map((e) => e.toRadixString(16)).join(' ');
 
-    var sale = '1';
-    var formatSale = sale.padLeft(12, '0');
+    var padding = pricePerRoom.length;
+    padding >= 2 ? padding = padding + 2 : padding = 3;
 
-    if (kDebugMode) print(HEX.decode(sale));
-    // print(ascii.decode(HEX.decode(sale)));
-    print(ascii.encode('20'));
-    // port.close();
+    var pprRight = pricePerRoom.padRight(padding, '0');
+    var ppr = pprRight.padLeft(12, '0');
+    var amount = ppr.codeUnits.map((e) => e.toRadixString(16)).join('');
+    // if (kDebugMode) print('amount hex: $amount, amount length: ${amount.length / 2.toInt()}');
 
-    Uint8List bytesToWrite = Uint8List.fromList(HEX.decode(sendByte));
-    if (kDebugMode) print(bytesToWrite);
-    port.write(bytesToWrite, timeout: 30); //pagsusulat
+    var transactionCodeHEX = transactionCode.codeUnits.map((e) => e.toRadixString(16)).join('');
+    if (kDebugMode) print('TRANSACTION CODE HEX: $transactionCodeHEX');
+
+    var transportHeader =
+        '${BDOMessageData.sTransportHeaderType}${BDOMessageData.sTransportDestination}${BDOMessageData.sTransportSource}';
+    var presentationHeader =
+        '${BDOMessageData.sFormatVersion}$messageResponseIndicator$transactionCodeHEX${BDOMessageData.sResponseCode}${BDOMessageData.sMoreIndicator0}${BDOMessageData.sFieldSeparator}';
+    var fieldData =
+        '${BDOMessageData.sTransactionAmount}${BDOMessageData.sFieldLength}$amount${BDOMessageData.sFieldSeparator}';
+
+    var messageData = '$transportHeader$presentationHeader$fieldData';
+
+    if (kDebugMode) print('MESSAGE DATA: $messageData');
+
+    List<int> lrcBytes = HEX.decode(messageData);
+    lrcBytes = lrcBytes.toList();
+
+    lrcBytes.add(int.parse(BDOMessageData.sETX));
+
+    // Uint8List lrcBytes = Uint8List.fromList(HEX.decode(messageData));
+    if (kDebugMode) print('MESSAGE DATA BYTES: $lrcBytes');
+
+    int lrcData = 0;
+
+    for (int hvm = 1; hvm < lrcBytes.length - 1; hvm++) {
+      lrcData ^= lrcBytes[hvm];
+    }
+
+    if (kDebugMode) print(HEX.encode([lrcData]));
+    if (kDebugMode) print('LRC DATA: $lrcData');
+
+    var lrcHEX = HEX.encode([lrcData]);
+
+    var lrcLength = lrcBytes.length - 1;
+    var ttlMsgData = lrcLength.toString();
+    var sLLLL = ttlMsgData.padLeft(4, '0');
+
+    var sendCommand = '${BDOMessageData.sSTX}$sLLLL$messageData${BDOMessageData.sETX}$lrcHEX';
+    if (kDebugMode) print('SEND COMMAND HEX $sendCommand');
+    Uint8List sendCommandBytes = Uint8List.fromList(HEX.decode(sendCommand));
+
+    // var sendByte =
+    '02 00 35 36 30 30 30 30 30 30 30 30 30 31 30 32 30 30 30 30 1C 34 30 00 12 30 30 30 30 30 30 30 30 31 30 30 30 1C 03 14';
+    // Uint8List bytesToWrite = Uint8List.fromList(HEX.decode(sendByte));
+
+    // if (kDebugMode) print('WORKING SEND BYTES : $bytesToWrite');
+    if (kDebugMode) print('NEW SEND BYTES : $sendCommandBytes');
+    port.write(sendCommandBytes); //pagsusulat
     int readBuffer = 1;
+    port.drain();
 
-    while (port.isOpen) {
-      Uint8List bytesRead = port.read(readBuffer, timeout: 30);
-      if (bytesRead.isNotEmpty) {
+    while (port.isOpen && serialReadList.isNotEmpty) {
+      Uint8List bytesRead = port.read(readBuffer, timeout: 0);
+      // if (kDebugMode) print('BYTES AVAILABLE FOR READING ${port.bytesAvailable} ');
+      // if (kDebugMode) print('SERIAL PORT SIGNAL : ${port.signals}');
+
+      if (bytesRead.isNotEmpty && serialReadList.isNotEmpty) {
         serialReadList.add(bytesRead.first);
-        var totalLength = serialReadList.length;
-        if (totalLength >= 165) {
-          if (kDebugMode) print('Closing port ${port.name}');
-          port.close();
-        }
+        // var totalLength = serialReadList.length;
+        // if (totalLength >= 165) {
+        //   if (kDebugMode) print('Closing port ${port.name}');
+        //   port.close();
+        // }
+      } else {
+        port.flush();
+        port.close();
       }
     }
 
     // serialReadList.addAll(HEX.decode(data));
     // serialReadList.addAll(byteArray);
 
-    if (kDebugMode) print(serialReadList);
+    if (kDebugMode) print('READ DATA: $serialReadList');
     // if (kDebugMode) print(String.fromCharCodes(serialReadList));
     if (serialReadList.first == 6) {
       serialReadList = serialReadList.sublist(1);
@@ -266,17 +323,21 @@ class ScreenController extends GetxController with BaseController {
         String sLLLL = sLL1 + sLL2;
 
         // 2nd read verification
-        int sLLLData = int.parse(sLLLL);
+        // int sLLLData = int.parse(sLLLL);
         List<int> sllllDatalist = serialReadList.sublist(1, 3);
 
         if (kDebugMode) print('LLLL: $sLL1$sLL2 ');
 
+        // 3RD READ SIMULATION
         var offset = 3;
         var messageDataLengthWithOffset = offset + int.parse(sLLLL);
-        var messageDataList = serialReadList.sublist(3, messageDataLengthWithOffset);
+
+        var messageDataList = serialReadList.sublist(offset, messageDataLengthWithOffset);
+
         // if (kDebugMode) print('MESSAGE DATA LIST : $messageDataList');
-        var sETX = serialReadList[3 + sLLLData].toRadixString(16);
-        var sLRC = serialReadList[3 + sLLLData + 1].toRadixString(16);
+        var sETX = serialReadList[offset + int.parse(sLLLL)].toRadixString(16);
+        var sLRC = serialReadList[offset + int.parse(sLLLL) + 1].toRadixString(16);
+
         if (kDebugMode) print('ETX: $sETX');
         if (kDebugMode) print('LRC: $sLRC');
 
