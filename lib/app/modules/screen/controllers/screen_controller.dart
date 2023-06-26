@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:iotelkiosk/globals/constant/bdotransaction_constant.dart';
-import 'package:serial_port_win32/serial_port_win32.dart' as winsp;
+// import 'package:serial_port_win32/serial_port_win32.dart' as winsp;
 import 'package:get/get.dart';
 import 'package:hex/hex.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
@@ -27,9 +27,11 @@ import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
+import 'package:iotelkiosk/globals/constant/led_constant.dart';
 import 'package:iotelkiosk/globals/services/base/base_storage.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 import 'package:translator/translator.dart';
+import 'package:windows_devices/windows_devices.dart';
 
 class ScreenController extends GetxController with BaseController {
   // VARIABLE DECLARTION WITH OBSERVABLE CAPABILITY;
@@ -37,6 +39,8 @@ class ScreenController extends GetxController with BaseController {
   // BOOLEAN
   final isLoading = false.obs;
   final isBottom = false.obs;
+  final isECREmpty = true.obs;
+  final isBankNoteReadyToReceive = false.obs;
 
   // STRING
   final imgUrl = ''.obs;
@@ -92,7 +96,6 @@ class ScreenController extends GetxController with BaseController {
   final scrollController = ScrollController();
 
   // LISTENING
-
   final player = Player(
     id: 0,
   );
@@ -107,15 +110,14 @@ class ScreenController extends GetxController with BaseController {
 
     hostname.value = Platform.localHostname;
 
-    // getPorts();
-    getBDOOpen(
-        transactionCode: BDOTransaction.sSale,
-        pricePerRoom: '1',
-        messageResponseIndicator: BDOMessageData.sRequestRespondeIndicator0);
+    // getBDOOpen(
+    //     transactionCode: BDOTransaction.sSale,
+    //     pricePerRoom: '2',
+    //     messageResponseIndicator: BDOMessageData.sRequestRespondeIndicator0);
     // getMoneydispenser();
     // cardDispenser();
     // openLED();
-    // openLEDLibserial(ledLocationAndStatus: LedOperation.bottomRIGHTLEDOFF);
+    openLEDLibserial(ledLocationAndStatus: LedOperation.bottomCENTERLEDON);
 
     mediaOpen();
 
@@ -148,6 +150,7 @@ class ScreenController extends GetxController with BaseController {
     //     accommodationTYPEID: selectedAccommodationType.value);
 
     // await getTerms(credentialHeaders: headers, languageID: selecttedLanguageID.value);
+    // monitorInfo();
   }
 
   @override
@@ -168,44 +171,6 @@ class ScreenController extends GetxController with BaseController {
     scrollController.dispose();
     // port.close();
   }
-
-  //=================================================================================================
-  // void getPorts() {
-  //   final List<PortInfo> portInfoList = SerialPort.getPortsWithFullMessages();
-  //   ports = SerialPort.getAvailablePorts();
-  //   String data = '';
-  //   const buffer =
-  //       '06, 02,03,88,36,30,30,30,30,30,30,30,30,30,31,31,32,30,30,30,30,1C,30,32,00,40,41,50,50,52,4F,56,45,44,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,1C,30,31,00,06,32,30,31,31,34,39,1C,36,35,00,06,30,30,30,30,30,31,1C,44,30,00,69,4D,4F,56,45,35,30,30,30,20,50,52,4F,44,55,43,54,49,4F,4E,20,54,45,53,42,44,4F,20,50,4F,53,20,4C,41,42,20,20,20,20,20,20,20,20,20,20,20,20,4D,41,4E,44,41,4C,55,59,4F,4E,47,20,43,49,54,59,20,20,20,20,20,20,20,1C,31,36,00,08,56,33,33,39,39,30,30,31,1C,44,31,00,15,30,30,30,30,30,39,31,38,33,36,39,30,32,32,31,1C,44,32,00,10,56,49,53,41,20,20,20,20,20,20,1C,33,30,00,16,34,31,38,33,35,39,30,30,30,30,30,30,39,31,30,35,1C,33,31,00,04,2A,2A,2A,2A,1C,35,30,00,06,30,30,30,38,30,30,1C,30,33,00,06,32,33,30,34,30,34,1C,30,34,00,06,31,34,30,32,35,31,1C,44,33,00,12,33,30,39,34,32,31,37,37,31,36,30,32,1C,44,34,00,02,30,31,1C,44,35,00,26,53,59,53,54,45,53,43,41,52,44,20,35,2F,50,53,20,20,20,20,20,20,20,20,20,20,20,1C,45,46,00,16,41,30,30,30,30,30,30,30,30,33,31,30,31,30,20,20,1C,45,47,00,16,56,69,73,61,20,43,72,65,64,69,74,20,20,20,20,20,1C,45,48,00,16,46,37,30,45,32,35,37,44,32,38,35,31,31,30,45,44,1C,03,A4';
-  //   var sendCommand =
-  //       '02 00 35 36 30 30 30 30 30 30 30 30 30 31 30 32 30 30 30 30 1C 34 30 00 12 30 30 30 30 30 30 30 30 31 30 30 30 1C 03 14';
-  //   var sendByte = '02003536303030303030303030313032303030301C343000123030303030303030313030301C0314';
-  //   sendCommand = sendCommand.replaceAll(' ', '');
-  //   Uint8List bytes = Uint8List.fromList(HEX.decode(sendByte));
-  //   if (kDebugMode) {
-  //     print(portInfoList);
-  //     print(ports);
-  //   }
-  //   if (ports.isNotEmpty) {
-  //     port = SerialPort(ports[0], openNow: false, ReadIntervalTimeout: 1, ReadTotalTimeoutConstant: 2);
-  //     port.openWithSettings(BaudRate: 9600, Parity: 0);
-  //     // port.open();
-  //     if (kDebugMode) print('Port Open: ${port.isOpened}');
-  //     port.writeBytesFromUint8List(bytes);
-  //     while (port.isOpened) {
-  //       // port.readBytesOnListen(8, (value) {
-  //       //   data = String.fromCharCodes(value);
-  //       //   if (kDebugMode) print(DateTime.now());
-  //       //   if (kDebugMode) print(data);
-  //       //   port.close();
-  //       // });
-  //       port.readBytesOnListen(1, (value) {
-  //         print(value);
-  //         port.close();
-  //       });
-  //     }
-  //     // port.close();
-  //   }
-  // }
 
   void getBDOOpen(
       {required String transactionCode, required String pricePerRoom, required String messageResponseIndicator}) {
@@ -287,185 +252,386 @@ class ScreenController extends GetxController with BaseController {
     if (kDebugMode) print('NEW SEND BYTES : $sendCommandBytes');
     port.write(sendCommandBytes); //pagsusulat
     int readBuffer = 1;
-    port.drain();
+    // port.drain();
 
-    while (port.isOpen && serialReadList.isNotEmpty) {
-      Uint8List bytesRead = port.read(readBuffer, timeout: 0);
-      // if (kDebugMode) print('BYTES AVAILABLE FOR READING ${port.bytesAvailable} ');
-      // if (kDebugMode) print('SERIAL PORT SIGNAL : ${port.signals}');
+    Uint8List bytesRead = Uint8List(0);
 
-      if (bytesRead.isNotEmpty && serialReadList.isNotEmpty) {
+    bytesRead = port.read(readBuffer, timeout: 0);
+    if (bytesRead.first == 6) {
+      isECREmpty.value = true;
+    }
+    while (isECREmpty.value) {
+      // Uint8List bytesRead = port.read(readBuffer, timeout: 0);
+      bytesRead = port.read(readBuffer, timeout: 0);
+
+      if (bytesRead.isNotEmpty) {
         serialReadList.add(bytesRead.first);
-        // var totalLength = serialReadList.length;
-        // if (totalLength >= 165) {
-        //   if (kDebugMode) print('Closing port ${port.name}');
-        //   port.close();
-        // }
+        if (kDebugMode) print('BYTES AVAILABLE FOR READING ${port.bytesAvailable} ');
+        if (port.bytesAvailable <= 0) isECREmpty.value = false;
       } else {
-        port.flush();
-        port.close();
+        isECREmpty.value = false;
       }
     }
-
-    // serialReadList.addAll(HEX.decode(data));
-    // serialReadList.addAll(byteArray);
+    port.close();
 
     if (kDebugMode) print('READ DATA: $serialReadList');
     // if (kDebugMode) print(String.fromCharCodes(serialReadList));
-    if (serialReadList.first == 6) {
-      serialReadList = serialReadList.sublist(1);
-      if (serialReadList.first == 2) {
-        // FIRST READ
-        if (kDebugMode) print('STX: ${serialReadList.first.toRadixString(16)}');
-        // 2ND READ
-        String sLL1 = serialReadList[1].toRadixString(16);
-        String sLL2 = serialReadList[2].toRadixString(16);
-        String sLLLL = sLL1 + sLL2;
+    // if (serialReadList.first == 6) {
+    //   serialReadList = serialReadList.sublist(1);
+    if (serialReadList.first == 2) {
+      // FIRST READ
+      if (kDebugMode) print('STX: ${serialReadList.first.toRadixString(16)}');
+      // 2ND READ
+      String sLL1 = serialReadList[1].toRadixString(16);
+      String sLL2 = serialReadList[2].toRadixString(16);
+      String sLLLL = sLL1 + sLL2;
 
-        // 2nd read verification
-        // int sLLLData = int.parse(sLLLL);
-        List<int> sllllDatalist = serialReadList.sublist(1, 3);
+      // 2nd read verification
+      // int sLLLData = int.parse(sLLLL);
+      List<int> sllllDatalist = serialReadList.sublist(1, 3);
 
-        if (kDebugMode) print('LLLL: $sLL1$sLL2 ');
+      if (kDebugMode) print('LLLL: $sLL1$sLL2 ');
 
-        // 3RD READ SIMULATION
-        var offset = 3;
-        var messageDataLengthWithOffset = offset + int.parse(sLLLL);
+      // 3RD READ SIMULATION
+      var offset = 3;
+      var messageDataLengthWithOffset = offset + int.parse(sLLLL);
 
-        var messageDataList = serialReadList.sublist(offset, messageDataLengthWithOffset);
+      var messageDataList = serialReadList.sublist(offset, messageDataLengthWithOffset);
 
-        // if (kDebugMode) print('MESSAGE DATA LIST : $messageDataList');
-        var sETX = serialReadList[offset + int.parse(sLLLL)].toRadixString(16);
-        var sLRC = serialReadList[offset + int.parse(sLLLL) + 1].toRadixString(16);
+      // if (kDebugMode) print('MESSAGE DATA LIST : $messageDataList');
+      var sETX = serialReadList[offset + int.parse(sLLLL)].toRadixString(16);
+      var sLRC = serialReadList[offset + int.parse(sLLLL) + 1].toRadixString(16);
 
-        if (kDebugMode) print('ETX: $sETX');
-        if (kDebugMode) print('LRC: $sLRC');
+      if (kDebugMode) print('ETX: $sETX');
+      if (kDebugMode) print('LRC: $sLRC');
 
-        var etxList = serialReadList.sublist(messageDataLengthWithOffset, messageDataLengthWithOffset + 1);
-        var lrcList = serialReadList.sublist(messageDataLengthWithOffset + 1, messageDataLengthWithOffset + 2);
-        if (kDebugMode) print('ETX LIST: $etxList');
-        if (kDebugMode) print('LRC LIST: $lrcList');
+      var etxList = serialReadList.sublist(messageDataLengthWithOffset, messageDataLengthWithOffset + 1);
+      var lrcList = serialReadList.sublist(messageDataLengthWithOffset + 1, messageDataLengthWithOffset + 2);
+      if (kDebugMode) print('ETX LIST: $etxList');
+      if (kDebugMode) print('LRC LIST: $lrcList');
 
-        if (sETX == '3') {
-          var lrc = 0;
+      if (sETX == '3') {
+        var lrc = 0;
 
-          var lrcCheck = sllllDatalist + messageDataList + etxList;
-          if (kDebugMode) print('LRC TOTAL: ${lrcCheck.length}}');
+        var lrcCheck = sllllDatalist + messageDataList + etxList;
+        if (kDebugMode) print('LRC TOTAL: ${lrcCheck.length}}');
 
-          for (int mainCtr in lrcCheck) {
-            lrc ^= mainCtr;
-            var responseCode = '';
+        for (int mainCtr in lrcCheck) {
+          lrc ^= mainCtr;
+          var responseCode = '';
 
-            var lrcReceived = int.parse(lrc.toRadixString(16), radix: 16);
+          var lrcReceived = int.parse(lrc.toRadixString(16), radix: 16);
 
-            if (lrcReceived == lrc) {
-              if (kDebugMode) print('LRC CORRECT');
-              // var transportHeader = messageDataList.sublist(0, 10);
-              var presentationHeader = messageDataList.sublist(10, 18);
-              var presentationHeaderList = presentationHeader.sublist(4, 6);
+          if (lrcReceived == lrc) {
+            if (kDebugMode) print('LRC CORRECT');
+            // var transportHeader = messageDataList.sublist(0, 10);
+            var presentationHeader = messageDataList.sublist(10, 18);
+            var presentationHeaderList = presentationHeader.sublist(4, 6);
 
-              for (var x in presentationHeaderList) {
-                x++;
-                if (kDebugMode) print(x);
+            for (var x in presentationHeaderList) {
+              x++;
+              if (kDebugMode) print(x);
 
-                responseCode += ascii.decode(presentationHeaderList);
+              responseCode += ascii.decode(presentationHeaderList);
 
-                // if (responseCode == "NANA") break;
-                var res = responseCodeList.where((element) => element == responseCode);
-                if (res.isNotEmpty) {
-                  break;
-                }
+              // if (responseCode == "NANA") break;
+              var res = responseCodeList.where((element) => element == responseCode);
+              if (res.isNotEmpty) {
+                break;
+              }
 
-                if (kDebugMode) print('RESPONSE CODE: $responseCode');
-                var fields = HEX.encode(messageDataList.sublist(18, messageDataList.length - 1));
+              if (kDebugMode) print('RESPONSE CODE: $responseCode');
+              var fields = HEX.encode(messageDataList.sublist(18, messageDataList.length - 1));
 
-                var messageDataFields = fields.split('1c');
-                // List<int> msgDataFields = messageDataFields.map((e) => int.parse(e)).toList();
+              var messageDataFields = fields.split('1c');
+              // List<int> msgDataFields = messageDataFields.map((e) => int.parse(e)).toList();
 
-                for (var ctr = 0; ctr < messageDataFields.length; ctr++) {
-                  Uint8List fn = Uint8List.fromList(HEX.decode(messageDataFields[ctr]));
-                  // Uint8List fv = Uint8List.fromList(HEX.decode(messageDataFields[ctr]));
-                  String fieldName = String.fromCharCodes(fn);
-                  // String fieldValue = String.fromCharCodes(fn);
+              for (var ctr = 0; ctr < messageDataFields.length; ctr++) {
+                Uint8List fn = Uint8List.fromList(HEX.decode(messageDataFields[ctr]));
+                // Uint8List fv = Uint8List.fromList(HEX.decode(messageDataFields[ctr]));
+                String fieldName = String.fromCharCodes(fn);
+                // String fieldValue = String.fromCharCodes(fn);
 
-                  if (kDebugMode) {
-                    print(
-                        "DATA $ctr : ${fieldName.substring(0, 2).trim()} : ${fieldName.replaceRange(0, 4, '').replaceAll('       ', ' ')}");
-                  }
+                if (kDebugMode) {
+                  print(
+                      "DATA $ctr : ${fieldName.substring(0, 2).trim()} : ${fieldName.replaceRange(0, 4, '').replaceAll('       ', ' ')}");
                 }
               }
-              if (kDebugMode) print('LRC: $lrc : MAIN CTR: $mainCtr');
-            } else {
-              if (kDebugMode) print('LRC ERROR');
             }
-            // if (responseCode == "NANA") break;
-            var res = responseCodeList.where((element) => element == responseCode);
-            if (res.isNotEmpty) {
-              break;
-            }
+            if (kDebugMode) print('LRC: $lrc : MAIN CTR: $mainCtr');
+          } else {
+            if (kDebugMode) print('LRC ERROR');
           }
-        } else {
-          if (kDebugMode) print('STX UNREAD');
+          // if (responseCode == "NANA") break;
+          var res = responseCodeList.where((element) => element == responseCode);
+          if (res.isNotEmpty) {
+            break;
+          }
+        }
+      } else {
+        if (kDebugMode) print('Start Transaction code not received');
+      }
+    }
+    // } else {
+    //   if (kDebugMode) print('Acknowledged code not received');
+    // }
+  }
+
+  // **********************************************************************
+  // DESCRIPTION: BANK NOTE AREA THIS WILL BE TRANSFER TO HOME CONTROLLER LATER
+  // AUTHOR: Henry V. Mempin
+  // DATE: 9 JUNE 2023
+  // BEGIN FUNCTION
+  // **********************************************************************
+
+  List<int> calculateCRC(List<int> bytes) {
+    const int seed = 0xFFFF;
+    const int polynomial = 0x8005;
+    const int stx = 0x7F;
+
+    int crc = seed;
+
+    for (int byte in bytes) {
+      if (byte != stx) {
+        // Exclude STX byte
+        crc ^= (byte << 8);
+
+        for (int bit = 0; bit < 8; bit++) {
+          if ((crc & 0x8000) != 0) {
+            crc = (crc << 1) ^ polynomial;
+          } else {
+            crc <<= 1;
+          }
         }
       }
-    } else {
-      if (kDebugMode) print('Acknowledged code not received');
     }
+
+    int lowByte = crc & 0xFF;
+    int highByte = (crc >> 8) & 0xFF;
+
+    return [lowByte, highByte];
+  }
+
+  int createPacket(int sequenceFlag, int slaveAddress) {
+    // Check if sequenceFlag is a valid value (0 or 1)
+    if (sequenceFlag != 0 && sequenceFlag != 1) {
+      throw ArgumentError('Invalid sequenceFlag value. Must be 0 or 1.');
+    }
+
+    // Check if slaveAddress is within the allowable range (0x00 to 0x7D)
+    if (slaveAddress < 0x00 || slaveAddress > 0x7D) {
+      // if (slaveAddress < 0 || slaveAddress > 125) {
+      throw ArgumentError('Invalid slaveAddress value. Must be between 0x00 and 0x7D.');
+    }
+
+    // Combine sequenceFlag and slaveAddress using bitwise operations
+    int packet = (sequenceFlag << 7) | slaveAddress;
+
+    return packet;
   }
 
   void getMoneydispenser() {
-    // final serialPort = SerialPort.availablePorts;
+    final serialPort = SerialPort.availablePorts;
     final portConfig = SerialPortConfig();
-    final port = SerialPort("COM1");
+    final port = SerialPort(serialPort.first);
 
     portConfig.baudRate = 9600;
-    portConfig.parity = SerialPortParity.none;
-    portConfig.bits = 8;
-    portConfig.stopBits = 2;
+    // portConfig.parity = SerialPortParity.none;
 
+    // portConfig.bits = 8;
+    // portConfig.stopBits = 2;
+    if (port.isOpen) port.close();
+    // port.drain();
+
+    // var packetHEX = createPacket(0, 0).toRadixString(16);
+
+    var seqID = createPacket(0, 0);
+    if (kDebugMode) print('SEQ/ID: $seqID');
+    var sSTX = '7F';
+    // var sSLAVEID = '00'; // 80 SEND THÉ COMMAND, 00 ACK TO DEVICE
+    var sSLAVEID = HEX.encode([seqID]);
+    // var sCommand = '606745230167452301';
+    var sCommand = '11';
+    var sCommandParam = '';
+    var sCombinedComm = sCommandParam.isEmpty ? sCommand : sCommand + sCommandParam;
+
+    var sLEN = (sCombinedComm.length / 2).ceil();
+
+    // var sLENGTH = '';
+    // sLEN >= 10 ? sLENGTH = sLEN.toString() : sLENGTH = '0$sLEN';
+    var sLENGTH = sLEN.toString().padLeft(2, '0');
+
+    var sTransaction = '$sSTX$sSLAVEID$sLENGTH$sCombinedComm';
+    var crcData = HEX.decode(sTransaction);
+    // var crcDataHEX = crcData.map((h) => h.toRadixString(16));
+    // CHECK THE CRC
+    // var crcCheck = calculateCRC(crcData).map((e) => e.toRadixString(16));
+    // var crcL = crcCheck.first.padLeft(2, '0');
+    // var crcH = crcCheck.last.padLeft(2, '0');
+    // ADD THE EXISTING COMMAND AND INCLUDE THE CRC
+    // var crcHEX = '$sTransaction$crcL$crcH'.toUpperCase();
     if (!port.openReadWrite()) {
-      if (kDebugMode) print(SerialPort.lastError);
-      exit(-1);
+      // if (kDebugMode) print(SerialPort.lastError);
+      if (kDebugMode) print('The port ${serialPort.first} is opened by other');
+      // exit(-
     }
+    if (kDebugMode) print(port.isOpen ? "Port is open" : "Port is closed");
 
-    var stx = '7F';
-    var bezel = '1101';
+    // OTHER METHOD OF COMBINING COMMAND AND CRC
+    var crc = calculateCRC(crcData);
+    var commandBytes = [crcData, crc].expand((element) => element).toList(); //COMBINED THE DATA + CRC
+    var hexvalue = HEX.encode(commandBytes).toUpperCase();
 
-    Uint8List bytesInitialize = Uint8List.fromList(HEX.decode(bezel));
-    Uint8List stxInit = Uint8List.fromList(HEX.decode(stx));
+    if (kDebugMode) print('SEND: $hexvalue');
+    // port.write(Uint8List.fromList(HEX.decode(crcHEX)), timeout: 0);
+    port.write(Uint8List.fromList(commandBytes), timeout: 0);
+    int readBuffer = 255;
 
-    port.write(stxInit);
-    port.write(bytesInitialize);
+    // TIMER
+    // Timer? reconnectionTimer;
+    // var interv = 3;
+    // var attempts = 5;
+    // reconnectionTimer = Timer.periodic(Duration(seconds: interv), (Timer timer) {
+    //   reconnectionTimer!.cancel();
+    // });
 
-    if (kDebugMode) print('${port.name} is open');
+    // for (int i = 0; i < attempts; i++) {
+    Uint8List bytesRead = Uint8List(0);
 
-    int readBuffer = 512;
-    // var asciiList = [];
+    bytesRead = port.read(readBuffer, timeout: 10);
+    if (bytesRead.isNotEmpty) {
+      var hexValue = HEX.encode(bytesRead).toUpperCase();
+      var response = bytesRead.sublist(3, bytesRead.length);
+      if (kDebugMode) print('HEX READ: $hexValue');
+      if (kDebugMode) print('BYTES READ: $bytesRead');
+      if (kDebugMode) print('RESPONSE CODE: ${response.first} -> ${genericResponse(response.first)}');
+      if (kDebugMode) print(String.fromCharCodes(bytesRead));
+      isBankNoteReadyToReceive.value = true;
+      if (port.bytesAvailable <= 0) isBankNoteReadyToReceive.value = false;
+    }
+    //   reconnectionTimer!.cancel();
+    //   reconnectionTimer = Timer.periodic(Duration(seconds: interv), (Timer timer) {
+    //     reconnectionTimer!.cancel();
+    //   });
+    // }
+    port.close();
+    if (kDebugMode) print(port.isOpen ? "Port is open" : "Port is closed");
+  }
 
-    while (port.isOpen) {
-      Uint8List bytesRead = port.read(readBuffer, timeout: 60);
+  String genericResponse(int responseCode) {
+    switch (responseCode) {
+      case 240:
+        {
+          return "OK, SUCCESS";
+        }
+      case 241:
+        {
+          return "SLAVE RESET";
+        }
+      case 242:
+        {
+          return "COMMAND NOT KNOWN";
+        }
+      case 243:
+        {
+          return "WRONG OR NO PARAMETERS";
+        }
+      case 244:
+        {
+          return "PARAMETERS OUT OF RANGE";
+        }
+      case 245:
+        {
+          return "COMMAND CANNOT BE PROCESSED";
+        }
+      case 246:
+        {
+          return "SOFTWARE ERROR";
+        }
+      case 248:
+        {
+          return "FAIL";
+        }
+      case 250:
+        {
+          return "KEY NOT SET";
+        }
+      default:
+        {
+          return "INVALID BYTE";
+        }
+    }
+  }
 
-      // if (kDebugMode) {
-      //   print('BYTES READ: $bytesRead');
-      //   // for (var i = 0; i < bytesRead.length; i++) {
-      //   //   // print(String.fromCharCode(bytesRead[i]));
-      //   //   asciiList.add(String.fromCharCode(bytesRead[i]));
-      //   // }
-      //   var asciiTable = String.fromCharCodes(bytesRead);
-      //   print('ASCII: $asciiTable');
-      // }
-
+  bool sendBankNotedCommand(String hexCommand, SerialPort port) {
+    int readBuffer = 255;
+    if (port.isOpen) {
+      var bytesToWrite = Uint8List.fromList(HEX.decode(hexCommand));
+      port.write(bytesToWrite);
+      Uint8List bytesRead = Uint8List(0);
+      bytesRead = port.read(readBuffer, timeout: 5);
       if (bytesRead.isNotEmpty) {
-        if (kDebugMode) print('BYTES READ DECIMAL: $bytesRead');
-        if (kDebugMode) print('BYTES READ HEX: ${HEX.encode(bytesRead).toUpperCase()}');
-        var asciiTable = String.fromCharCodes(bytesRead);
-        if (kDebugMode) print('ASCII: $asciiTable');
+        var hexValue = HEX.encode(bytesRead).toUpperCase();
+        var response = bytesRead.sublist(3, bytesRead.length);
+        if (kDebugMode) print('HEX READ: $hexValue');
+        if (kDebugMode) print('BYTES READ: $bytesRead');
+        if (kDebugMode) print('RESPONSE CODE: ${response.first} -> ${genericResponse(response.first)}');
+        if (kDebugMode) print(String.fromCharCodes(bytesRead));
+        isBankNoteReadyToReceive.value = true;
+        return true;
+      } else {
+        return false;
       }
+    }
+    return false;
+  }
 
-      // if (bytesRead.isEmpty) {
-      //   port.close();
-      //   if (kDebugMode) print('Port is close');
-      // }
+  // THIS WILL BE TEMPORARY, IT WILL MOVE THE HC (Home Controller)
+  bool connectToBankNoteValidator(int attempts, int interval) {
+    // Timer reconnectionTimer = Timer(interval.seconds, () {});
+
+    return true;
+  }
+
+  // FINDMAXPROTOCOLVERSION
+
+  // **********************************************************************
+  // DESCRIPTION: BANK NOTE AREA THIS WILL BE TRANSFER TO HOME CONTROLLER LATER
+  // AUTHOR: Henry V. Mempin
+  // DATE: 9 JUNE 2023
+  // BEGIN FUNCTION
+  // **********************************************************************
+
+  void monitorInfo() async {
+    final deviceSelector = DisplayMonitor.getDeviceSelector();
+    final deviceInformationCollection = await DeviceInformation.findAllAsyncAqsFilter(deviceSelector);
+
+    for (final device in deviceInformationCollection.toList()) {
+      final monitor = await DisplayMonitor.fromInterfaceIdAsync(device.id);
+      if (monitor != null) {
+        printMonitorSpecs(monitor);
+      }
+    }
+  }
+
+  void printMonitorSpecs(DisplayMonitor displayMonitor) {
+    if (kDebugMode) {
+      // print(displayMonitor.deviceId);
+      // print('DISPLAY ADAPTER ID: ${displayMonitor.displayAdapterDeviceId}');
+
+      print('DISPLAY NAME: ${displayMonitor.displayName}');
+      print('Monitor size: '
+          '${displayMonitor.physicalSizeInInches?.width.toStringAsFixed(1)}in x '
+          '${displayMonitor.physicalSizeInInches?.height.toStringAsFixed(1)}in');
+      print('Monitor connection kind: ${displayMonitor.connectionKind.name}');
+      print('Monitor physical connection: ${displayMonitor.physicalConnector.name}');
+      print('Monitor usage kind: ${displayMonitor.usageKind.name}');
+      print('Monitor DPI: ${displayMonitor.rawDpiX.ceil()} (X) / '
+          '${displayMonitor.rawDpiY.ceil()} (Y)');
+      print(
+          'NATIVE RESOLUTION: ${displayMonitor.nativeResolutionInRawPixels.width}px X ${displayMonitor.nativeResolutionInRawPixels.height}px');
+      print('Monitor luminance range: ${displayMonitor.minLuminanceInNits} '
+          '- ${displayMonitor.maxLuminanceInNits} nits');
     }
   }
 
@@ -509,25 +675,25 @@ class ScreenController extends GetxController with BaseController {
     }
   }
 
-  void openLED() {
-    final serialPort = winsp.SerialPort.getAvailablePorts();
-    final port = winsp.SerialPort(serialPort.first, BaudRate: 9600);
+  // void openLED() {
+  //   final serialPort = winsp.SerialPort.getAvailablePorts();
+  //   final port = winsp.SerialPort(serialPort.first, BaudRate: 9600);
 
-    if (port.isOpened) {
-      port.close();
-    } else {
-      if (kDebugMode) print('Connected to: ${port.portName}');
-    }
+  //   if (port.isOpened) {
+  //     port.close();
+  //   } else {
+  //     if (kDebugMode) print('Connected to: ${port.portName}');
+  //   }
 
-    port.open();
+  //   port.open();
 
-    var sendCom = 'O(00,01,0)E';
-    port.writeBytesFromString(sendCom);
-    if (port.isOpened) {
-      port.close();
-      // exit(-1);
-    }
-  }
+  //   var sendCom = 'O(00,01,0)E';
+  //   port.writeBytesFromString(sendCom);
+  //   if (port.isOpened) {
+  //     port.close();
+  //     // exit(-1);
+  //   }
+  // }
 
   void openLEDLibserial({String ledLocationAndStatus = ''}) {
     // final serialPort = SerialPort.availablePorts;
@@ -543,10 +709,8 @@ class ScreenController extends GetxController with BaseController {
     }
 
     port.openWrite();
-
     // Encode the string using a specific encoding (e.g., ASCII)
     List<int> encodedBytes = ascii.encode(ledLocationAndStatus);
-
     // Create a Uint8List from the encoded bytes
     Uint8List uint8List = Uint8List.fromList(encodedBytes);
 

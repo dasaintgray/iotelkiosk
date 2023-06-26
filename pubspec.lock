@@ -471,10 +471,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_windows
-      sha256: d3f80b32e83ec208ac95253e0cd4d298e104fbc63cb29c5c69edaed43b0c69d6
+      sha256: "1cb68ba4cd3a795033de62ba1b7b4564dace301f952de6bfb3cd91b202b6ee96"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.6"
+    version: "2.1.7"
   petitparser:
     dependency: transitive
     description:
@@ -523,14 +523,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.6"
-  serial_port_win32:
-    dependency: "direct main"
-    description:
-      name: serial_port_win32
-      sha256: "02132d520a2cfe8bf1915565939f0d68106c970620a9e386026c8f889659f1ab"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.0"
   sizer:
     dependency: "direct main"
     description:
@@ -707,10 +699,10 @@ packages:
     dependency: transitive
     description:
       name: win32
-      sha256: "5a751eddf9db89b3e5f9d50c20ab8612296e4e8db69009788d6c8b060a84191c"
+      sha256: "1414f27dd781737e51afa9711f2ac2ace6ab4498ee98e20863fa5505aa00c58c"
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.4"
+    version: "5.0.4"
   window_manager:
     dependency: "direct main"
     description:
@@ -719,6 +711,86 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.4"
+  windows_applicationmodel:
+    dependency: transitive
+    description:
+      name: windows_applicationmodel
+      sha256: "066d522cce2a7631658eba29dae855b60e9e443503a7ebeca92b50128080d309"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4+1"
+  windows_data:
+    dependency: transitive
+    description:
+      name: windows_data
+      sha256: fb692516aca4c12bb2d0139500a99a555b0994aea039d55f53ae9023835999ca
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1+2"
+  windows_devices:
+    dependency: "direct main"
+    description:
+      name: windows_devices
+      sha256: "39df5bb4ff60664afcc00cb681978d3d9568218fdf6016dd4fa5633700375f81"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2+2"
+  windows_foundation:
+    dependency: transitive
+    description:
+      name: windows_foundation
+      sha256: "898e1d3dfe834edae781a726e3952a33c8a94c03f87ac1a96a88727b121faf90"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.7+1"
+  windows_globalization:
+    dependency: transitive
+    description:
+      name: windows_globalization
+      sha256: fad9ba2034dee4b9a4335d31efa4c144dbeef77fd0ddb8c6bd71365da5d66ca6
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1+2"
+  windows_graphics:
+    dependency: "direct main"
+    description:
+      name: windows_graphics
+      sha256: "2305169076e12a6c4be25f818ae613baa7902259f8a72bcfeaf05ae21f81fb69"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4+1"
+  windows_media:
+    dependency: transitive
+    description:
+      name: windows_media
+      sha256: "52786b61e0effe9a2841c74f3c26891f8da440183a19812ec5e6ebda353ad08c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3+1"
+  windows_storage:
+    dependency: transitive
+    description:
+      name: windows_storage
+      sha256: c3985204d91d7ed136fc396ebe11d0b738f58ced3def101b75c211fb63959324
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2+1"
+  windows_system:
+    dependency: transitive
+    description:
+      name: windows_system
+      sha256: d269817f422fee789a1a9d02e696c10e0779f01069d0ba6aa493f303092c2ba6
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4+1"
+  windows_ui:
+    dependency: transitive
+    description:
+      name: windows_ui
+      sha256: "70cc98148d1a907cf575ac568afb85550edc6125d22768f74e4a0bc8e47a4e92"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3+1"
   xdg_directories:
     dependency: transitive
     description:

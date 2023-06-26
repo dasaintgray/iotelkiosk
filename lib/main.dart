@@ -31,6 +31,7 @@ void main() async {
     windowOptions,
     () async {
       await windowManager.setFullScreen(true);
+      await windowManager.setAlignment(Alignment.center);
       await windowManager.show();
       await windowManager.focus();
     },
