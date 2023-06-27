@@ -1,7 +1,7 @@
 import 'package:iotelkiosk/globals/helper/dialog_helper.dart';
 import 'package:iotelkiosk/globals/services/exceptions/base_client_exception.dart';
 
-class BaseController {
+mixin class BaseController {
   void handleError(error) {
     hideLoading();
     if (error is BadRequestException) {

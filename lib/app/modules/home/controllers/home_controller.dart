@@ -133,39 +133,6 @@ class HomeController extends GetxController with BaseController {
     });
   }
 
-  // SERIAL PORT TEST
-  Future openSerialPort() async {
-    // final portName = SerialPort.availablePorts.first;
-    // SerialPort serialPort = SerialPort(portName);
-    // var response = await serialPort.open(mode: SerialPortMode.readWrite);
-
-    // final port = SerialPort(portName);
-    // port.config.baudRate = 9600;
-
-    // var result = port.openReadWrite();
-    // if (result) {
-    //   try {
-    //     port.write(stringToUint8List('0XC0'));
-
-    //     final portReader = SerialPortReader(port);
-    //     Stream<String> dataRead = portReader.stream.map(
-    //       (event) {
-    //         return String.fromCharCodes(event);
-    //       },
-    //     );
-
-    //     dataRead.listen(
-    //       (event) {
-    //         print('read data: $event');
-    //       },
-    //     );
-    //   } on SerialPortError catch (err, _) {
-    //     print(SerialPort.lastError);
-    //     port.close();
-    //   }
-    // }
-  }
-
   Uint8List stringToUint8List(String data) {
     List<int> codeUnits = data.codeUnits;
     Uint8List uint8list = Uint8List.fromList(codeUnits);

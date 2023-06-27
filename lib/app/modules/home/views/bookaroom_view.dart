@@ -4,7 +4,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
-import 'package:iotelkiosk/app/modules/home/views/accommodation_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
@@ -12,12 +11,10 @@ import 'package:iotelkiosk/globals/widgets/carousel_title_widget.dart';
 import 'package:iotelkiosk/globals/widgets/weather_clock_widget.dart';
 import 'package:sizer/sizer.dart';
 
-class RoomTypeView extends GetView {
-  RoomTypeView({Key? key}) : super(key: key);
-
+class BookaroomView extends GetView {
+  BookaroomView({Key? key}) : super(key: key);
   final hc = Get.find<HomeController>();
   final sc = Get.find<ScreenController>();
-
   @override
   Widget build(BuildContext context) {
     return Sizer(builder: (BuildContext context, orientation, deviceType) {
@@ -89,7 +86,8 @@ class RoomTypeView extends GetView {
                         textStyle: TextStyle(color: HenryColors.darkGreen, fontSize: 15.sp),
                       ),
                     ),
-                    menuRoomType(orientation, languageID: sc.selecttedLanguageID.value),
+                    // menuRoomType(orientation, languageID: sc.selecttedLanguageID.value),
+                    menuBookARoom(orientation, languageID: sc.selecttedLanguageID.value),
                     SizedBox(
                       height: orientation == Orientation.portrait ? 10.h : 2.h,
                       child: Row(
@@ -125,9 +123,8 @@ class RoomTypeView extends GetView {
     });
   }
 
-  Widget menuRoomType(Orientation orientation, {int? languageID, String? code, String? type}) {
+  menuBookARoom(Orientation orientation, {int? languageID, String? code, String? type}) {
     final langCode = sc.languageList.first.data.languages.where((element) => element.id == languageID);
-    // bool isTranslate = langCode.first.code.toLowerCase() != sc.defaultLanguageCode.value.toLowerCase();
 
     return SizedBox(
       height: orientation == Orientation.portrait ? 45.h : 20.h,
@@ -178,14 +175,13 @@ class RoomTypeView extends GetView {
                   right: 8.w,
                   child: GestureDetector(
                     onTap: () async {
-                      sc.isLoading.value = true;
                       sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
                       sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
                       var response = await sc.getAccommodation(
                           credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
                       if (response) {
                         if (kDebugMode) print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
-                        Get.to(() => AccommodationView());
+                        // Get.to(() => AccommodationView());
                       }
                     },
                     child: SizedBox(

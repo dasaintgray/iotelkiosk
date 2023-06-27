@@ -1,19 +1,15 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
-import 'package:iotelkiosk/app/modules/home/views/accommodation_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
-import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/carousel_title_widget.dart';
 import 'package:iotelkiosk/globals/widgets/weather_clock_widget.dart';
 import 'package:sizer/sizer.dart';
 
-class RoomTypeView extends GetView {
-  RoomTypeView({Key? key}) : super(key: key);
+class UnderdevView extends GetView {
+  UnderdevView({Key? key}) : super(key: key);
 
   final hc = Get.find<HomeController>();
   final sc = Get.find<ScreenController>();
@@ -89,7 +85,7 @@ class RoomTypeView extends GetView {
                         textStyle: TextStyle(color: HenryColors.darkGreen, fontSize: 15.sp),
                       ),
                     ),
-                    menuRoomType(orientation, languageID: sc.selecttedLanguageID.value),
+                    // menuRoomType(orientation, languageID: sc.selecttedLanguageID.value),
                     SizedBox(
                       height: orientation == Orientation.portrait ? 10.h : 2.h,
                       child: Row(
@@ -123,87 +119,5 @@ class RoomTypeView extends GetView {
         ),
       );
     });
-  }
-
-  Widget menuRoomType(Orientation orientation, {int? languageID, String? code, String? type}) {
-    final langCode = sc.languageList.first.data.languages.where((element) => element.id == languageID);
-    // bool isTranslate = langCode.first.code.toLowerCase() != sc.defaultLanguageCode.value.toLowerCase();
-
-    return SizedBox(
-      height: orientation == Orientation.portrait ? 45.h : 20.h,
-      width: 75.w,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(25.0),
-        itemCount: sc.roomTypeList.first.data.roomTypes.length,
-        itemBuilder: (BuildContext context, int index) {
-          var imageFilename = 'assets/menus/${sc.roomTypeList.first.data.roomTypes[index].code.toLowerCase()}.png';
-          return SizedBox(
-            height: 10.h,
-            child: Stack(
-              children: [
-                Positioned(
-                  left: 25.w,
-                  top: 35,
-                  right: 10.w,
-                  child: SizedBox(
-                    width: 10.w,
-                    child: sc.isLoading.value
-                        ? Center(
-                            child: Column(
-                              children: [
-                                const CircularProgressIndicator.adaptive(),
-                                Text(
-                                  'Loading, please wait..',
-                                  style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
-                                )
-                              ],
-                            ),
-                          )
-                        : Text(
-                            langCode.first.code.toLowerCase() == sc.defaultLanguageCode.value.toLowerCase()
-                                ? sc.roomTypeList.first.data.roomTypes[index].description.toUpperCase()
-                                : sc.roomTypeList.first.data.roomTypes[index].translatedText!,
-                            style: TextStyle(
-                              color: HenryColors.darkGreen,
-                              fontSize: 12.sp,
-                            ),
-                          )
-                            .animate()
-                            .fade(duration: HenryGlobal.animationSpeed)
-                            .scale(duration: HenryGlobal.animationSpeed),
-                  ),
-                ),
-                Positioned(
-                  left: 8.w,
-                  right: 8.w,
-                  child: GestureDetector(
-                    onTap: () async {
-                      sc.isLoading.value = true;
-                      sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
-                      sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
-                      var response = await sc.getAccommodation(
-                          credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
-                      if (response) {
-                        if (kDebugMode) print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
-                        Get.to(() => AccommodationView());
-                      }
-                    },
-                    child: SizedBox(
-                      height: 7.h,
-                      child: sc.roomTypeList.first.data.roomTypes.isEmpty
-                          ? null
-                          : Image.asset(imageFilename, fit: BoxFit.contain)
-                              .animate()
-                              .fade(duration: HenryGlobal.animationSpeed)
-                              .scale(duration: HenryGlobal.animationSpeed),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
   }
 }

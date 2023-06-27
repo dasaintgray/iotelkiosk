@@ -1,3 +1,4 @@
+import 'package:accessibility_tools/accessibility_tools.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_acrylic/flutter_acrylic.dart';
@@ -31,23 +32,19 @@ void main() async {
     windowOptions,
     () async {
       await windowManager.setFullScreen(true);
-      await windowManager.setAlignment(Alignment.center);
+      // await windowManager.setAlignment(Alignment.center);
       await windowManager.show();
       await windowManager.focus();
     },
   );
 
-  // aero mode
-  // if (Platform.isWindows) {
-  //   // await Window.setEffect(
-  //   //   effect: WindowEffect.acrylic,
-  //   //   color: const Color.fromARGB(255, 8, 59, 100).withOpacity(0.6),
-  //   // );
-  //   // await Window.initialize();
-  // }
-
   runApp(
     GetMaterialApp(
+      builder: (context, child) => AccessibilityTools(
+        checkFontOverflows: true,
+        checkSemanticLabels: false,
+        child: child,
+      ),
       title: "iOtel Kiosk Application",
       debugShowCheckedModeBanner: false,
       initialRoute: AppPages.INITIAL,

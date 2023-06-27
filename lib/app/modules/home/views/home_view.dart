@@ -238,12 +238,17 @@ class HomeView extends GetView<HomeController> {
                       sc.selecttedLanguageID.value = sc.languageList.first.data.languages[index].id;
                       sc.selectedLanguageCode.value = sc.languageList.first.data.languages[index].code;
 
-                      var response = sc.getMenu(languageID: lID, code: sCode, type: 'ITEM');
+                      var response = sc.getMenu(
+                        languageID: lID,
+                        code: sCode,
+                      );
                       if (response) {
                         // hc.menuIndex.value = 1;
                         // hc.menuIndex.value++;
                         if (kDebugMode) print('SELECTED LANGUAGE CODE ${sc.selectedLanguageCode.value}');
-                        Get.to(() => TransactionView());
+                        Get.to(
+                          () => TransactionView(),
+                        );
                         // debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
                       }
                     },
@@ -251,7 +256,11 @@ class HomeView extends GetView<HomeController> {
                       height: 7.h,
                       child: sc.languageList.isEmpty
                           ? null
-                          : Image.asset(sc.languageList.first.data.languages[index].flag!, fit: BoxFit.fill)
+                          : Image.asset(
+                              sc.languageList.first.data.languages[index].flag!,
+                              fit: BoxFit.fill,
+                              semanticLabel: 'Select Language',
+                            )
                               .animate()
                               .fade(duration: HenryGlobal.animationSpeed)
                               .scale(duration: HenryGlobal.animationSpeed),

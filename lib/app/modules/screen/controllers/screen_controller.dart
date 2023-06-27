@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -30,8 +32,8 @@ import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/led_constant.dart';
 import 'package:iotelkiosk/globals/services/base/base_storage.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
+import 'package:iotelkiosk/globals/services/devices/display_service.dart';
 import 'package:translator/translator.dart';
-import 'package:windows_devices/windows_devices.dart';
 
 class ScreenController extends GetxController with BaseController {
   // VARIABLE DECLARTION WITH OBSERVABLE CAPABILITY;
@@ -109,6 +111,8 @@ class ScreenController extends GetxController with BaseController {
     super.onInit();
 
     hostname.value = Platform.localHostname;
+    // monitorInfo();
+    setDisplayMonitor('DISPLAY2');
 
     // getBDOOpen(
     //     transactionCode: BDOTransaction.sSale,
@@ -150,7 +154,6 @@ class ScreenController extends GetxController with BaseController {
     //     accommodationTYPEID: selectedAccommodationType.value);
 
     // await getTerms(credentialHeaders: headers, languageID: selecttedLanguageID.value);
-    // monitorInfo();
   }
 
   @override
@@ -602,36 +605,35 @@ class ScreenController extends GetxController with BaseController {
   // BEGIN FUNCTION
   // **********************************************************************
 
-  void monitorInfo() async {
-    final deviceSelector = DisplayMonitor.getDeviceSelector();
-    final deviceInformationCollection = await DeviceInformation.findAllAsyncAqsFilter(deviceSelector);
+  // void monitorInfo() {
+  //   // Enumerate all displays and print their information
+  //   for (final display in Display.findAll()) {
+  //     if (kDebugMode) {
+  //       print('Display name: ${display.name}');
+  //       print('Display Resolution : ${display.resolution.prettify()}');
+  //       print('Is connected: ${display.isConnected}');
+  //       print('Is primary: ${display.isPrimary}');
+  //     }
+  //     // if (display.isConnected) {
+  //     //   if (kDebugMode) {
+  //     //     print('Display Resolution : ${display.resolution.prettify()}');
+  //     //     // print('Supported Resolution');
+  //     //     // for (final resolution in display.supportedResolutions) {
+  //     //     //   if (kDebugMode) print(' - ${resolution.prettify()}');
+  //     //     // }
+  //     //   }
+  //     // }
+  //   }
+  //   final display = Display.findByName("DISPLAY3");
+  //   if (display != null && display.isConnected) {
+  //     if (!display.isPrimary) display.setAsPrimary();
+  //   }
+  // }
 
-    for (final device in deviceInformationCollection.toList()) {
-      final monitor = await DisplayMonitor.fromInterfaceIdAsync(device.id);
-      if (monitor != null) {
-        printMonitorSpecs(monitor);
-      }
-    }
-  }
-
-  void printMonitorSpecs(DisplayMonitor displayMonitor) {
-    if (kDebugMode) {
-      // print(displayMonitor.deviceId);
-      // print('DISPLAY ADAPTER ID: ${displayMonitor.displayAdapterDeviceId}');
-
-      print('DISPLAY NAME: ${displayMonitor.displayName}');
-      print('Monitor size: '
-          '${displayMonitor.physicalSizeInInches?.width.toStringAsFixed(1)}in x '
-          '${displayMonitor.physicalSizeInInches?.height.toStringAsFixed(1)}in');
-      print('Monitor connection kind: ${displayMonitor.connectionKind.name}');
-      print('Monitor physical connection: ${displayMonitor.physicalConnector.name}');
-      print('Monitor usage kind: ${displayMonitor.usageKind.name}');
-      print('Monitor DPI: ${displayMonitor.rawDpiX.ceil()} (X) / '
-          '${displayMonitor.rawDpiY.ceil()} (Y)');
-      print(
-          'NATIVE RESOLUTION: ${displayMonitor.nativeResolutionInRawPixels.width}px X ${displayMonitor.nativeResolutionInRawPixels.height}px');
-      print('Monitor luminance range: ${displayMonitor.minLuminanceInNits} '
-          '- ${displayMonitor.maxLuminanceInNits} nits');
+  void setDisplayMonitor(String displayName) {
+    final display = Display.findByName(displayName);
+    if (display != null && display.isConnected) {
+      if (!display.isPrimary) display.setAsPrimary();
     }
   }
 
@@ -698,7 +700,7 @@ class ScreenController extends GetxController with BaseController {
   void openLEDLibserial({String ledLocationAndStatus = ''}) {
     // final serialPort = SerialPort.availablePorts;
     final portConfig = SerialPortConfig();
-    final port = SerialPort("COM2");
+    final port = SerialPort("COM1");
     portConfig.baudRate = 9600;
     portConfig.parity = SerialPortParity.none;
 
@@ -860,7 +862,7 @@ class ScreenController extends GetxController with BaseController {
         if (kDebugMode) {
           print('TRANSLATION RECORDS: ${transactionList.first.data.conversion.length}');
         }
-        getMenu(languageID: 0, code: 'SLMT', type: 'TITLE');
+        getMenu(code: 'SLMT', type: 'TITLE');
         isLoading.value = false;
         return true;
       } else {
@@ -1176,53 +1178,46 @@ class ScreenController extends GetxController with BaseController {
       // TITLE
       if (type == "TITLE") {
         titleTrans.addAll(
-            transactionList[0].data.conversion.where((element) => element.code == code && element.type == type));
+            transactionList[0].data.conversion.where((element) => element.code == code && element.type == 'TITLE'));
       } else {
         titleTrans.addAll(transactionList[0]
             .data
             .conversion
-            .where((element) => element.languageId == languageID && element.code == code && element.type == type));
-        // titleTrans.addAll(
-        //     transactionList[0].data.conversion.where((element) => element.code == code && element.type == 'TITLE'));
+            .where((element) => element.languageId == languageID && element.code == code && element.type == 'TITLE'));
       }
-      // for (var ctr = 0; ctr < titleTrans.length; ctr++) {
-      //   var valueString = await titleTrans[ctr].translationText.translate(
-      //       from: screenController.defaultLanguageCode.value.toLowerCase(),
-      //       to: selectedLanguageCode.value.toLowerCase());
-      //   titleTrans[ctr].translationText = valueString.toString();
-      //   print(valueString);
-      // }
+      // titleTrans.addAll(transactionList[0]
+      //     .data
+      //     .conversion
+      //     .where((element) => element.languageId == languageID && element.code == code && element.type == 'TITLE'));
       if (kDebugMode) {
-        print('TOTAL MENU : ${titleTrans.length}');
+        print('TOTAL TITLE : ${titleTrans.length}');
       }
-
-      // ITEM
+      // ITEM LABEL
       pageTrans.addAll(
         transactionList[0]
             .data
             .conversion
-            .where((element) => element.languageId == languageID && element.code == code && element.type == type),
+            .where((element) => element.languageId == languageID && element.code == code && element.type == 'ITEM'),
       );
-      // pageTrans.addAll(
-      //   transactionList[0].data.conversion.where((element) => element.code == code && element.type == type),
-      // );
 
-      // for (var ctr = 0; ctr < pageTrans.length; ctr++) {
-      //   var valueString = await pageTrans[ctr].translationText.translate(
-      //       from: screenController.defaultLanguageCode.value.toLowerCase(),
-      //       to: selectedLanguageCode.value.toLowerCase());
-      //   pageTrans[ctr].translationText = valueString.toString();
-      // }
       if (kDebugMode) {
-        print('MENU ITEMS (code: $code | type: $type) : TOTAL RECORD: ${pageTrans.length} : INDEX: $indexCode');
+        print('MENU ITEMS (code: $code | type: $type) : PAGE TRANS: ${pageTrans.length} : INDEX: $indexCode');
       }
-
       return true;
     } else {
       return false;
     }
     // return true;
   }
+  // ---------------------------------------------------------------------------------------------------------
+}
 
-// ---------------------------------------------------------------------------------------------------------
+typedef Resolution = ({int width, int height});
+
+extension on Resolution {
+  /// Returns a prettified version of the [Resolution] (e.g. `1920 x 1080`).
+  String prettify() {
+    final (:width, :height) = this;
+    return '$width x $height';
+  }
 }

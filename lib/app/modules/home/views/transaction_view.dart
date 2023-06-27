@@ -8,7 +8,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:iotelkiosk/app/modules/home/views/accommodation_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/roomtype_view.dart';
+import 'package:iotelkiosk/app/modules/home/views/underdev_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
@@ -27,8 +29,6 @@ class TransactionView extends GetView<HomeController> {
   TransactionView({Key? key}) : super(key: key);
 
   final hc = Get.find<HomeController>();
-  // final hc = Get.put(HomeController());
-
   final sc = Get.find<ScreenController>();
 
   // final DateTime dtLocalTime = DateTime.now();
@@ -43,8 +43,6 @@ class TransactionView extends GetView<HomeController> {
             if (hc.isIdleActive.value) {
               sc.player.play();
             }
-            // hc.resetTimer();
-            // hc.initTimezone();
           },
           child: Stack(
             children: [
@@ -123,12 +121,13 @@ class TransactionView extends GetView<HomeController> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                sc.getMenu(code: 'SLMT');
+                                sc.getMenu(code: 'SLMT', type: 'TITLE');
                                 Get.back();
                               },
                               child: Image.asset(
                                 'assets/menus/back-arrow.png',
                                 fit: BoxFit.cover,
+                                semanticLabel: 'Back to previous menu',
                               ),
                             ),
                             const SizedBox(
@@ -263,43 +262,49 @@ class TransactionView extends GetView<HomeController> {
                   right: 8.w,
                   child: GestureDetector(
                     onTap: () async {
-                      sc.isLoading.value = true;
-                      // sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SRT');
-                      var response = await sc.getRoomType(
-                          credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
-
-                      if (response) {
-                        sc.isLoading.value = false;
-                        sc.selectedTransactionType.value = sc.pageTrans[index].translationText;
-
-                        sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SRT');
-
-                        if (kDebugMode) {
-                          print('SELECTED TRANSACTION: ${sc.selectedTransactionType.value}');
-                        }
-                        switch (index) {
-                          case 0: //CHECK IN
-                            {
-                              Get.to(() => RoomTypeView());
+                      switch (index) {
+                        case 0: //CHECK IN
+                          {
+                            // sc.isLoading.value = true;
+                            // var response = await sc.getRoomType(
+                            //     credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
+                            // if (response) {
+                            //   sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SRT');
+                            //   sc.isLoading.value = false;
+                            //   sc.selectedTransactionType.value = sc.pageTrans[index].translationText;
+                            //   if (kDebugMode) {
+                            //     print('SELECTED TRANSACTION: ${sc.selectedTransactionType.value}');
+                            //   }
+                            // }
+                            // Get.to(() => RoomTypeView());
+                            sc.isLoading.value = true;
+                            var response = await sc.getAccommodation(
+                                credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
+                            if (response) {
+                              if (kDebugMode) print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
+                              // sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
+                              sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
+                              Get.to(() => AccommodationView());
                             }
-                            break;
-                          case 1: //CHECK OUT
-                            {
-                              Center(
-                                child: Text(
-                                  'Under Development',
-                                  style: TextStyle(color: HenryColors.puti, fontSize: 15.sp),
-                                ),
-                              );
-                            }
-                        }
+                          }
+                          break;
+                        case 1: //CHECK OUT
+                          {}
+                          break;
+                        default:
+                          {
+                            Get.to(() => UnderdevView());
+                          }
                       }
                     },
                     child: SizedBox(
                       height: 7.h,
                       child: sc.pageTrans.isEmpty
                           ? null
-                          : Image.asset(sc.pageTrans[index].images!, fit: BoxFit.contain)
+                          : Image.asset(
+                              sc.pageTrans[index].images!,
+                              fit: BoxFit.contain,
+                            )
                               .animate()
                               .fade(duration: HenryGlobal.animationSpeed)
                               .scale(duration: HenryGlobal.animationSpeed),
