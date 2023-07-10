@@ -9,6 +9,7 @@ import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
+import 'package:intl/intl.dart';
 import 'package:iotelkiosk/globals/constant/bdotransaction_constant.dart';
 // import 'package:serial_port_win32/serial_port_win32.dart' as winsp;
 import 'package:get/get.dart';
@@ -96,6 +97,9 @@ class ScreenController extends GetxController with BaseController {
   // CONTROLLERS
   final scrollController = ScrollController();
 
+  // DATE
+  final dtNow = DateFormat.yMMMMd().format(DateTime.now());
+
   // LISTENING
   final player = Player(
     id: 0,
@@ -125,11 +129,11 @@ class ScreenController extends GetxController with BaseController {
     mediaOpen();
 
     await userLogin();
-    await getWeather();
-    await getSettings();
-
     final accessToken = userLoginList.first.accessToken;
     final headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'};
+
+    await getWeather();
+    await getSettings();
 
     await getLanguages(credentialHeaders: headers);
     await getTransaction(credentialHeaders: headers);
@@ -147,10 +151,7 @@ class ScreenController extends GetxController with BaseController {
     // await getAccommodation(credentialHeaders: headers, languageCode: langcode);
     // await getPaymentType(credentialHeaders: headers);
 
-    // await getAvailableRoomsGraphQL(
-    //     credentialHeaders: headers,
-    //     roomTYPEID: selectedRoomTypeID.value,
-    //     accommodationTYPEID: selectedAccommodationType.value);
+    await getAvailableRoomsGraphQL(credentialHeaders: headers, roomTYPEID: 1, accommodationTYPEID: 1);
 
     // await getTerms(credentialHeaders: headers, languageID: selecttedLanguageID.value);
   }
@@ -1049,15 +1050,15 @@ class ScreenController extends GetxController with BaseController {
           paymentTypeList.refresh();
         }
 
-        if (kDebugMode) {
-          print('Payment Type: ${paymentTypeList.first.data.paymentTypes.length}');
-        }
+        if (kDebugMode) print('Payment Type: ${paymentTypeList.first.data.paymentTypes.length}');
+
         return true;
+      } else {
+        return false;
       }
     } finally {
       isLoading.value = false;
     }
-    return false;
   }
 
   // ROOM TYPE

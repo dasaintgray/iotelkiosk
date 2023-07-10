@@ -64,7 +64,7 @@ query getLanguage {
     code
     description
     flag
-    lenguwahe_details: Languages_Translations {
+    lenguwahe_details: Translation {
       LanguageId
       code
       type

@@ -59,7 +59,6 @@ class GlobalProvider extends BaseController {
       return null;
     }
   }
-
   // POST
 
   // GRAPHQL

@@ -121,13 +121,13 @@ class HomeController extends GetxController with BaseController {
 
     systemIdle.onIdleStateChanged.listen((event) {
       if (kDebugMode) {
-        print('system idle: $event');
+        print('SYSTEM IDLE?: $event');
       }
       screenController.player.play(); //play the video
       screenController.getMenu(code: 'SLMT', type: 'TITLE'); //go back to main selection
-      // Get.back();
-      Get.off(() => ScreenView());
       isIdleActive.value = event;
+      //CLOSE THE HOMECONTROLLER INTO THE MEMORY AND STAY THE SCREENCONTROLLER ALIVE
+      Get.off(() => ScreenView());
     });
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
+import 'package:iotelkiosk/app/modules/home/views/disclaimer_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/carousel_title_widget.dart';
@@ -150,7 +151,7 @@ class InsertPaymentView extends GetView {
       height: orientation == Orientation.portrait ? 49.h : 20.h,
       width: 75.w,
       child: Container(
-        margin: const EdgeInsets.all(20.0),
+        margin: const EdgeInsets.all(30.0),
         height: 20.h,
         width: 20.w,
         decoration: const BoxDecoration(
@@ -246,7 +247,12 @@ class InsertPaymentView extends GetView {
                 child: Center(
                   child: MaterialButton(
                     onPressed: () async {
-                      hc.menuIndex.value = 6;
+                      sc.isLoading.value = true;
+                      var response = await sc.getTerms(credentialHeaders: hc.globalHeaders);
+                      if (response) {
+                        sc.isLoading.value = false;
+                        Get.to(() => DisclaimerView());
+                      }
                     },
                     color: HenryColors.darkGreen,
                     padding: const EdgeInsets.all(30),

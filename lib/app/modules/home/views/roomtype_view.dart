@@ -185,6 +185,7 @@ class RoomTypeView extends GetView {
                       //   if (kDebugMode) print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
                       //   Get.to(() => AccommodationView());
                       // }
+
                       sc.isLoading.value = true;
                       var response = await sc.getPaymentType(
                           credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);

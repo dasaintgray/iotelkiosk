@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/views/home_view.dart';
-import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:marquee/marquee.dart';
 import 'package:sizer/sizer.dart';
@@ -121,20 +120,23 @@ class ScreenView extends GetView<ScreenController> {
                       style: TextStyle(fontSize: 25.sp, color: HenryColors.puti),
                       textAlign: TextAlign.center,
                       child: Center(
-                        child: Marquee(
-                          text: HenryGlobal.longText,
-                          // style: const TextStyle(color: HenryColors.puti),
-                          scrollAxis: Axis.vertical,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          blankSpace: 20.0,
-                          velocity: 100.0,
-                          pauseAfterRound: const Duration(seconds: 2),
-                          startPadding: 10.0,
-                          accelerationDuration: const Duration(seconds: 2),
-                          accelerationCurve: Curves.linear,
-                          decelerationDuration: const Duration(milliseconds: 500),
-                          decelerationCurve: Curves.elasticIn,
-                        ),
+                        child: sc.isLoading.value
+                            ? const CircularProgressIndicator.adaptive()
+                            : Marquee(
+                                text: '${sc.availRoomList.length} Available Rooms as of today ${sc.dtNow}',
+                                // HenryGlobal.longText,
+                                // style: const TextStyle(color: HenryColors.puti),
+                                scrollAxis: Axis.vertical,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                blankSpace: 20.0,
+                                velocity: 100.0,
+                                pauseAfterRound: const Duration(seconds: 2),
+                                startPadding: 10.0,
+                                accelerationDuration: const Duration(seconds: 2),
+                                accelerationCurve: Curves.linear,
+                                decelerationDuration: const Duration(milliseconds: 500),
+                                decelerationCurve: Curves.elasticIn,
+                              ),
                       ),
                     ),
                   ),
