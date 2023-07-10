@@ -26,8 +26,8 @@ import '../controllers/home_controller.dart';
 class HomeView extends GetView<HomeController> {
   HomeView({Key? key}) : super(key: key);
 
-  final hc = Get.find<HomeController>();
-  // final hc = Get.put(HomeController());
+  // final hc = Get.find<HomeController>();
+  final hc = Get.put(HomeController());
 
   final sc = Get.find<ScreenController>();
 

@@ -1,10 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
-import 'package:iotelkiosk/app/modules/home/views/accommodation_view.dart';
+import 'package:iotelkiosk/app/modules/home/views/payment_method_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
@@ -128,7 +127,6 @@ class RoomTypeView extends GetView {
   Widget menuRoomType(Orientation orientation, {int? languageID, String? code, String? type}) {
     final langCode = sc.languageList.first.data.languages.where((element) => element.id == languageID);
     // bool isTranslate = langCode.first.code.toLowerCase() != sc.defaultLanguageCode.value.toLowerCase();
-
     return SizedBox(
       height: orientation == Orientation.portrait ? 45.h : 20.h,
       width: 75.w,
@@ -178,14 +176,21 @@ class RoomTypeView extends GetView {
                   right: 8.w,
                   child: GestureDetector(
                     onTap: () async {
+                      // sc.isLoading.value = true;
+                      // sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
+                      // sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
+                      // var response = await sc.getAccommodation(
+                      //     credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
+                      // if (response) {
+                      //   if (kDebugMode) print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
+                      //   Get.to(() => AccommodationView());
+                      // }
                       sc.isLoading.value = true;
-                      sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
-                      sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
-                      var response = await sc.getAccommodation(
+                      var response = await sc.getPaymentType(
                           credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
                       if (response) {
-                        if (kDebugMode) print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
-                        Get.to(() => AccommodationView());
+                        sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SPM');
+                        Get.to(() => PaymentMethodView());
                       }
                     },
                     child: SizedBox(

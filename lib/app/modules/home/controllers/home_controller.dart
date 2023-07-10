@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
-import 'package:iotelkiosk/app/routes/app_pages.dart';
+import 'package:iotelkiosk/app/modules/screen/views/screen_view.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 import 'package:system_idle/system_idle.dart';
 
@@ -97,12 +97,12 @@ class HomeController extends GetxController with BaseController {
     // openSerialPort();
   }
 
-  @override
-  void onClose() {
-    super.onClose();
-    // stopTimer();
-    screenController.dispose();
-  }
+  // @override
+  // void onClose() {
+  //   super.onClose();
+  //   // stopTimer();
+  //   // screenController.dispose();
+  // }
 
   Future<String?> convertText(
       {required String? sourceText, required String? fromLangCode, required String? toLanguageCode}) async {
@@ -125,10 +125,8 @@ class HomeController extends GetxController with BaseController {
       }
       screenController.player.play(); //play the video
       screenController.getMenu(code: 'SLMT', type: 'TITLE'); //go back to main selection
-      // menuIndex.value = 0; //default menu index
       // Get.back();
-      // Get.offAndToNamed(Routes.SCREEN);
-      Get.toNamed(Routes.SCREEN);
+      Get.off(() => ScreenView());
       isIdleActive.value = event;
     });
   }

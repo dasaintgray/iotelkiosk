@@ -9,7 +9,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:iotelkiosk/app/modules/home/views/accommodation_view.dart';
-import 'package:iotelkiosk/app/modules/home/views/roomtype_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/underdev_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';

@@ -14,8 +14,8 @@ class ScreenView extends GetView<ScreenController> {
   ScreenView({Key? key}) : super(key: key);
 
   // CONTROLLER
-  final sc = Get.find<ScreenController>();
-  // final hc = Get.find<HomeController>();
+  // final sc = Get.find<ScreenController>();
+  final sc = Get.put(ScreenController());
 
   @override
   Widget build(BuildContext context) {

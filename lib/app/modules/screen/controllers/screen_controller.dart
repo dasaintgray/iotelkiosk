@@ -29,7 +29,6 @@ import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
-import 'package:iotelkiosk/globals/constant/led_constant.dart';
 import 'package:iotelkiosk/globals/services/base/base_storage.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 import 'package:iotelkiosk/globals/services/devices/display_service.dart';
@@ -112,7 +111,7 @@ class ScreenController extends GetxController with BaseController {
 
     hostname.value = Platform.localHostname;
     // monitorInfo();
-    setDisplayMonitor('DISPLAY2');
+    setDisplayMonitor('DISPLAY3');
 
     // getBDOOpen(
     //     transactionCode: BDOTransaction.sSale,
@@ -121,7 +120,7 @@ class ScreenController extends GetxController with BaseController {
     // getMoneydispenser();
     // cardDispenser();
     // openLED();
-    openLEDLibserial(ledLocationAndStatus: LedOperation.bottomCENTERLEDON);
+    // openLEDLibserial(ledLocationAndStatus: LedOperation.bottomCENTERLEDON);
 
     mediaOpen();
 

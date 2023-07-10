@@ -4,7 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
-import 'package:iotelkiosk/app/modules/home/views/payment_method_view.dart';
+import 'package:iotelkiosk/app/modules/home/views/roomtype_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
@@ -165,18 +165,19 @@ class AccommodationView extends GetView {
                   right: 8.w,
                   child: GestureDetector(
                     onTap: () async {
-                      sc.selectedAccommodationTypeID.value =
-                          sc.accommodationTypeList.first.data.accommodationTypes[index].id;
-
-                      if (kDebugMode) {
-                        print('SELECTED ACCOMMODATION TYPE ID: ${sc.selectedAccommodationTypeID.value}');
-                      }
-
-                      var response = await sc.getPaymentType(
+                      sc.isLoading.value = true;
+                      var response = await sc.getRoomType(
                           credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
                       if (response) {
-                        sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SPM');
-                        Get.to(() => PaymentMethodView());
+                        sc.selectedAccommodationTypeID.value =
+                            sc.accommodationTypeList.first.data.accommodationTypes[index].id;
+                        if (kDebugMode) {
+                          print('SELECTED ACCOMMODATION TYPE ID: ${sc.selectedAccommodationTypeID.value}');
+                        }
+                        sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SRT');
+                        sc.isLoading.value = false;
+                        sc.selectedTransactionType.value = sc.pageTrans[index].translationText;
+                        Get.to(() => RoomTypeView());
                       }
                     },
                     child: SizedBox(
