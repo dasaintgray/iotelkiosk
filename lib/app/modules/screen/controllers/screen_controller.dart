@@ -115,7 +115,7 @@ class ScreenController extends GetxController with BaseController {
 
     hostname.value = Platform.localHostname;
     // monitorInfo();
-    setDisplayMonitor('DISPLAY3');
+    setDisplayMonitor('DISPLAY2');
 
     // getBDOOpen(
     //     transactionCode: BDOTransaction.sSale,
@@ -153,6 +153,8 @@ class ScreenController extends GetxController with BaseController {
 
     await getAvailableRoomsGraphQL(credentialHeaders: headers, roomTYPEID: 1, accommodationTYPEID: 1);
 
+    await subscribeCashDispenser();
+
     // await getTerms(credentialHeaders: headers, languageID: selecttedLanguageID.value);
   }
 
@@ -173,6 +175,14 @@ class ScreenController extends GetxController with BaseController {
     super.onClose();
     scrollController.dispose();
     // port.close();
+  }
+
+  String? getAccessToken() {
+    if (userLoginList.isEmpty) {
+      return null;
+    } else {
+      return userLoginList.first.accessToken;
+    }
   }
 
   void getBDOOpen(
@@ -756,6 +766,16 @@ class ScreenController extends GetxController with BaseController {
     return 0;
   }
 
+  // SUBSCRIPTION
+  Future subscribeCashDispenser() async {
+    // String? headerToken = getAccessToken();
+    final headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer $getAccessToken()'};
+
+    var cashResponse = await GlobalProvider().cashDispenserStatus(headers: headers);
+
+    if (kDebugMode) print(cashResponse);
+  }
+
   Future<bool> getSettings() async {
     isLoading.value = true;
 
@@ -964,7 +984,7 @@ class ScreenController extends GetxController with BaseController {
       {required Map<String, String> credentialHeaders,
       required int? roomTYPEID,
       required int? accommodationTYPEID}) async {
-    isLoading.value = true;
+    // isLoading.value = true;
 
     final dtnow = DateTime.now();
 
@@ -978,9 +998,11 @@ class ScreenController extends GetxController with BaseController {
 
     try {
       if (response != null) {
+        availableRoomList.clear(); //clear first
         availableRoomList.add(response);
         availableRoomList.shuffle();
 
+        availRoomList.clear(); //clear first
         availRoomList.addAll(availableRoomList.first.data.availableRooms.toList());
         preSelectedRoomID.value = pickRoom();
 
@@ -996,11 +1018,11 @@ class ScreenController extends GetxController with BaseController {
 
         return true;
       } else {
-        isLoading.value = false;
+        // isLoading.value = false;
         return false;
       }
     } finally {
-      isLoading.value = false;
+      // isLoading.value = false;
     }
   }
 

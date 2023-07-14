@@ -10,6 +10,7 @@ import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/translation_terms_model.dart';
+import 'package:iotelkiosk/app/data/models_rest/apiresponse_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/userlogin_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
@@ -48,6 +49,20 @@ class GlobalProvider extends BaseController {
       return null;
     }
   }
+
+  Future<ApiResponseModel?> cashDispenserCommand({required String? cashCommand, required String? sTerminalCode}) async {
+    final sCommand = '?command=${cashCommand!.toUpperCase()}&Terminal=$sTerminalCode';
+    final sendpoint = HenryGlobal.iotelEndPoint + sCommand;
+    final response = await HenryBaseClient().getRequest(HenryGlobal.iotelURI, sendpoint, HenryGlobal.iotelHeaders);
+
+    if (response != null) {
+      return apiResponseModelFromJson(response);
+    } else {
+      return null;
+    }
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------------------
 
   Future<UserLoginModel?> userLogin() async {
     final response = await HenryBaseClient()
@@ -232,6 +247,21 @@ class GlobalProvider extends BaseController {
     }
   }
   //  -----------------------------------------------------------------------------------------------------
+
+  // SUBSCRIPTION AREA -----------------------------------------------------------------------------------------------------
+
+  Future<Snapshot?> cashDispenserStatus({required Map<String, String> headers}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
+
+    Snapshot snapshot = await hasuraConnect.subscription(cashDispenserListener, headers: headers);
+
+    snapshot.listen((event) {
+      print(event);
+    }).onError(handleError);
+    return null;
+  }
+
+  // SUBSCRIPTION AREA -----------------------------------------------------------------------------------------------------
 
   // MUTATION AREA (INSERT, UPDATE, DELETE)
   Future<int>? addContacts(

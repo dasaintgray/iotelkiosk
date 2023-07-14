@@ -7,8 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:iotelkiosk/app/data/models_rest/apiresponse_model.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/app/modules/screen/views/screen_view.dart';
+import 'package:iotelkiosk/app/providers/providers_global.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 import 'package:system_idle/system_idle.dart';
 
@@ -53,6 +55,7 @@ class HomeController extends GetxController with BaseController {
   late final Map<String, String> globalHeaders;
 
   // LIST
+  final apiResponseList = <ApiResponseModel>[].obs;
 
   // SERIAL TEST
   StreamSubscription<CameraClosingEvent>? errorStreamSubscription;
@@ -151,24 +154,6 @@ class HomeController extends GetxController with BaseController {
     return result;
   }
 
-  // bool checkMonitor() {
-  //   final monitorData = MediaQueryData.fromView();
-
-  //   final bool isMonitor = monitorData.size.shortestSide > 600;
-  //   if (isMonitor) {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // }
-
-  // void enumerateWindows() {
-  //   final wndProc = dartffi.Pointer.fromFunction<EnumWindowsProc>(enumWindowsProc, 0);
-  //   // dartffi.Pointer.fromFunction<EnumWindowsProc>(enumWindowsProc, 0);
-  //   EnumWindows(wndProc, 0);
-  // }
-  // FIND THE WINDOW HANDLE USING THE WIN32 AND FFI
-
   // INITIALIZING CAMERAS
   // AUTHOR: Henry V. Mempin
 
@@ -251,6 +236,22 @@ class HomeController extends GetxController with BaseController {
     newyorkNow = tz.TZDateTime.now(newyork);
     seoulNow = tz.TZDateTime.now(seoul);
     sydneyNow = tz.TZDateTime.now(sydney);
+  }
+
+  Future<bool?> cashDispenserCommand({required String? sCommand, required String? sTerminal}) async {
+    isLoading.value = true;
+    final cashResponse = await GlobalProvider()
+        .cashDispenserCommand(cashCommand: sCommand!.toUpperCase(), sTerminalCode: sTerminal!.toUpperCase());
+    try {
+      if (cashResponse != null) {
+        apiResponseList.add(cashResponse);
+        return true;
+      } else {
+        return false;
+      }
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   // void startTimer() {

@@ -46,6 +46,7 @@ class AvailableRoom {
   double serviceCharge;
   String? photo;
   String id;
+  String code;
 
   AvailableRoom({
     required this.description,
@@ -53,6 +54,7 @@ class AvailableRoom {
     required this.serviceCharge,
     this.photo,
     required this.id,
+    required this.code,
   });
 
   factory AvailableRoom.fromJson(Map<String, dynamic> json) => AvailableRoom(
@@ -61,6 +63,7 @@ class AvailableRoom {
         serviceCharge: json["serviceCharge"],
         photo: json["photo"],
         id: json["id"],
+        code: json['code'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -69,5 +72,6 @@ class AvailableRoom {
         "serviceCharge": serviceCharge,
         "photo": photo,
         "id": id,
+        "code": code
       };
 }

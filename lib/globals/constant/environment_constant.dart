@@ -37,8 +37,14 @@ class HenryGlobal {
   // GRAPHQL HOST AND QUERY
   // static const hostURL = "https://gql.circuitmindz.com/v1/graphql";
   // static const hostURL = "https://gql.circuitmindz.com/v1/graphql";
+
   static const hostREST = "http://sandbox.ad.circuitmindz.com:5000";
   static const sandboxGQL = 'https://quickie-gw.ad.circuitmindz.com/graphql';
+
+  // IOTEL HARDWARE API
+  static const iotelURI = 'http://qckkiosk1.ad.circuitmindz.com:6969';
+  static const iotelEndPoint = '/processcommand';
+  static var iotelHeaders = {"API_KEY": "#CMRJG\$@05062023!"};
 
   static const userEP = '/api/users/login';
 
@@ -175,6 +181,7 @@ query getAvailableRooms($agentID: Int!, $roomTypeID: Int!,
     serviceCharge
     photo
     id
+    code
   }
 } 
 ''';
@@ -397,6 +404,26 @@ String addPhotos = r'''
       createdBy
     }
     affected_rows
+  }
+}
+''';
+
+// SUBSCRIPTION AREA
+
+String cashDispenserListener = r''' 
+subscription cashDispenseStatus {
+  CashDispensers(delay: 10, iteration: 50) {
+    key
+    status
+    code
+    value
+    modifiedDate
+    Id
+    Terminal {
+      Id
+      code
+      description
+    }
   }
 }
 ''';
