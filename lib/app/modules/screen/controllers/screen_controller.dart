@@ -9,11 +9,9 @@ import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
+import 'package:hasura_connect/hasura_connect.dart';
 import 'package:intl/intl.dart';
 import 'package:iotelkiosk/globals/constant/bdotransaction_constant.dart';
-// import 'package:serial_port_win32/serial_port_win32.dart' as winsp;
-import 'package:get/get.dart';
-import 'package:hex/hex.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
@@ -34,6 +32,8 @@ import 'package:iotelkiosk/globals/services/base/base_storage.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 import 'package:iotelkiosk/globals/services/devices/display_service.dart';
 import 'package:translator/translator.dart';
+import 'package:get/get.dart';
+import 'package:hex/hex.dart';
 
 class ScreenController extends GetxController with BaseController {
   // VARIABLE DECLARTION WITH OBSERVABLE CAPABILITY;
@@ -114,8 +114,9 @@ class ScreenController extends GetxController with BaseController {
     super.onInit();
 
     hostname.value = Platform.localHostname;
+
     // monitorInfo();
-    setDisplayMonitor('DISPLAY3');
+    setDisplayMonitor('DISPLAY2');
 
     // getBDOOpen(
     //     transactionCode: BDOTransaction.sSale,
@@ -152,8 +153,8 @@ class ScreenController extends GetxController with BaseController {
     // await getPaymentType(credentialHeaders: headers);
 
     await getAvailableRoomsGraphQL(credentialHeaders: headers, roomTYPEID: 1, accommodationTYPEID: 1);
-
-    await subscribeCashDispenser();
+    // await getTerminalDataSubs(headers: headers);
+    // await getTerminalData(authorizationHeader: headers);
 
     // await getTerms(credentialHeaders: headers, languageID: selecttedLanguageID.value);
   }
@@ -767,14 +768,22 @@ class ScreenController extends GetxController with BaseController {
   }
 
   // SUBSCRIPTION
-  Future subscribeCashDispenser() async {
-    // String? headerToken = getAccessToken();
-    final headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer $getAccessToken()'};
+  Future<bool?> getTerminalData({required Map<String, String> authorizationHeader}) async {
+    Map<String, dynamic> variables = {"terminalID": 3, "status": "New", "delay": 5, "iteration": 50};
 
-    var cashResponse = await GlobalProvider().cashDispenserStatus(headers: headers);
+    Snapshot snapshot =
+        await GlobalProvider().eventDataSubscription(headers: authorizationHeader, variables: variables);
 
-    if (kDebugMode) print(cashResponse);
+    snapshot.listen((event) {
+      if (kDebugMode) print('event: $event');
+    }).onError(handleError);
+    return null;
   }
+
+  // Future getTerminalDataSubs({required Map<String, String> headers}) async {
+  //   var response = GlobalProvider().terminalDataSubscription(headers: headers);
+  //   if (kDebugMode) print('terminal response: ${response.toString()}');
+  // }
 
   Future<bool> getSettings() async {
     isLoading.value = true;
@@ -1111,8 +1120,9 @@ class ScreenController extends GetxController with BaseController {
     return false;
   }
 
-  //  MUTATION AREA
+  // TERMINALS
 
+  //  MUTATION AREA
   Future addTransaction({required Map<String, String> credentialHeaders}) async {
     isLoading.value = true;
     final dtNow = DateTime.now();

@@ -8,6 +8,7 @@ import 'package:iotelkiosk/app/data/models_graphql/payment_type_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/terminals_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/translation_terms_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/apiresponse_model.dart';
@@ -233,6 +234,17 @@ class GlobalProvider extends BaseController {
     return null;
   }
 
+  Future<TerminalsModel?> fetchTerminals({required Map<String, String> headers}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
+
+    final response = await hasuraConnect.query(qryTerminals).catchError(handleError);
+
+    if (response != null) {
+      return terminalsModelFromJson(jsonEncode(response));
+    }
+    return null;
+  }
+
   // DYNAMIC AND GLOBAL FETCH ON ALL QUERY
   //  -----------------------------------------------------------------------------------------------------
   Future<dynamic> fetchGraphQLData(
@@ -249,16 +261,26 @@ class GlobalProvider extends BaseController {
   //  -----------------------------------------------------------------------------------------------------
 
   // SUBSCRIPTION AREA -----------------------------------------------------------------------------------------------------
+  // Future<dynamic> terminalDataSubscription({required Map<String, String> headers}) async {
+  //   HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
-  Future<Snapshot?> cashDispenserStatus({required Map<String, String> headers}) async {
+  //   Map<String, dynamic> variables = {"terminalID": 3, "status": "New", "delay": 5, "iteration": 5};
+
+  //   Snapshot snapshot = await hasuraConnect.subscription(terminalData, headers: headers, variables: variables);
+  //   // snapshot.listen(
+  //   //   (event) {
+  //   //     print(event);
+  //   //   },
+  //   // ).onError(handleError);
+  //   // snapshot.listen((event) => print('event: $event')).onData((data) => print('DATA: $data'));
+  //   // snapshot.listen((event) => print('EVENT: $event')).onError(handleError);
+  //   return null;
+  // }
+
+  Future<Snapshot<dynamic>> eventDataSubscription(
+      {required Map<String, String> headers, required Map<String, dynamic> variables}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
-
-    Snapshot snapshot = await hasuraConnect.subscription(cashDispenserListener, headers: headers);
-
-    snapshot.listen((event) {
-      print(event);
-    }).onError(handleError);
-    return null;
+    return await hasuraConnect.subscription(terminalData, variables: variables);
   }
 
   // SUBSCRIPTION AREA -----------------------------------------------------------------------------------------------------

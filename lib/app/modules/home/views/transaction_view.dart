@@ -9,6 +9,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:iotelkiosk/app/modules/home/views/accommodation_view.dart';
+import 'package:iotelkiosk/app/modules/home/views/bookaroom_view.dart';
+import 'package:iotelkiosk/app/modules/home/views/checkout_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/underdev_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
@@ -288,7 +290,14 @@ class TransactionView extends GetView<HomeController> {
                           }
                           break;
                         case 1: //CHECK OUT
-                          {}
+                          {
+                            Get.to(() => const CheckoutView());
+                          }
+                          break;
+                        case 2: //book a room
+                          {
+                            Get.to(() => BookaroomView());
+                          }
                           break;
                         default:
                           {

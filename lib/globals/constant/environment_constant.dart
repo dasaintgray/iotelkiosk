@@ -233,20 +233,6 @@ query getNationalities($code: String!) {
 }
 ''';
 
-String qryTerminals = r'''query getTerminal {
-  Terminals {
-    isActive
-    code
-    description
-    LocationId
-    macAddress
-    terminalDetails: Terminals_TerminalDetails {
-      value
-      description
-    } 
-  }
-}''';
-
 String qryPaymentType = r'''
 query getPaymentType {
   PaymentTypes(sortby: {by: "asc", sort: "Id"}) {
@@ -265,6 +251,18 @@ String qryTerms = r'''query getTerms($languageID: Int!) {
     translationText
   }
 }''';
+
+String qryTerminals = r'''query getTerminals {
+  Terminals {
+    Id
+    description
+    code
+    isActive
+    macAddress
+    ipAddress
+  }
+} 
+''';
 
 // MUTATION AREA (INSERT, UPDATE, DELETE)
 // ----------------------------------------------------------------------------------------------------
@@ -409,21 +407,20 @@ String addPhotos = r'''
 ''';
 
 // SUBSCRIPTION AREA
-
-String cashDispenserListener = r''' 
-subscription cashDispenseStatus {
-  CashDispensers(delay: 10, iteration: 50) {
-    key
+String terminalData = r''' 
+subscription terminalData($terminalID: Int!, $status: String!, $delay: Int!, $iteration: Int!) {
+  TerminalData(
+    delay: $delay
+    iteration: $iteration
+    where: {status: $status, TerminalId: $terminalID}
+  ) {
+    meta
     status
     code
     value
     modifiedDate
     Id
-    Terminal {
-      Id
-      code
-      description
-    }
+    TerminalId
   }
 }
 ''';

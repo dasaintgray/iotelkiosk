@@ -7,10 +7,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:hasura_connect/hasura_connect.dart';
+import 'package:iotelkiosk/app/data/models_graphql/terminaldata_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/terminals_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/apiresponse_model.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/app/modules/screen/views/screen_view.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
+import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 import 'package:system_idle/system_idle.dart';
 
@@ -56,6 +60,11 @@ class HomeController extends GetxController with BaseController {
 
   // LIST
   final apiResponseList = <ApiResponseModel>[].obs;
+  final terminalDataList = <TerminalDataModel>[].obs;
+  final terminalsList = <TerminalsModel>[];
+
+  // MAP
+  final snapshotData = [];
 
   // SERIAL TEST
   StreamSubscription<CameraClosingEvent>? errorStreamSubscription;
@@ -77,11 +86,13 @@ class HomeController extends GetxController with BaseController {
 
     initTimezone();
     configureSystemIdle();
+
     // startTimer();
 
     if (screenController.userLoginList.isNotEmpty) {
       accessToken.value = screenController.userLoginList.first.accessToken;
       globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer ${accessToken.value}'};
+      getTerminalData(headers: globalHeaders, terminalID: 3);
     }
     // await getTerms(credentialHeaders: headers, languageID: 6);
   }
@@ -91,6 +102,7 @@ class HomeController extends GetxController with BaseController {
     // ignore: unnecessary_overrides
     super.onReady();
     await getCamera();
+    await getTerminals();
 
     // globalAccessToken = HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
     // globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer $globalAccessToken'};
@@ -106,6 +118,46 @@ class HomeController extends GetxController with BaseController {
   //   // stopTimer();
   //   // screenController.dispose();
   // }
+
+  Map<String, String>? getAccessToken() {
+    if (screenController.userLoginList.isNotEmpty) {
+      accessToken.value = screenController.userLoginList.first.accessToken;
+      Map<String, String> globalToken = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${accessToken.value}'
+      };
+      return globalToken;
+    } else {
+      return null;
+    }
+  }
+
+  Future<dynamic> getTerminalData(
+      {required Map<String, String> headers, required int terminalID, int delay = 5, int iteration = 50}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
+
+    Map<String, dynamic> variables = {
+      "terminalID": terminalID,
+      "status": "NEW",
+      "delay": delay,
+      "iteration": iteration
+    };
+    Snapshot terminalDataSnapShot = await hasuraConnect.subscription(terminalData, variables: variables);
+
+    // LISTENING
+    terminalDataSnapShot.listen(
+      (event) {
+        var eventData = terminalDataModelFromJson(jsonEncode(event['data']['TerminalData']));
+        if (eventData.isNotEmpty) {
+          // print('event data: $eventData');
+          terminalDataList.clear();
+          terminalDataList.addAll(eventData);
+          print(terminalDataList.length);
+          print(terminalDataList.first.code);
+        }
+      },
+    ).onError(handleError);
+  }
 
   Future<String?> convertText(
       {required String? sourceText, required String? fromLangCode, required String? toLanguageCode}) async {
@@ -245,6 +297,24 @@ class HomeController extends GetxController with BaseController {
     try {
       if (cashResponse != null) {
         apiResponseList.add(cashResponse);
+        return true;
+      } else {
+        return false;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool?> getTerminals() async {
+    // final response = await GlobalProvider().fetchGraphQLData(documents: qryTerminals, headers: getAccessToken());
+    isLoading.value = true;
+    Map<String, String>? accessHeaders = getAccessToken();
+    final response = await GlobalProvider().fetchTerminals(headers: accessHeaders!);
+    try {
+      if (response != null) {
+        terminalsList.add(response);
+        print(terminalsList.first.data.terminals.first.code);
         return true;
       } else {
         return false;
