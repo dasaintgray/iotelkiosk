@@ -213,7 +213,7 @@ class PaymentMethodView extends GetView {
                                         sc.getMenu(languageID: languageID, code: 'IP', type: 'TITLE');
 
                                         var cashresponse =
-                                            await hc.cashDispenserCommand(sCommand: 'CASA', sTerminal: 'KIOSK1');
+                                            await hc.cashDispenserCommand(sCommand: 'CASA', iTerminalID: 3);
                                         if (cashresponse!) {
                                           sc.isLoading.value = false;
                                           Get.to(() => InsertPaymentView());

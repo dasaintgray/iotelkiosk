@@ -406,6 +406,19 @@ String addPhotos = r'''
 }
 ''';
 
+// MUTATION - TERMINAL DATA
+String updateTerminalDataGraphQL = r''' 
+mutation mutationTerminalData($STATUS: String!, $ID: Int!, $TerminalID: Int!) {
+  TerminalData(
+    mutate: {status: $STATUS}
+    where: {Id: $ID, TerminalId: $TerminalID}
+  ) {
+    response
+    Ids
+  }
+}
+''';
+
 // SUBSCRIPTION AREA
 String terminalData = r''' 
 subscription terminalData($terminalID: Int!, $status: String!, $delay: Int!, $iteration: Int!) {

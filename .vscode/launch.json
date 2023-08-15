@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "iotelkiosk",
+            "name": "iotelkiosk (debug)",
             "request": "launch",
             "type": "dart"
         },

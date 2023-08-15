@@ -51,8 +51,8 @@ class GlobalProvider extends BaseController {
     }
   }
 
-  Future<ApiResponseModel?> cashDispenserCommand({required String? cashCommand, required String? sTerminalCode}) async {
-    final sCommand = '?command=${cashCommand!.toUpperCase()}&Terminal=$sTerminalCode';
+  Future<ApiResponseModel?> cashDispenserCommand({required String? cashCommand, required int? iTerminalID}) async {
+    final sCommand = '?command=${cashCommand!.toUpperCase()}&Terminal=$iTerminalID';
     final sendpoint = HenryGlobal.iotelEndPoint + sCommand;
     final response = await HenryBaseClient().getRequest(HenryGlobal.iotelURI, sendpoint, HenryGlobal.iotelHeaders);
 
@@ -247,7 +247,7 @@ class GlobalProvider extends BaseController {
 
   // DYNAMIC AND GLOBAL FETCH ON ALL QUERY
   //  -----------------------------------------------------------------------------------------------------
-  Future<dynamic> fetchGraphQLData(
+  Future<dynamic> executeGraphQLData(
       {String? documents, Map<String, dynamic>? params, Map<String, String>? headers}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: HenryGlobal.graphQlHeaders);
 
@@ -284,6 +284,19 @@ class GlobalProvider extends BaseController {
   }
 
   // SUBSCRIPTION AREA -----------------------------------------------------------------------------------------------------
+
+  //MUTATION GLOBAL
+  Future<dynamic> mutateGraphQLData(
+      {required String? documents, Map<String, dynamic>? variables, Map<String, String>? accessHeaders}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: accessHeaders);
+
+    var response = await hasuraConnect.mutation(documents!, variables: variables).catchError(handleError);
+    if (response != null) {
+      return jsonEncode(response);
+    } else {
+      return null;
+    }
+  }
 
   // MUTATION AREA (INSERT, UPDATE, DELETE)
   Future<int>? addContacts(

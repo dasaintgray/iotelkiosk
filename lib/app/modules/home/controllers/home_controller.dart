@@ -56,6 +56,7 @@ class HomeController extends GetxController with BaseController {
   late Size previewSize;
 
   final accessToken = ''.obs;
+  final defaultTerminalID = 0.obs;
   late final Map<String, String> globalHeaders;
 
   // LIST
@@ -85,14 +86,16 @@ class HomeController extends GetxController with BaseController {
     super.onInit();
 
     initTimezone();
-    configureSystemIdle();
+    configureSystemIdle(idlingTime: 120);
+    await getTerminals();
 
     // startTimer();
-
     if (screenController.userLoginList.isNotEmpty) {
       accessToken.value = screenController.userLoginList.first.accessToken;
       globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer ${accessToken.value}'};
-      getTerminalData(headers: globalHeaders, terminalID: 3);
+      defaultTerminalID.value = terminalsList.first.data.terminals.first.id;
+      getTerminalData(
+          headers: globalHeaders, terminalID: defaultTerminalID.value.isEqual(0) ? 3 : defaultTerminalID.value);
     }
     // await getTerms(credentialHeaders: headers, languageID: 6);
   }
@@ -102,7 +105,6 @@ class HomeController extends GetxController with BaseController {
     // ignore: unnecessary_overrides
     super.onReady();
     await getCamera();
-    await getTerminals();
 
     // globalAccessToken = HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
     // globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer $globalAccessToken'};
@@ -149,11 +151,12 @@ class HomeController extends GetxController with BaseController {
       (event) {
         var eventData = terminalDataModelFromJson(jsonEncode(event['data']['TerminalData']));
         if (eventData.isNotEmpty) {
-          // print('event data: $eventData');
           terminalDataList.clear();
           terminalDataList.addAll(eventData);
-          print(terminalDataList.length);
-          print(terminalDataList.first.code);
+          print(terminalDataList.first.meta);
+          if (terminalDataList.isNotEmpty) {
+            updateTerminalData(recordID: terminalDataList.first.id, terminalID: terminalDataList.first.terminalId);
+          }
         }
       },
     ).onError(handleError);
@@ -171,8 +174,8 @@ class HomeController extends GetxController with BaseController {
     return null;
   }
 
-  void configureSystemIdle() async {
-    await systemIdle.initialize(time: 30);
+  void configureSystemIdle({required int? idlingTime}) async {
+    await systemIdle.initialize(time: idlingTime!);
 
     systemIdle.onIdleStateChanged.listen((event) {
       if (kDebugMode) {
@@ -290,10 +293,10 @@ class HomeController extends GetxController with BaseController {
     sydneyNow = tz.TZDateTime.now(sydney);
   }
 
-  Future<bool?> cashDispenserCommand({required String? sCommand, required String? sTerminal}) async {
+  Future<bool?> cashDispenserCommand({required String? sCommand, required int? iTerminalID}) async {
     isLoading.value = true;
-    final cashResponse = await GlobalProvider()
-        .cashDispenserCommand(cashCommand: sCommand!.toUpperCase(), sTerminalCode: sTerminal!.toUpperCase());
+    final cashResponse =
+        await GlobalProvider().cashDispenserCommand(cashCommand: sCommand!.toUpperCase(), iTerminalID: iTerminalID!);
     try {
       if (cashResponse != null) {
         apiResponseList.add(cashResponse);
@@ -321,6 +324,23 @@ class HomeController extends GetxController with BaseController {
       }
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  // UPDATE THE TERMINAL DATA USING MUTATION
+  // DATE: 14 AUGUST, 2023
+  Future<bool?> updateTerminalData({required int recordID, required int terminalID}) async {
+    Map<String, dynamic> params = {"STATUS": "READ", "ID": recordID, "TerminalID": terminalID};
+
+    var accessToken = getAccessToken();
+
+    var response = await GlobalProvider()
+        .mutateGraphQLData(documents: updateTerminalDataGraphQL, variables: params, accessHeaders: accessToken);
+    if (response != null) {
+      print(response);
+      return true;
+    } else {
+      return false;
     }
   }
 
