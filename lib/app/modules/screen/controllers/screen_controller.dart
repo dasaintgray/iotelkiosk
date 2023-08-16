@@ -35,6 +35,9 @@ import 'package:translator/translator.dart';
 import 'package:get/get.dart';
 import 'package:hex/hex.dart';
 
+import 'package:timezone/data/latest.dart' as tzd;
+import 'package:timezone/standalone.dart' as tz;
+
 class ScreenController extends GetxController with BaseController {
   // VARIABLE DECLARTION WITH OBSERVABLE CAPABILITY;
 
@@ -100,6 +103,14 @@ class ScreenController extends GetxController with BaseController {
   // DATE
   final dtNow = DateFormat.yMMMMd().format(DateTime.now());
 
+  final japanNow = DateTime.now().obs;
+  final newyorkNow = DateTime.now().obs;
+  final seoulNow = DateTime.now().obs;
+  final sydneyNow = DateTime.now().obs;
+
+  // LOCAL TIME
+  final localTime = DateTime.now().obs;
+
   // LISTENING
   final player = Player(
     id: 0,
@@ -114,6 +125,8 @@ class ScreenController extends GetxController with BaseController {
     super.onInit();
 
     hostname.value = Platform.localHostname;
+
+    initTimezone();
 
     // monitorInfo();
     setDisplayMonitor('DISPLAY2');
@@ -159,6 +172,8 @@ class ScreenController extends GetxController with BaseController {
     // await getTerms(credentialHeaders: headers, languageID: selecttedLanguageID.value);
   }
 
+  // APP LIFE CYCLE
+
   @override
   void onReady() {
     super.onReady();
@@ -176,6 +191,22 @@ class ScreenController extends GetxController with BaseController {
     super.onClose();
     scrollController.dispose();
     // port.close();
+  }
+
+  // ------------------------------------------------------------------------------------------------------
+  // CONTROLLER CODE
+
+  void initTimezone() {
+    tzd.initializeTimeZones();
+    final japan = tz.getLocation('Asia/Tokyo');
+    final newyork = tz.getLocation('America/New_York');
+    final seoul = tz.getLocation('Asia/Seoul');
+    final sydney = tz.getLocation('Australia/Sydney');
+
+    japanNow.value = tz.TZDateTime.now(japan);
+    newyorkNow.value = tz.TZDateTime.now(newyork);
+    seoulNow.value = tz.TZDateTime.now(seoul);
+    sydneyNow.value = tz.TZDateTime.now(sydney);
   }
 
   String? getAccessToken() {

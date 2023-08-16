@@ -18,8 +18,6 @@ import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 import 'package:system_idle/system_idle.dart';
 
-import 'package:timezone/data/latest.dart' as tzd;
-import 'package:timezone/standalone.dart' as tz;
 // ignore: depend_on_referenced_packages
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:translator/translator.dart';
@@ -27,14 +25,6 @@ import 'package:translator/translator.dart';
 // FFI AND WIN32
 
 class HomeController extends GetxController with BaseController {
-  DateTime japanNow = DateTime.now();
-  DateTime newyorkNow = DateTime.now();
-  DateTime seoulNow = DateTime.now();
-  DateTime sydneyNow = DateTime.now();
-
-  // LOCAL TIME
-  DateTime localTime = DateTime.now();
-
   // late Timer timer;
   late final idleTime = 0;
 
@@ -85,7 +75,6 @@ class HomeController extends GetxController with BaseController {
   void onInit() async {
     super.onInit();
 
-    initTimezone();
     configureSystemIdle(idlingTime: 120);
     await getTerminals();
 
@@ -105,6 +94,7 @@ class HomeController extends GetxController with BaseController {
     // ignore: unnecessary_overrides
     super.onReady();
     await getCamera();
+    await printIPS();
 
     // globalAccessToken = HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
     // globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer $globalAccessToken'};
@@ -120,6 +110,15 @@ class HomeController extends GetxController with BaseController {
   //   // stopTimer();
   //   // screenController.dispose();
   // }
+
+  Future printIPS() async {
+    for (var interfaces in await NetworkInterface.list()) {
+      print('== interface: ${interfaces.name} ==');
+      for (var addr in interfaces.addresses) {
+        print('${addr.address} ${addr.host} ${addr.rawAddress} ${addr.isLoopback} ${addr.type.name}');
+      }
+    }
+  }
 
   Map<String, String>? getAccessToken() {
     if (screenController.userLoginList.isNotEmpty) {
@@ -279,19 +278,6 @@ class HomeController extends GetxController with BaseController {
   }
 
   // END OF INITIALIZING CAMERAS
-
-  void initTimezone() {
-    tzd.initializeTimeZones();
-    final japan = tz.getLocation('Asia/Tokyo');
-    final newyork = tz.getLocation('America/New_York');
-    final seoul = tz.getLocation('Asia/Seoul');
-    final sydney = tz.getLocation('Australia/Sydney');
-
-    japanNow = tz.TZDateTime.now(japan);
-    newyorkNow = tz.TZDateTime.now(newyork);
-    seoulNow = tz.TZDateTime.now(seoul);
-    sydneyNow = tz.TZDateTime.now(sydney);
-  }
 
   Future<bool?> cashDispenserCommand({required String? sCommand, required int? iTerminalID}) async {
     isLoading.value = true;

@@ -77,20 +77,20 @@ class TransactionView extends GetView<HomeController> {
                         height: 20.h,
                         width: double.infinity,
                         child: WeatherAndClock(
-                          localTime: hc.localTime,
+                          localTime: sc.localTime.value,
                           localTimeLocation: 'Philipppines',
                           degreeC: sc.weatherList.first.current.tempC.toStringAsFixed(0),
                           degreeF: sc.weatherList.first.current.tempF.toStringAsFixed(0),
                           weatherCondition: sc.weatherList.first.current.condition.text,
                           localWeatherLocation: sc.weatherList.first.location.name,
                           localWeatherCountry: sc.weatherList.first.location.country,
-                          countryOneTime: hc.japanNow,
+                          countryOneTime: sc.japanNow.value,
                           countryOneLocation: 'Japan',
-                          countryTwoTime: hc.newyorkNow,
+                          countryTwoTime: sc.newyorkNow.value,
                           countryTwoLocation: 'New York',
-                          countryThreeTime: hc.seoulNow,
+                          countryThreeTime: sc.seoulNow.value,
                           countryThreeLocation: 'Seoul',
-                          countryFourTime: hc.sydneyNow,
+                          countryFourTime: sc.sydneyNow.value,
                           countryFourLocation: 'Sydney',
                           weatherImage: sc.imgUrl.value,
                           textStyle: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
@@ -643,8 +643,8 @@ class TransactionView extends GetView<HomeController> {
             height: orientation == Orientation.portrait ? 25.h : 20.h,
             child: TimePickerDialog(
               initialTime: TimeOfDay(
-                  hour: int.parse(DateFormat('HH').format(hc.localTime)),
-                  minute: int.parse(DateFormat('mm').format(hc.localTime))),
+                  hour: int.parse(DateFormat('HH').format(sc.localTime.value)),
+                  minute: int.parse(DateFormat('mm').format(sc.localTime.value))),
             ),
           ),
           // SizedBox(
@@ -1098,11 +1098,11 @@ class TransactionView extends GetView<HomeController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          DateFormat("EEEE").format(hc.localTime),
+                          DateFormat("EEEE").format(sc.localTime.value),
                           style: TextStyle(color: HenryColors.puti, fontSize: 6.sp),
                         ),
                         Text(
-                          DateFormat("MMMM, dd, y").format(hc.localTime),
+                          DateFormat("MMMM, dd, y").format(sc.localTime.value),
                           style: TextStyle(color: HenryColors.puti, fontSize: 6.sp),
                         ),
                         const Divider(
@@ -1114,7 +1114,7 @@ class TransactionView extends GetView<HomeController> {
                           child: HenryClock(
                             locationOfTime: 'Philippines',
                             locationStyle: const TextStyle(color: HenryColors.puti, fontSize: 15),
-                            dateTime: hc.localTime,
+                            dateTime: sc.localTime.value,
                             isLive: true,
                             useClockSkin: false,
                             showSeconds: false,
@@ -1187,7 +1187,7 @@ class TransactionView extends GetView<HomeController> {
               HenryClock(
                 locationOfTime: 'Japan',
                 locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
-                dateTime: hc.japanNow,
+                dateTime: sc.japanNow.value,
                 isLive: true,
                 showSeconds: false,
                 use24Hour: true,
@@ -1202,7 +1202,7 @@ class TransactionView extends GetView<HomeController> {
               HenryClock(
                 locationOfTime: 'New York',
                 locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
-                dateTime: hc.newyorkNow,
+                dateTime: sc.newyorkNow.value,
                 isLive: true,
                 showSeconds: false,
                 use24Hour: true,
@@ -1217,7 +1217,7 @@ class TransactionView extends GetView<HomeController> {
               HenryClock(
                 locationOfTime: 'Korea',
                 locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
-                dateTime: hc.seoulNow,
+                dateTime: sc.seoulNow.value,
                 isLive: true,
                 showSeconds: false,
                 use24Hour: true,
@@ -1232,7 +1232,7 @@ class TransactionView extends GetView<HomeController> {
               HenryClock(
                 locationOfTime: 'Sydney',
                 locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
-                dateTime: hc.sydneyNow,
+                dateTime: sc.sydneyNow.value,
                 isLive: true,
                 showSeconds: false,
                 use24Hour: true,
