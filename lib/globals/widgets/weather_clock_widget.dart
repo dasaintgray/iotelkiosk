@@ -61,13 +61,17 @@ class WeatherAndClock extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        DateFormat("EEEE").format(localTime),
+                      DefaultTextStyle(
                         style: textStyle,
+                        child: Text(
+                          DateFormat("EEEE").format(localTime),
+                        ),
                       ),
-                      Text(
-                        DateFormat("MMMM, dd, y").format(localTime),
+                      DefaultTextStyle(
                         style: TextStyle(color: HenryColors.puti, fontSize: 6.sp),
+                        child: Text(
+                          DateFormat("MMMM, dd, y").format(localTime),
+                        ),
                       ),
                       const Divider(
                         color: HenryColors.puti,
@@ -115,14 +119,27 @@ class WeatherAndClock extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                '$degreeC° C',
+                              DefaultTextStyle(
                                 style: TextStyle(color: HenryColors.puti, fontSize: 6.sp),
+                                child: Text(
+                                  '$degreeC° C',
+                                ),
                               ),
-                              Text(
-                                '$degreeF° F',
+                              DefaultTextStyle(
                                 style: TextStyle(color: HenryColors.puti, fontSize: 6.sp),
+                                child: Text(
+                                  '$degreeF° F',
+                                ),
                               ),
+
+                              // Text(
+                              //   '$degreeC° C',
+                              //   style: TextStyle(color: HenryColors.puti, fontSize: 6.sp),
+                              // ),
+                              // Text(
+                              //   '$degreeF° F',
+                              //   style: TextStyle(color: HenryColors.puti, fontSize: 6.sp),
+                              // ),
                             ],
                           ),
                         ],
@@ -131,12 +148,22 @@ class WeatherAndClock extends StatelessWidget {
                         color: HenryColors.puti,
                         thickness: 3,
                       ),
-                      Text(
-                        weatherCondition,
+                      DefaultTextStyle(
                         style: TextStyle(color: HenryColors.puti, fontSize: 4.sp, overflow: TextOverflow.ellipsis),
+                        child: Text(
+                          weatherCondition,
+                        ),
                       ),
-                      Text('$localWeatherLocation, $localWeatherCountry',
-                          style: TextStyle(color: HenryColors.puti, fontSize: 3.sp))
+                      DefaultTextStyle(
+                        style: TextStyle(color: HenryColors.puti, fontSize: 3.sp),
+                        child: Text('$localWeatherLocation, $localWeatherCountry'),
+                      ),
+                      // Text(
+                      //   weatherCondition,
+                      //   style: TextStyle(color: HenryColors.puti, fontSize: 4.sp, overflow: TextOverflow.ellipsis),
+                      // ),
+                      // Text('$localWeatherLocation, $localWeatherCountry',
+                      //     style: TextStyle(color: HenryColors.puti, fontSize: 3.sp))
                     ],
                   ),
                 ),
@@ -148,66 +175,138 @@ class WeatherAndClock extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            HenryClock(
-              locationOfTime: countryOneLocation,
-              locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
-              dateTime: countryOneTime,
-              isLive: true,
-              showSeconds: false,
-              use24Hour: true,
-              useClockSkin: true,
-              textScaleFactor: 2,
-              digitalClockTextColor: Colors.black,
-              decoration: const BoxDecoration(
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.all(Radius.zero),
+            DefaultTextStyle(
+              style: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+              child: HenryClock(
+                locationOfTime: countryOneLocation,
+                locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+                dateTime: countryOneTime,
+                isLive: true,
+                showSeconds: false,
+                use24Hour: true,
+                useClockSkin: true,
+                textScaleFactor: 2,
+                digitalClockTextColor: Colors.black,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.zero),
+                ),
               ),
             ),
-            HenryClock(
-              locationOfTime: countryTwoLocation,
-              locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
-              dateTime: countryTwoTime,
-              isLive: true,
-              showSeconds: false,
-              use24Hour: true,
-              useClockSkin: true,
-              textScaleFactor: 2,
-              digitalClockTextColor: Colors.black,
-              decoration: const BoxDecoration(
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.all(Radius.zero),
+            DefaultTextStyle(
+              style: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+              child: HenryClock(
+                locationOfTime: countryTwoLocation,
+                locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+                dateTime: countryTwoTime,
+                isLive: true,
+                showSeconds: false,
+                use24Hour: true,
+                useClockSkin: true,
+                textScaleFactor: 2,
+                digitalClockTextColor: Colors.black,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.zero),
+                ),
               ),
             ),
-            HenryClock(
-              locationOfTime: countryThreeLocation,
-              locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
-              dateTime: countryThreeTime,
-              isLive: true,
-              showSeconds: false,
-              use24Hour: true,
-              useClockSkin: true,
-              textScaleFactor: 2,
-              digitalClockTextColor: Colors.black,
-              decoration: const BoxDecoration(
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.all(Radius.zero),
+            DefaultTextStyle(
+              style: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+              child: HenryClock(
+                locationOfTime: countryThreeLocation,
+                locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+                dateTime: countryThreeTime,
+                isLive: true,
+                showSeconds: false,
+                use24Hour: true,
+                useClockSkin: true,
+                textScaleFactor: 2,
+                digitalClockTextColor: Colors.black,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.zero),
+                ),
               ),
             ),
-            HenryClock(
-              locationOfTime: countryFourLocation,
-              locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
-              dateTime: countryFourTime,
-              isLive: true,
-              showSeconds: false,
-              use24Hour: true,
-              useClockSkin: true,
-              textScaleFactor: 2,
-              digitalClockTextColor: Colors.black,
-              decoration: const BoxDecoration(
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.all(Radius.zero),
+            DefaultTextStyle(
+              style: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+              child: HenryClock(
+                locationOfTime: countryFourLocation,
+                locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+                dateTime: countryFourTime,
+                isLive: true,
+                showSeconds: false,
+                use24Hour: true,
+                useClockSkin: true,
+                textScaleFactor: 2,
+                digitalClockTextColor: Colors.black,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.all(Radius.zero),
+                ),
               ),
             ),
+            // HenryClock(
+            //   locationOfTime: countryOneLocation,
+            //   locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+            //   dateTime: countryOneTime,
+            //   isLive: true,
+            //   showSeconds: false,
+            //   use24Hour: true,
+            //   useClockSkin: true,
+            //   textScaleFactor: 2,
+            //   digitalClockTextColor: Colors.black,
+            //   decoration: const BoxDecoration(
+            //     shape: BoxShape.rectangle,
+            //     borderRadius: BorderRadius.all(Radius.zero),
+            //   ),
+            // ),
+            // HenryClock(
+            //   locationOfTime: countryTwoLocation,
+            //   locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+            //   dateTime: countryTwoTime,
+            //   isLive: true,
+            //   showSeconds: false,
+            //   use24Hour: true,
+            //   useClockSkin: true,
+            //   textScaleFactor: 2,
+            //   digitalClockTextColor: Colors.black,
+            //   decoration: const BoxDecoration(
+            //     shape: BoxShape.rectangle,
+            //     borderRadius: BorderRadius.all(Radius.zero),
+            //   ),
+            // ),
+            // HenryClock(
+            //   locationOfTime: countryThreeLocation,
+            //   locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+            //   dateTime: countryThreeTime,
+            //   isLive: true,
+            //   showSeconds: false,
+            //   use24Hour: true,
+            //   useClockSkin: true,
+            //   textScaleFactor: 2,
+            //   digitalClockTextColor: Colors.black,
+            //   decoration: const BoxDecoration(
+            //     shape: BoxShape.rectangle,
+            //     borderRadius: BorderRadius.all(Radius.zero),
+            //   ),
+            // ),
+            // HenryClock(
+            //   locationOfTime: countryFourLocation,
+            //   locationStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+            //   dateTime: countryFourTime,
+            //   isLive: true,
+            //   showSeconds: false,
+            //   use24Hour: true,
+            //   useClockSkin: true,
+            //   textScaleFactor: 2,
+            //   digitalClockTextColor: Colors.black,
+            //   decoration: const BoxDecoration(
+            //     shape: BoxShape.rectangle,
+            //     borderRadius: BorderRadius.all(Radius.zero),
+            //   ),
+            // ),
           ],
         ),
       ],

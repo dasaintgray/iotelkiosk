@@ -46,77 +46,77 @@ class InsertPaymentView extends GetView {
                 child: Image.asset('assets/png/iotellogo.png', fit: BoxFit.contain),
               ),
             ),
-            Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 20.h,
-                      width: double.infinity,
-                      child: WeatherAndClock(
-                        localTime: sc.localTime.value,
-                        localTimeLocation: 'Philipppines',
-                        degreeC: sc.weatherList.first.current.tempC.toStringAsFixed(0),
-                        degreeF: sc.weatherList.first.current.tempF.toStringAsFixed(0),
-                        weatherCondition: sc.weatherList.first.current.condition.text,
-                        localWeatherLocation: sc.weatherList.first.location.name,
-                        localWeatherCountry: sc.weatherList.first.location.country,
-                        countryOneTime: sc.japanNow.value,
-                        countryOneLocation: 'Japan',
-                        countryTwoTime: sc.newyorkNow.value,
-                        countryTwoLocation: 'New York',
-                        countryThreeTime: sc.seoulNow.value,
-                        countryThreeLocation: 'Seoul',
-                        countryFourTime: sc.sydneyNow.value,
-                        countryFourLocation: 'Sydney',
-                        weatherImage: sc.imgUrl.value,
-                        textStyle: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
-                      ),
-                    ),
-                    SizedBox(
-                      height: orientation == Orientation.portrait ? 12.h : 1.h,
-                      width: double.infinity,
-                    ),
-                    SizedBox(
-                      height: 5.h,
-                      width: double.infinity,
-                      child: CarouselTitle(
-                        titleTrans: sc.titleTrans,
-                        textStyle: TextStyle(color: HenryColors.darkGreen, fontSize: 15.sp),
-                      ),
-                    ),
-                    // menuRoomType(orientation, languageID: sc.selecttedLanguageID.value),
-
-                    menuInsertPayment(orientation, languageID: sc.selecttedLanguageID.value),
-
-                    SizedBox(
-                      height: orientation == Orientation.portrait ? 10.h : 2.h,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              var response = sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'ST');
-                              if (response) Get.back();
-                            },
-                            child: Image.asset(
-                              'assets/menus/back-arrow.png',
-                              fit: BoxFit.cover,
-                            ),
+            Obx(() => Scaffold(
+                  body: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: 20.h,
+                          width: double.infinity,
+                          child: WeatherAndClock(
+                            localTime: hc.localTime.value,
+                            localTimeLocation: 'Philipppines',
+                            degreeC: sc.weatherList.first.current.tempC.toStringAsFixed(0),
+                            degreeF: sc.weatherList.first.current.tempF.toStringAsFixed(0),
+                            weatherCondition: sc.weatherList.first.current.condition.text,
+                            localWeatherLocation: sc.weatherList.first.location.name,
+                            localWeatherCountry: sc.weatherList.first.location.country,
+                            countryOneTime: hc.japanNow.value,
+                            countryOneLocation: 'Japan',
+                            countryTwoTime: hc.newyorkNow.value,
+                            countryTwoLocation: 'New York',
+                            countryThreeTime: hc.seoulNow.value,
+                            countryThreeLocation: 'Seoul',
+                            countryFourTime: hc.sydneyNow.value,
+                            countryFourLocation: 'Sydney',
+                            weatherImage: sc.imgUrl.value,
+                            textStyle: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
                           ),
-                          const SizedBox(
-                            width: 50,
+                        ),
+                        SizedBox(
+                          height: orientation == Orientation.portrait ? 12.h : 1.h,
+                          width: double.infinity,
+                        ),
+                        SizedBox(
+                          height: 5.h,
+                          width: double.infinity,
+                          child: CarouselTitle(
+                            titleTrans: sc.titleTrans,
+                            textStyle: TextStyle(color: HenryColors.darkGreen, fontSize: 15.sp),
                           ),
-                        ],
-                      ),
+                        ),
+                        // menuRoomType(orientation, languageID: sc.selecttedLanguageID.value),
+
+                        menuInsertPayment(orientation, languageID: sc.selecttedLanguageID.value),
+
+                        SizedBox(
+                          height: orientation == Orientation.portrait ? 10.h : 2.h,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  var response = sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'ST');
+                                  if (response) Get.back();
+                                },
+                                child: Image.asset(
+                                  'assets/menus/back-arrow.png',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 50,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ),
+                  ),
+                )),
           ],
         ),
       );

@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:hasura_connect/hasura_connect.dart';
 import 'package:intl/intl.dart';
+import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
 import 'package:iotelkiosk/globals/constant/bdotransaction_constant.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
@@ -24,7 +25,6 @@ import 'package:iotelkiosk/app/data/models_graphql/translation_terms_model.dart'
 import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/userlogin_model.dart';
 
-import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
@@ -34,9 +34,6 @@ import 'package:iotelkiosk/globals/services/devices/display_service.dart';
 import 'package:translator/translator.dart';
 import 'package:get/get.dart';
 import 'package:hex/hex.dart';
-
-import 'package:timezone/data/latest.dart' as tzd;
-import 'package:timezone/standalone.dart' as tz;
 
 class ScreenController extends GetxController with BaseController {
   // VARIABLE DECLARTION WITH OBSERVABLE CAPABILITY;
@@ -48,15 +45,14 @@ class ScreenController extends GetxController with BaseController {
   final isBankNoteReadyToReceive = false.obs;
 
   // STRING
-  final imgUrl = ''.obs;
-  final sCity = ''.obs;
   final defaultLanguageCode = 'en'.obs;
   final hostname = ''.obs;
+  final sCity = ''.obs;
+  final imgUrl = ''.obs;
 
   // INTEGER
 
   // LIST or OBJECT DATA
-  final weatherList = <WeatherModel>[].obs;
   final settingsList = <SettingsModel>[].obs;
   final userLoginList = <UserLoginModel>[].obs;
 
@@ -90,6 +86,7 @@ class ScreenController extends GetxController with BaseController {
   final titleTrans = <Conversion>[].obs;
   final btnMessage = <Conversion>[].obs;
   final availRoomList = <AvailableRoom>[].obs;
+  final weatherList = <WeatherModel>[].obs;
 
   // OTHER LIST
   List<int> serialReadList = [];
@@ -102,14 +99,6 @@ class ScreenController extends GetxController with BaseController {
 
   // DATE
   final dtNow = DateFormat.yMMMMd().format(DateTime.now());
-
-  final japanNow = DateTime.now().obs;
-  final newyorkNow = DateTime.now().obs;
-  final seoulNow = DateTime.now().obs;
-  final sydneyNow = DateTime.now().obs;
-
-  // LOCAL TIME
-  final localTime = DateTime.now().obs;
 
   // LISTENING
   final player = Player(
@@ -125,8 +114,6 @@ class ScreenController extends GetxController with BaseController {
     super.onInit();
 
     hostname.value = Platform.localHostname;
-
-    initTimezone();
 
     // monitorInfo();
     setDisplayMonitor('DISPLAY2');
@@ -196,25 +183,31 @@ class ScreenController extends GetxController with BaseController {
   // ------------------------------------------------------------------------------------------------------
   // CONTROLLER CODE
 
-  void initTimezone() {
-    tzd.initializeTimeZones();
-    final japan = tz.getLocation('Asia/Tokyo');
-    final newyork = tz.getLocation('America/New_York');
-    final seoul = tz.getLocation('Asia/Seoul');
-    final sydney = tz.getLocation('Australia/Sydney');
-
-    japanNow.value = tz.TZDateTime.now(japan);
-    newyorkNow.value = tz.TZDateTime.now(newyork);
-    seoulNow.value = tz.TZDateTime.now(seoul);
-    sydneyNow.value = tz.TZDateTime.now(sydney);
-  }
-
   String? getAccessToken() {
     if (userLoginList.isEmpty) {
       return null;
     } else {
       return userLoginList.first.accessToken;
     }
+  }
+
+  Future<bool> getWeather() async {
+    isLoading.value = true;
+    final weatherResponse =
+        await GlobalProvider().fetchWeather(queryParam: sCity.value.isEmpty ? 'Angeles City' : sCity.value);
+    try {
+      if (weatherResponse != null) {
+        weatherList.add(weatherResponse);
+        imgUrl.value = 'http:${weatherResponse.current.condition.icon}';
+        isLoading.value = false;
+        return true;
+      } else {
+        isLoading.value = false;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
   }
 
   void getBDOOpen(
@@ -839,27 +832,6 @@ class ScreenController extends GetxController with BaseController {
 
         isLoading.value = false;
         return true;
-      }
-    } finally {
-      isLoading.value = false;
-    }
-    return false;
-  }
-
-  Future<bool> getWeather() async {
-    isLoading.value = true;
-    final weatherResponse =
-        await GlobalProvider().fetchWeather(queryParam: sCity.value.isEmpty ? 'Angeles City' : sCity.value);
-    try {
-      if (weatherResponse != null) {
-        weatherList.add(weatherResponse);
-        imgUrl.value = 'http:${weatherResponse.current.condition.icon}';
-        // ignore: avoid_print
-        // print(weatherResponse);
-        isLoading.value = false;
-        return true;
-      } else {
-        isLoading.value = false;
       }
     } finally {
       isLoading.value = false;

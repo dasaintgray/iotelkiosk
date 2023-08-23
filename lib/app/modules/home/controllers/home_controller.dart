@@ -22,6 +22,9 @@ import 'package:system_idle/system_idle.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:translator/translator.dart';
 
+import 'package:timezone/data/latest.dart' as tzd;
+import 'package:timezone/standalone.dart' as tz;
+
 // FFI AND WIN32
 
 class HomeController extends GetxController with BaseController {
@@ -57,24 +60,31 @@ class HomeController extends GetxController with BaseController {
   // MAP
   final snapshotData = [];
 
+  // LOCAL TIME
+  final japanNow = DateTime.now().obs;
+  final newyorkNow = DateTime.now().obs;
+  final seoulNow = DateTime.now().obs;
+  final sydneyNow = DateTime.now().obs;
+  final localTime = DateTime.now().obs;
+
+  // STRING
+
   // SERIAL TEST
   StreamSubscription<CameraClosingEvent>? errorStreamSubscription;
   StreamSubscription<CameraClosingEvent>? cameraClosingEvent;
 
   // UI
   late TextEditingController textEditingController = TextEditingController();
-
   // ScreenController screenController = Get.put(ScreenController());
   final ScreenController screenController = Get.find<ScreenController>();
-
   final SystemIdle systemIdle = SystemIdle.instance;
-
   final translator = GoogleTranslator();
 
   @override
   void onInit() async {
     super.onInit();
 
+    initTimezone();
     configureSystemIdle(idlingTime: 120);
     await getTerminals();
 
@@ -94,7 +104,9 @@ class HomeController extends GetxController with BaseController {
     // ignore: unnecessary_overrides
     super.onReady();
     await getCamera();
-    await printIPS();
+    // await printIPS();
+    var response = await getIPFromInterface(interfaceName: 'Wi-Fi');
+    print(response);
 
     // globalAccessToken = HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
     // globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer $globalAccessToken'};
@@ -111,6 +123,20 @@ class HomeController extends GetxController with BaseController {
   //   // screenController.dispose();
   // }
 
+  void initTimezone() {
+    tzd.initializeTimeZones();
+    final japan = tz.getLocation('Asia/Tokyo');
+    final newyork = tz.getLocation('America/New_York');
+    final seoul = tz.getLocation('Asia/Seoul');
+    final sydney = tz.getLocation('Australia/Sydney');
+
+    japanNow.value = tz.TZDateTime.now(japan);
+    newyorkNow.value = tz.TZDateTime.now(newyork);
+    seoulNow.value = tz.TZDateTime.now(seoul);
+    sydneyNow.value = tz.TZDateTime.now(sydney);
+  }
+
+  // DISPLAY THE IP OF ALL INTERFACES
   Future printIPS() async {
     for (var interfaces in await NetworkInterface.list()) {
       print('== interface: ${interfaces.name} ==');
@@ -118,6 +144,17 @@ class HomeController extends GetxController with BaseController {
         print('${addr.address} ${addr.host} ${addr.rawAddress} ${addr.isLoopback} ${addr.type.name}');
       }
     }
+  }
+
+  Future<String?> getIPFromInterface({required String interfaceName}) async {
+    for (var interfaces in await NetworkInterface.list()) {
+      for (var addr in interfaces.addresses) {
+        if (interfaceName == interfaces.name) {
+          return addr.address;
+        }
+      }
+    }
+    return null;
   }
 
   Map<String, String>? getAccessToken() {

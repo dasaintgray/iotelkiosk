@@ -6,9 +6,12 @@ import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/insert_payment_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
+import 'package:iotelkiosk/globals/constant/led_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
-import 'package:iotelkiosk/globals/widgets/carousel_title_widget.dart';
-import 'package:iotelkiosk/globals/widgets/weather_clock_widget.dart';
+import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
+import 'package:iotelkiosk/globals/widgets/kioskbi_widget.dart';
+import 'package:iotelkiosk/globals/widgets/kioskheader_widget.dart';
+import 'package:iotelkiosk/globals/widgets/menutitle_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class PaymentMethodView extends GetView {
@@ -19,109 +22,62 @@ class PaymentMethodView extends GetView {
 
   @override
   Widget build(BuildContext context) {
-    return Sizer(builder: (BuildContext context, orientation, deviceType) {
-      return GestureDetector(
-        onTap: () {
-          if (hc.isIdleActive.value) {
-            sc.player.play();
-          }
-        },
-        child: Stack(
+    return Sizer(
+      builder: (BuildContext context, Orientation orientation, DeviceType deviceType) {
+        return Stack(
           children: [
-            Positioned(
-              child: Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/background/bck.png'),
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: orientation == Orientation.portrait ? 15.h : 5.h,
-              bottom: orientation == Orientation.portrait ? 65.h : 45.h,
-              left: orientation == Orientation.portrait ? 35.w : 45.w,
-              right: orientation == Orientation.portrait ? 35.w : 45.w,
-              child: SizedBox(
-                child: Image.asset('assets/png/iotellogo.png', fit: BoxFit.contain),
-              ),
-            ),
+            const KioskBackgroundImage(),
+            orientation == Orientation.portrait
+                ? CompanyLogo(top: 15.h, bottom: 65.h, left: 35.w, right: 35.w)
+                : CompanyLogo(top: 5.h, bottom: 45.h, left: 45.w, right: 45.w),
+            KioskHeader(),
             Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 20.h,
-                      width: double.infinity,
-                      child: WeatherAndClock(
-                        localTime: sc.localTime.value,
-                        localTimeLocation: 'Philipppines',
-                        degreeC: sc.weatherList.first.current.tempC.toStringAsFixed(0),
-                        degreeF: sc.weatherList.first.current.tempF.toStringAsFixed(0),
-                        weatherCondition: sc.weatherList.first.current.condition.text,
-                        localWeatherLocation: sc.weatherList.first.location.name,
-                        localWeatherCountry: sc.weatherList.first.location.country,
-                        countryOneTime: sc.japanNow.value,
-                        countryOneLocation: 'Japan',
-                        countryTwoTime: sc.newyorkNow.value,
-                        countryTwoLocation: 'New York',
-                        countryThreeTime: sc.seoulNow.value,
-                        countryThreeLocation: 'Seoul',
-                        countryFourTime: sc.sydneyNow.value,
-                        countryFourLocation: 'Sydney',
-                        weatherImage: sc.imgUrl.value,
-                        textStyle: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
-                      ),
-                    ),
-                    SizedBox(
-                      height: orientation == Orientation.portrait ? 12.h : 1.h,
-                      width: double.infinity,
-                    ),
-                    SizedBox(
-                      height: 5.h,
-                      width: double.infinity,
-                      child: CarouselTitle(
-                        titleTrans: sc.titleTrans,
-                        textStyle: TextStyle(color: HenryColors.darkGreen, fontSize: 15.sp),
-                      ),
-                    ),
-                    menuPaymentType(orientation, languageID: sc.selecttedLanguageID.value),
-                    Obx(() => Visibility(
-                          visible: !sc.isLoading.value,
-                          child: SizedBox(
-                            height: orientation == Orientation.portrait ? 10.h : 2.h,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    var response = sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'ST');
-                                    if (response) Get.back();
-                                  },
-                                  child: Image.asset(
-                                    'assets/menus/back-arrow.png',
-                                    fit: BoxFit.cover,
-                                  ),
+              body: Column(
+                children: [
+                  // SPACE
+                  SizedBox(
+                    height: 32.h,
+                  ),
+                  // TITLE
+                  KioskMenuTitle(titleLength: sc.titleTrans.length, titleTrans: sc.titleTrans),
+                  // SPACE
+                  SizedBox(
+                    height: 2.h,
+                  ),
+                  // MENU
+                  menuPaymentType(orientation, languageID: sc.selecttedLanguageID.value),
+                  Obx(() => Visibility(
+                        visible: !sc.isLoading.value,
+                        child: SizedBox(
+                          height: orientation == Orientation.portrait ? 10.h : 2.h,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  var response = sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'ST');
+                                  if (response) Get.back();
+                                },
+                                child: Image.asset(
+                                  'assets/menus/back-arrow.png',
+                                  fit: BoxFit.cover,
                                 ),
-                                const SizedBox(
-                                  width: 50,
-                                ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(
+                                width: 50,
+                              ),
+                            ],
                           ),
-                        )),
-                  ],
-                ),
+                        ),
+                      )),
+                ],
               ),
             ),
           ],
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 
   Widget menuPaymentType(Orientation orientation, {int? languageID, String? code, String? type}) {
@@ -137,7 +93,7 @@ class PaymentMethodView extends GetView {
                     children: [
                       const CircularProgressIndicator.adaptive(),
                       Text(
-                        'Initializing payment, \nplease wait ....',
+                        'Initializing Cash Acceptor, \nplease wait ....',
                         style: TextStyle(color: HenryColors.darkGreen, fontSize: 25.sp),
                         textAlign: TextAlign.center,
                       )
@@ -209,13 +165,15 @@ class PaymentMethodView extends GetView {
 
                                       if (response!) {
                                         // sc.subscribeCashDispenser();
-
                                         sc.getMenu(languageID: languageID, code: 'IP', type: 'TITLE');
+                                        // initialize the led on cash acceptor
+                                        sc.openLEDLibserial(ledLocationAndStatus: LedOperation.bottomRIGHTLEDON);
 
                                         var cashresponse =
                                             await hc.cashDispenserCommand(sCommand: 'CASA', iTerminalID: 3);
                                         if (cashresponse!) {
                                           sc.isLoading.value = false;
+                                          hc.update();
                                           Get.to(() => InsertPaymentView());
                                         }
                                       }
