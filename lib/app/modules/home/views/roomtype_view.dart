@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -29,13 +30,14 @@ class RoomTypeView extends GetView {
             orientation == Orientation.portrait
                 ? CompanyLogo(top: 15.h, bottom: 65.h, left: 35.w, right: 35.w)
                 : CompanyLogo(top: 5.h, bottom: 45.h, left: 45.w, right: 45.w),
-            KioskHeader(),
+            // KioskHeader(),
             Scaffold(
               body: Column(
                 children: [
+                  KioskHeader(),
                   // SPACE
                   SizedBox(
-                    height: 32.h,
+                    height: 12.h,
                   ),
                   // TITLE
                   KioskMenuTitle(titleLength: sc.titleTrans.length, titleTrans: sc.titleTrans),
@@ -141,10 +143,14 @@ class RoomTypeView extends GetView {
                       // }
 
                       sc.isLoading.value = true;
+                      sc.selectedRoomTypeID.value = sc.roomTypeList.first.data.roomTypes[index].id;
                       var response = await sc.getPaymentType(
                           credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
                       if (response) {
                         sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SPM');
+                        var response = await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: 1);
+                        if (kDebugMode) print(response);
+
                         hc.update();
                         Get.to(() => PaymentMethodView());
                       }

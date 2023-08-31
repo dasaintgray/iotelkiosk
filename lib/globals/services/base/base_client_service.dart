@@ -125,6 +125,7 @@ class HenryBaseClient {
       case 422:
         throw BadRequestException(responseJSON.toString(), response.request!.url.toString());
       case 500:
+        throw BadRequestException(responseJSON.toString(), response.request!.url.toString());
       default:
         throw FetchDataException('Error occured with code \n${response.statusCode} : ${response.reasonPhrase}',
             response.request!.url.toString());

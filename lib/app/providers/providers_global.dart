@@ -54,9 +54,12 @@ class GlobalProvider extends BaseController {
   Future<ApiResponseModel?> cashDispenserCommand({required String? cashCommand, required int? iTerminalID}) async {
     final sCommand = '?command=${cashCommand!.toUpperCase()}&Terminal=$iTerminalID';
     final sendpoint = HenryGlobal.iotelEndPoint + sCommand;
-    final response = await HenryBaseClient().getRequest(HenryGlobal.iotelURI, sendpoint, HenryGlobal.iotelHeaders);
+    final response = await HenryBaseClient()
+        .getRequest(HenryGlobal.iotelURI, sendpoint, HenryGlobal.iotelHeaders)
+        .catchError(handleError);
 
     if (response != null) {
+      // return apiResponseModelFromJson(jsonEncode(response));
       return apiResponseModelFromJson(response);
     } else {
       return null;

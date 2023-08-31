@@ -36,10 +36,15 @@ class HomeController extends GetxController with BaseController {
   final isIdleActive = false.obs;
   final isMenuLanguageVisible = true.obs;
   final isMenuTransactionVisible = true.obs;
-  final roomTypeTranslatedText = ''.obs;
+  final isConfirmReady = false.obs;
+  final isOverPaymentDetected = false.obs;
 
   // INT
   final menuIndex = 0.obs;
+
+  // DOUBLE
+  final nabasangPera = 0.0.obs;
+  final overPayment = 0.0.obs;
 
   // CAMERA GLOBAL VARIABLES
   final cameraInfo = 'Unkown'.obs;
@@ -68,6 +73,7 @@ class HomeController extends GetxController with BaseController {
   final localTime = DateTime.now().obs;
 
   // STRING
+  final roomTypeTranslatedText = ''.obs;
 
   // SERIAL TEST
   StreamSubscription<CameraClosingEvent>? errorStreamSubscription;
@@ -85,7 +91,7 @@ class HomeController extends GetxController with BaseController {
     super.onInit();
 
     initTimezone();
-    configureSystemIdle(idlingTime: 120);
+    configureSystemIdle(idlingTime: 180);
     await getTerminals();
 
     // startTimer();
@@ -94,8 +100,10 @@ class HomeController extends GetxController with BaseController {
       globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer ${accessToken.value}'};
       defaultTerminalID.value = terminalsList.first.data.terminals.first.id;
       getTerminalData(
-          headers: globalHeaders, terminalID: defaultTerminalID.value.isEqual(0) ? 3 : defaultTerminalID.value);
+          headers: globalHeaders, terminalID: defaultTerminalID.value.isEqual(0) ? 1 : defaultTerminalID.value);
     }
+
+    nabasangPera.value = 0;
     // await getTerms(credentialHeaders: headers, languageID: 6);
   }
 
@@ -171,15 +179,17 @@ class HomeController extends GetxController with BaseController {
   }
 
   Future<dynamic> getTerminalData(
-      {required Map<String, String> headers, required int terminalID, int delay = 5, int iteration = 50}) async {
+      {required Map<String, String> headers,
+      required int terminalID,
+      int delay = 5,
+      int iteration = 50,
+      String sCode = ''}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
-    Map<String, dynamic> variables = {
-      "terminalID": terminalID,
-      "status": "NEW",
-      "delay": delay,
-      "iteration": iteration
-    };
+    Map<String, dynamic> variables = sCode.isEmpty
+        ? {"terminalID": terminalID, "status": "NEW", "delay": delay, "iteration": iteration}
+        : {"terminalID": terminalID, "status": "NEW", "delay": delay, "iteration": iteration, "code": sCode};
+
     Snapshot terminalDataSnapShot = await hasuraConnect.subscription(terminalData, variables: variables);
 
     // LISTENING
@@ -189,9 +199,34 @@ class HomeController extends GetxController with BaseController {
         if (eventData.isNotEmpty) {
           terminalDataList.clear();
           terminalDataList.addAll(eventData);
-          print(terminalDataList.first.meta);
+          if (kDebugMode) print(terminalDataList.first.code);
           if (terminalDataList.isNotEmpty) {
-            updateTerminalData(recordID: terminalDataList.first.id, terminalID: terminalDataList.first.terminalId);
+            if (sCode == "CASI") {
+              if (kDebugMode) print(terminalDataList.first.value);
+              var valueRead = terminalDataList.first.value;
+              if (kDebugMode) print(valueRead);
+              if (valueRead.isCurrency) {
+                nabasangPera.value == 0
+                    ? nabasangPera.value = double.parse(valueRead)
+                    : nabasangPera.value = nabasangPera.value + double.parse(valueRead);
+                if (kDebugMode) print(nabasangPera.value);
+                updateTerminalData(recordID: terminalDataList.first.id, terminalID: terminalDataList.first.terminalId);
+                if (nabasangPera.value >= screenController.totalAmountDue.value) {
+                  if (nabasangPera.value == screenController.totalAmountDue.value) {
+                    isOverPaymentDetected.value = false;
+                  } else {
+                    overPayment.value = nabasangPera.value - screenController.totalAmountDue.value;
+                    isOverPaymentDetected.value = true;
+                  }
+                  isConfirmReady.value = true;
+                } else {
+                  isConfirmReady.value = false;
+                }
+              } else {
+                if (kDebugMode) print(terminalDataList.first.value);
+              }
+              updateTerminalData(recordID: terminalDataList.first.id, terminalID: terminalDataList.first.terminalId);
+            }
           }
         }
       },
@@ -221,7 +256,9 @@ class HomeController extends GetxController with BaseController {
       screenController.getMenu(code: 'SLMT', type: 'TITLE'); //go back to main selection
       isIdleActive.value = event;
       //CLOSE THE HOMECONTROLLER INTO THE MEMORY AND STAY THE SCREENCONTROLLER ALIVE
-      Get.off(() => ScreenView());
+      // Get.off(() => ScreenView());
+      Get.offAll(() => ScreenView());
+      // Get.back();
     });
   }
 

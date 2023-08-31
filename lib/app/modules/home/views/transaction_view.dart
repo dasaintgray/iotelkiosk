@@ -39,13 +39,14 @@ class TransactionView extends GetView<HomeController> {
             orientation == Orientation.portrait
                 ? CompanyLogo(top: 15.h, bottom: 65.h, left: 35.w, right: 35.w)
                 : CompanyLogo(top: 5.h, bottom: 45.h, left: 45.w, right: 45.w),
-            KioskHeader(),
+            // KioskHeader(),
             Scaffold(
               body: Column(
                 children: [
+                  KioskHeader(),
                   // SPACE
                   SizedBox(
-                    height: 32.h,
+                    height: 12.h,
                   ),
                   // TITLE
                   KioskMenuTitle(titleLength: sc.titleTrans.length, titleTrans: sc.titleTrans),

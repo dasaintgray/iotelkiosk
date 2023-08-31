@@ -9,7 +9,6 @@ import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
-import 'package:hasura_connect/hasura_connect.dart';
 import 'package:intl/intl.dart';
 import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
 import 'package:iotelkiosk/globals/constant/bdotransaction_constant.dart';
@@ -160,7 +159,6 @@ class ScreenController extends GetxController with BaseController {
   }
 
   // APP LIFE CYCLE
-
   @override
   void onReady() {
     super.onReady();
@@ -732,10 +730,10 @@ class ScreenController extends GetxController with BaseController {
   //   }
   // }
 
-  void openLEDLibserial({String ledLocationAndStatus = ''}) {
+  void openLEDLibserial({String ledLocationAndStatus = '', required String? portName}) {
     // final serialPort = SerialPort.availablePorts;
     final portConfig = SerialPortConfig();
-    final port = SerialPort("COM1");
+    final port = SerialPort(portName!);
     portConfig.baudRate = 9600;
     portConfig.parity = SerialPortParity.none;
 
@@ -792,17 +790,17 @@ class ScreenController extends GetxController with BaseController {
   }
 
   // SUBSCRIPTION
-  Future<bool?> getTerminalData({required Map<String, String> authorizationHeader}) async {
-    Map<String, dynamic> variables = {"terminalID": 3, "status": "New", "delay": 5, "iteration": 50};
+  // Future<bool?> getTerminalData({required Map<String, String> authorizationHeader}) async {
+  //   Map<String, dynamic> variables = {"terminalID": 3, "status": "New", "delay": 5, "iteration": 50};
 
-    Snapshot snapshot =
-        await GlobalProvider().eventDataSubscription(headers: authorizationHeader, variables: variables);
+  //   Snapshot snapshot =
+  //       await GlobalProvider().eventDataSubscription(headers: authorizationHeader, variables: variables);
 
-    snapshot.listen((event) {
-      if (kDebugMode) print('event: $event');
-    }).onError(handleError);
-    return null;
-  }
+  //   snapshot.listen((event) {
+  //     if (kDebugMode) print('event: $event');
+  //   }).onError(handleError);
+  //   return null;
+  // }
 
   // Future getTerminalDataSubs({required Map<String, String> headers}) async {
   //   var response = GlobalProvider().terminalDataSubscription(headers: headers);

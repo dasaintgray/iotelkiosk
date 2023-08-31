@@ -30,13 +30,14 @@ class PaymentMethodView extends GetView {
             orientation == Orientation.portrait
                 ? CompanyLogo(top: 15.h, bottom: 65.h, left: 35.w, right: 35.w)
                 : CompanyLogo(top: 5.h, bottom: 45.h, left: 45.w, right: 45.w),
-            KioskHeader(),
+            // KioskHeader(),
             Scaffold(
               body: Column(
                 children: [
+                  KioskHeader(),
                   // SPACE
                   SizedBox(
-                    height: 32.h,
+                    height: 12.h,
                   ),
                   // TITLE
                   KioskMenuTitle(titleLength: sc.titleTrans.length, titleTrans: sc.titleTrans),
@@ -91,11 +92,20 @@ class PaymentMethodView extends GetView {
                     // mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const CircularProgressIndicator.adaptive(),
+                      SizedBox(
+                        height: 10.h,
+                        width: 18.w,
+                        child: CircularProgressIndicator.adaptive(
+                            strokeWidth: 5.sp, valueColor: const AlwaysStoppedAnimation<Color>(HenryColors.puti)),
+                      ),
                       Text(
-                        'Initializing Cash Acceptor, \nplease wait ....',
-                        style: TextStyle(color: HenryColors.darkGreen, fontSize: 25.sp),
+                        'Initializing \nCash Acceptor Device \nplease wait ....',
+                        style: TextStyle(color: HenryColors.darkGreen, fontSize: 20.sp),
                         textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        '[The light is flushing...]',
+                        style: TextStyle(color: HenryColors.puti, fontSize: 5.sp),
                       )
                     ],
                   ),
@@ -153,11 +163,13 @@ class PaymentMethodView extends GetView {
                             child: GestureDetector(
                               onTap: () async {
                                 switch (index) {
+                                  // CASH
                                   case 0:
                                     {
                                       sc.isLoading.value = true;
                                       sc.selectedPaymentTypeCode.value =
                                           sc.paymentTypeList.first.data.paymentTypes[index].code;
+
                                       var response = await sc.getAvailableRoomsGraphQL(
                                           credentialHeaders: hc.globalHeaders,
                                           roomTYPEID: sc.selectedRoomTypeID.value,
@@ -167,12 +179,23 @@ class PaymentMethodView extends GetView {
                                         // sc.subscribeCashDispenser();
                                         sc.getMenu(languageID: languageID, code: 'IP', type: 'TITLE');
                                         // initialize the led on cash acceptor
-                                        sc.openLEDLibserial(ledLocationAndStatus: LedOperation.bottomRIGHTLEDON);
+                                        sc.openLEDLibserial(
+                                            ledLocationAndStatus: LedOperation.bottomRIGHTLEDON, portName: 'COM1');
 
                                         var cashresponse =
-                                            await hc.cashDispenserCommand(sCommand: 'CASA', iTerminalID: 3);
+                                            await hc.cashDispenserCommand(sCommand: 'CASA', iTerminalID: 1);
                                         if (cashresponse!) {
+                                          sc.openLEDLibserial(
+                                              ledLocationAndStatus: LedOperation.bottomRIGHTLEDOFF, portName: 'COM1');
                                           sc.isLoading.value = false;
+                                          // CHECK ANG TERMINAL DATA DITO
+                                          hc.defaultTerminalID.value = hc.terminalsList.first.data.terminals.first.id;
+
+                                          var accessToken = hc.getAccessToken();
+                                          hc.getTerminalData(
+                                              headers: accessToken!,
+                                              terminalID: hc.defaultTerminalID.value,
+                                              sCode: 'CASI');
                                           hc.update();
                                           Get.to(() => InsertPaymentView());
                                         }
@@ -183,7 +206,7 @@ class PaymentMethodView extends GetView {
                                     {
                                       Get.defaultDialog(
                                         title: "Information",
-                                        content: const Text('No Device Detected'),
+                                        content: const Text('No POS MCR Device Detected'),
                                       );
                                     }
                                 }
