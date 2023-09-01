@@ -23,7 +23,8 @@ import '../controllers/home_controller.dart';
 class TransactionView extends GetView<HomeController> {
   TransactionView({Key? key}) : super(key: key);
 
-  final hc = Get.find<HomeController>();
+  // final hc = Get.find<HomeController>();
+  final hc = Get.put(HomeController());
   final sc = Get.find<ScreenController>();
 
   // final DateTime dtLocalTime = DateTime.now();

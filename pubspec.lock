@@ -177,6 +177,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.4"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      sha256: c2b87cb7756efdf69892005af546c56c0b5037f54d2a88269b4f347a505e3ca2
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.5"
   fading_edge_scrollview:
     dependency: transitive
     description:
@@ -379,6 +387,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  logging:
+    dependency: transitive
+    description:
+      name: logging
+      sha256: "623a88c9594aa774443aa3eb2d41807a48486b5613e67599fb4c41c0ad47c340"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   marquee:
     dependency: "direct main"
     description:
@@ -531,6 +547,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.6"
+  signalr_core:
+    dependency: "direct main"
+    description:
+      name: signalr_core
+      sha256: dca676372a00c051511591ed0e24521ff7aa4e9320a7fa778a1007f7f522c8c0
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   sizer:
     dependency: "direct main"
     description:
@@ -552,6 +576,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.1"
+  sse_client:
+    dependency: transitive
+    description:
+      name: sse_client
+      sha256: "71bd826430b41ab20a69d85bf2dfe9f11cfe222938e681ada1aea71fc8adf348"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   stack_trace:
     dependency: transitive
     description:
@@ -631,6 +663,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.7"
+  tuple:
+    dependency: transitive
+    description:
+      name: tuple
+      sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
   typed_data:
     dependency: transitive
     description:
@@ -703,6 +743,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  web_socket_channel:
+    dependency: transitive
+    description:
+      name: web_socket_channel
+      sha256: d88238e5eac9a42bb43ca4e721edba3c08c6354d4a53063afaa568516217621b
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.0"
   win32:
     dependency: "direct main"
     description:

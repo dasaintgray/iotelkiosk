@@ -22,6 +22,7 @@ class WeatherAndClock extends StatelessWidget {
   final String countryFourLocation;
   final String weatherImage;
   final TextStyle textStyle;
+  final bool isLiveUpdate;
 
   const WeatherAndClock({
     super.key,
@@ -42,6 +43,7 @@ class WeatherAndClock extends StatelessWidget {
     required this.countryFourLocation,
     required this.weatherImage,
     required this.textStyle,
+    required this.isLiveUpdate,
   });
 
   @override
@@ -83,7 +85,7 @@ class WeatherAndClock extends StatelessWidget {
                           locationOfTime: localTimeLocation,
                           locationStyle: const TextStyle(color: HenryColors.puti, fontSize: 15),
                           dateTime: localTime,
-                          isLive: true,
+                          isLive: isLiveUpdate,
                           useClockSkin: false,
                           showSeconds: false,
                           textScaleFactor: 1.5,

@@ -8,14 +8,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:hasura_connect/hasura_connect.dart';
+import 'package:http/io_client.dart';
+import 'package:iotelkiosk/app/data/models_graphql/denomination_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/terminaldata_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/terminals_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/apiresponse_model.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/app/modules/screen/views/screen_view.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
+import 'package:iotelkiosk/globals/constant/bank_note_constant.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
+import 'package:signalr_core/signalr_core.dart';
 import 'package:system_idle/system_idle.dart';
 
 // ignore: depend_on_referenced_packages
@@ -38,6 +42,7 @@ class HomeController extends GetxController with BaseController {
   final isMenuTransactionVisible = true.obs;
   final isConfirmReady = false.obs;
   final isOverPaymentDetected = false.obs;
+  final clockLiveUpdate = false.obs;
 
   // INT
   final menuIndex = 0.obs;
@@ -58,9 +63,10 @@ class HomeController extends GetxController with BaseController {
   late final Map<String, String> globalHeaders;
 
   // LIST
-  final apiResponseList = <ApiResponseModel>[].obs;
   final terminalDataList = <TerminalDataModel>[].obs;
+  final apiResponseList = <ApiResponseModel>[];
   final terminalsList = <TerminalsModel>[];
+  final denominationList = <DenominationModel>[];
 
   // MAP
   final snapshotData = [];
@@ -90,6 +96,8 @@ class HomeController extends GetxController with BaseController {
   void onInit() async {
     super.onInit();
 
+    clockLiveUpdate.value = true;
+
     initTimezone();
     configureSystemIdle(idlingTime: 180);
     await getTerminals();
@@ -99,8 +107,8 @@ class HomeController extends GetxController with BaseController {
       accessToken.value = screenController.userLoginList.first.accessToken;
       globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer ${accessToken.value}'};
       defaultTerminalID.value = terminalsList.first.data.terminals.first.id;
-      getTerminalData(
-          headers: globalHeaders, terminalID: defaultTerminalID.value.isEqual(0) ? 1 : defaultTerminalID.value);
+      // getTerminalData(
+      //     headers: globalHeaders, terminalID: defaultTerminalID.value.isEqual(0) ? 1 : defaultTerminalID.value);
     }
 
     nabasangPera.value = 0;
@@ -116,12 +124,16 @@ class HomeController extends GetxController with BaseController {
     var response = await getIPFromInterface(interfaceName: 'Wi-Fi');
     print(response);
 
+    // await getSignalRData(hubConnectURL: 'http://mssql2.ad.circuitmindz.com:9090/philockhub');
+
     // globalAccessToken = HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
     // globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer $globalAccessToken'};
 
     // var os = Platform.operatingSystem;
     // var system = Platform.operatingSystemVersion;
     // openSerialPort();
+
+    await getDenominationData(terminalID: defaultTerminalID.value);
   }
 
   // @override
@@ -179,16 +191,24 @@ class HomeController extends GetxController with BaseController {
   }
 
   Future<dynamic> getTerminalData(
-      {required Map<String, String> headers,
-      required int terminalID,
+      {required Map<String, String>? headers,
+      required int? terminalID,
       int delay = 5,
       int iteration = 50,
-      String sCode = ''}) async {
+      required String? sCode}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
-    Map<String, dynamic> variables = sCode.isEmpty
-        ? {"terminalID": terminalID, "status": "NEW", "delay": delay, "iteration": iteration}
-        : {"terminalID": terminalID, "status": "NEW", "delay": delay, "iteration": iteration, "code": sCode};
+    Map<String, dynamic> variables = {
+      "terminalID": terminalID,
+      "status": "NEW",
+      "delay": delay,
+      "iteration": iteration,
+      "code": sCode
+    };
+
+    // Map<String, dynamic> variables = sCode.isEmpty
+    //     ? {"terminalID": terminalID, "status": "NEW", "delay": delay, "iteration": iteration}
+    //     : {"terminalID": terminalID, "status": "NEW", "delay": delay, "iteration": iteration, "code": sCode};
 
     Snapshot terminalDataSnapShot = await hasuraConnect.subscription(terminalData, variables: variables);
 
@@ -210,7 +230,12 @@ class HomeController extends GetxController with BaseController {
                     ? nabasangPera.value = double.parse(valueRead)
                     : nabasangPera.value = nabasangPera.value + double.parse(valueRead);
                 if (kDebugMode) print(nabasangPera.value);
+
+                // ADD DENOMINATION COUNT IN DB
+
+                // UPDATE THE TERMINAL DATA
                 updateTerminalData(recordID: terminalDataList.first.id, terminalID: terminalDataList.first.terminalId);
+
                 if (nabasangPera.value >= screenController.totalAmountDue.value) {
                   if (nabasangPera.value == screenController.totalAmountDue.value) {
                     isOverPaymentDetected.value = false;
@@ -231,6 +256,70 @@ class HomeController extends GetxController with BaseController {
         }
       },
     ).onError(handleError);
+  }
+
+  Future<bool> updateDenominationData({required String klaseNgPera, required int iCount}) async {
+    // ignore: constant_pattern_never_matches_value_type
+    final String fieldsValue;
+    switch (klaseNgPera) {
+      case "20.00":
+        {
+          fieldsValue = Pera.bente.value;
+        }
+        break;
+      case "50.00":
+        {
+          fieldsValue = Pera.sikwenta.value;
+        }
+        break;
+      case "100.00":
+        {
+          fieldsValue = Pera.isangdaan.value;
+        }
+        break;
+      case "200.00":
+        {
+          fieldsValue = Pera.dalawangdaan.value;
+        }
+        break;
+      case "500.00":
+        {
+          fieldsValue = Pera.limangdaan.value;
+        }
+        break;
+      case "1000.00":
+        {
+          fieldsValue = Pera.isanglibo.value;
+        }
+        break;
+      default:
+        {
+          fieldsValue = "Invalid Note";
+        }
+        break;
+    }
+    print(fieldsValue);
+
+    return true;
+  }
+
+  Future<void> getSignalRData({required String hubConnectURL}) async {
+    final connection = HubConnectionBuilder()
+        .withUrl(
+            hubConnectURL,
+            HttpConnectionOptions(
+              client: IOClient(HttpClient()..badCertificateCallback = (x, y, z) => true),
+              logging: (level, message) => print(message),
+            ))
+        .build();
+
+    await connection.start();
+
+    connection.on('DataUpdated', (message) {
+      print(message.toString());
+    });
+
+    // await connection.invoke('SendMessage', args: ['iotelkiosk', 'Jakolista']);
   }
 
   Future<String?> convertText(
@@ -378,6 +467,24 @@ class HomeController extends GetxController with BaseController {
       if (response != null) {
         terminalsList.add(response);
         print(terminalsList.first.data.terminals.first.code);
+        return true;
+      } else {
+        return false;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool?> getDenominationData({required int terminalID}) async {
+    isLoading.value = true;
+    Map<String, String>? accessHeaders = getAccessToken();
+
+    final response = await GlobalProvider().fetchDenominationData(headers: accessHeaders!, terminalID: terminalID);
+
+    try {
+      if (response != null) {
+        denominationList.add(response);
         return true;
       } else {
         return false;

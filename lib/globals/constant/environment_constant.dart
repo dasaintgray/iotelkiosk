@@ -264,6 +264,22 @@ String qryTerminals = r'''query getTerminals {
 } 
 ''';
 
+String qryDenomination = r'''
+query denominationData($terminalID: Int!) {
+  TerminalDenominations(where: {TerminalId: $terminalID}) {
+    Id
+    p20
+    p50
+    p100
+    p200
+    p500
+    p1000
+    total
+    TerminalId
+  }
+}
+''';
+
 // MUTATION AREA (INSERT, UPDATE, DELETE)
 // ----------------------------------------------------------------------------------------------------
 

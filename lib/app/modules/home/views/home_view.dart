@@ -114,6 +114,7 @@ class HomeView extends GetView<HomeController> {
                         // hc.menuIndex.value = 1;
                         // hc.menuIndex.value++;
                         if (kDebugMode) print('SELECTED LANGUAGE CODE ${sc.selectedLanguageCode.value}');
+                        hc.update();
                         Get.to(
                           () => TransactionView(),
                         );

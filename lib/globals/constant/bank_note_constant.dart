@@ -52,3 +52,17 @@ class BankNoteCommand {
   static const String sCHANNELDISABLE = 'B5';
   static const String sINITIALISING = 'B6';
 }
+
+enum Pera {
+  bente("20.00", "p20"),
+  sikwenta("50.00", "p50"),
+  isangdaan("100.00", "p100"),
+  dalawangdaan("200.00", "p200"),
+  limangdaan("500.00", "p500"),
+  isanglibo("1000.00", "p1000");
+
+  final String halaga;
+  final String value;
+
+  const Pera(this.halaga, this.value);
+}

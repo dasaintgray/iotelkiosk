@@ -14,10 +14,11 @@ class KioskHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 20.h,
-      child: Obx(
-        () => WeatherAndClock(
+    return Obx(
+      () => SizedBox(
+        height: 20.h,
+        child: WeatherAndClock(
+          isLiveUpdate: hc.clockLiveUpdate.value,
           localTime: hc.localTime.value,
           localTimeLocation: 'Philipppines',
           degreeC: sc.weatherList.first.current.tempC.toStringAsFixed(0),

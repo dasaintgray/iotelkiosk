@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:hasura_connect/hasura_connect.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/denomination_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/payment_type_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
@@ -244,6 +245,20 @@ class GlobalProvider extends BaseController {
 
     if (response != null) {
       return terminalsModelFromJson(jsonEncode(response));
+    }
+    return null;
+  }
+
+  Future<DenominationModel?> fetchDenominationData(
+      {required Map<String, String> headers, required int terminalID}) async {
+    final params = {"terminalID": terminalID};
+
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
+
+    final response = await hasuraConnect.query(qryDenomination, variables: params).catchError(handleError);
+
+    if (response != null) {
+      return denominationModelFromJson(jsonEncode(response['data']['TerminalDenominations']));
     }
     return null;
   }

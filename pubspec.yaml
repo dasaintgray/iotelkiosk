@@ -35,6 +35,9 @@ dependencies:
   translator: ^0.1.7
   ffi: ^2.0.2
   win32: ^5.0.3
+
+  # WEB COMMUNICATION 
+  signalr_core: ^1.1.1
   
   # proste_indexed_stack: ^0.2.4
   #local_session_timeout: ^2.2.0  //for local activity checkier

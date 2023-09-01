@@ -60,6 +60,7 @@ class DisclaimerView extends GetView {
                       height: 20.h,
                       width: double.infinity,
                       child: WeatherAndClock(
+                        isLiveUpdate: hc.clockLiveUpdate.value,
                         localTime: hc.localTime.value,
                         localTimeLocation: 'Philipppines',
                         degreeC: sc.weatherList.first.current.tempC.toStringAsFixed(0),

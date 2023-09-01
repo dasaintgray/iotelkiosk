@@ -53,9 +53,17 @@ class InsertPaymentView extends GetView {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          onTap: () {
-                            var response = sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'ST');
-                            if (response) Get.back();
+                          onTap: () async {
+                            // STOP THE CASH DISPENSER IF RUNNING
+                            var cashDResponse = await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: 1);
+                            if (cashDResponse!) {
+                              await hc.updateTerminalData(
+                                  recordID: hc.terminalDataList.first.id,
+                                  terminalID: hc.terminalDataList.first.terminalId);
+
+                              var response = sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'ST');
+                              if (response) Get.back();
+                            }
                           },
                           child: Image.asset(
                             'assets/menus/back-arrow.png',
@@ -169,51 +177,57 @@ class InsertPaymentView extends GetView {
                       height: 2.h,
                       width: double.infinity,
                     ),
-                    Container(
-                      height: 13.h,
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        color: HenryColors.darkGreen,
-                        gradient: LinearGradient(
-                            colors: [HenryColors.darkGreen, Colors.white],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            tileMode: TileMode.clamp),
-                        borderRadius: BorderRadius.only(topLeft: Radius.circular(60), topRight: Radius.circular(60)),
-                      ),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              amountReceivedText,
-                              style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
-                            ),
-                          ),
-                          Obx(
-                            () => Expanded(
-                              flex: 2,
-                              child: Visibility(
-                                visible: hc.nabasangPera.value != 0.0,
+                    Obx(
+                      () => SizedBox(
+                        height: 15.h,
+                        width: double.infinity,
+                        // decoration: const BoxDecoration(
+                        //   color: HenryColors.darkGreen,
+                        //   gradient: LinearGradient(
+                        //       colors: [HenryColors.darkGreen, Colors.white],
+                        //       begin: Alignment.topLeft,
+                        //       end: Alignment.bottomRight,
+                        //       tileMode: TileMode.clamp),
+                        //   borderRadius: BorderRadius.only(topLeft: Radius.circular(60), topRight: Radius.circular(60)),
+                        // ),
+                        child: hc.nabasangPera.value != 0.0
+                            ? Column(
+                                children: [
+                                  Expanded(
+                                    flex: 1,
+                                    child: Text(
+                                      amountReceivedText,
+                                      style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Visibility(
+                                      visible: hc.nabasangPera.value != 0.0,
+                                      child: Text(
+                                        'PHP ${hc.nabasangPera.value.toStringAsFixed(2)}',
+                                        style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: hc.isOverPaymentDetected.value
+                                        ? Text(
+                                            'Change: PHP ${hc.overPayment.value.toStringAsFixed(2)}',
+                                            style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                                          )
+                                        : const Text(''),
+                                  ),
+                                ],
+                              )
+                            : Center(
                                 child: Text(
-                                  'PHP ${hc.nabasangPera.value.toStringAsFixed(2)}',
+                                  'Please insert CASH in Cash Acceptor...',
                                   style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
-                            ),
-                          ),
-                          Obx(
-                            () => Expanded(
-                              flex: 2,
-                              child: hc.isOverPaymentDetected.value
-                                  ? Text(
-                                      'Over Payment: PHP ${hc.overPayment.value.toStringAsFixed(2)}',
-                                      style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
-                                    )
-                                  : const Text(''),
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   ],
