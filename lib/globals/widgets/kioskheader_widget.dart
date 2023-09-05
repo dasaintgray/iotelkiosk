@@ -7,10 +7,12 @@ import 'package:iotelkiosk/globals/widgets/weather_clock_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class KioskHeader extends StatelessWidget {
-  KioskHeader({Key? key}) : super(key: key);
+  KioskHeader({Key? key, required this.isLive}) : super(key: key);
 
   final hc = Get.find<HomeController>();
   final sc = Get.find<ScreenController>();
+
+  final bool isLive;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +20,7 @@ class KioskHeader extends StatelessWidget {
       () => SizedBox(
         height: 20.h,
         child: WeatherAndClock(
-          isLiveUpdate: hc.clockLiveUpdate.value,
+          isLiveUpdate: isLive,
           localTime: hc.localTime.value,
           localTimeLocation: 'Philipppines',
           degreeC: sc.weatherList.first.current.tempC.toStringAsFixed(0),

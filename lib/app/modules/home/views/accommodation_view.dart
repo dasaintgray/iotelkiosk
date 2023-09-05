@@ -33,8 +33,13 @@ class AccommodationView extends GetView {
             // KioskHeader(),
             Scaffold(
               body: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  KioskHeader(),
+                  Obx(
+                    () => KioskHeader(
+                      isLive: hc.clockLiveUpdate.value,
+                    ),
+                  ),
                   // SPACE
                   SizedBox(
                     height: 12.h,
@@ -47,6 +52,7 @@ class AccommodationView extends GetView {
                   ),
                   // MENU
                   menuAccommodationType(orientation, languageID: sc.selecttedLanguageID.value),
+
                   SizedBox(
                     height: orientation == Orientation.portrait ? 5.h : 2.h,
                     child: Row(
@@ -56,7 +62,7 @@ class AccommodationView extends GetView {
                         GestureDetector(
                           onTap: () {
                             sc.getMenu(code: 'SLMT', type: 'TITLE');
-                            hc.update();
+                            // hc.update();
                             Get.back();
                           },
                           child: Image.asset(

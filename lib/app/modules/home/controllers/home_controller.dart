@@ -9,7 +9,6 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:hasura_connect/hasura_connect.dart';
 import 'package:http/io_client.dart';
-import 'package:iotelkiosk/app/data/models_graphql/denomination_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/terminaldata_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/terminals_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/apiresponse_model.dart';
@@ -51,6 +50,15 @@ class HomeController extends GetxController with BaseController {
   final nabasangPera = 0.0.obs;
   final overPayment = 0.0.obs;
 
+  // MONEY DUE
+  final iP20 = 0.obs;
+  final iP50 = 0.obs;
+  final iP100 = 0.obs;
+  final iP200 = 0.obs;
+  final iP500 = 0.obs;
+  final iP1000 = 0.obs;
+  final iTotal = 0.obs;
+
   // CAMERA GLOBAL VARIABLES
   final cameraInfo = 'Unkown'.obs;
   final cameraList = [].obs;
@@ -66,7 +74,7 @@ class HomeController extends GetxController with BaseController {
   final terminalDataList = <TerminalDataModel>[].obs;
   final apiResponseList = <ApiResponseModel>[];
   final terminalsList = <TerminalsModel>[];
-  final denominationList = <DenominationModel>[];
+  // final denominationList = <DenominationModel>[];
 
   // MAP
   final snapshotData = [];
@@ -88,7 +96,8 @@ class HomeController extends GetxController with BaseController {
   // UI
   late TextEditingController textEditingController = TextEditingController();
   // ScreenController screenController = Get.put(ScreenController());
-  final ScreenController screenController = Get.find<ScreenController>();
+  // final ScreenController screenController = Get.find<ScreenController>();
+  final ScreenController screenController = Get.put(ScreenController());
   final SystemIdle systemIdle = SystemIdle.instance;
   final translator = GoogleTranslator();
 
@@ -99,7 +108,7 @@ class HomeController extends GetxController with BaseController {
     clockLiveUpdate.value = true;
 
     initTimezone();
-    configureSystemIdle(idlingTime: 180);
+    configureSystemIdle(idlingTime: 60);
     await getTerminals();
 
     // startTimer();
@@ -107,6 +116,9 @@ class HomeController extends GetxController with BaseController {
       accessToken.value = screenController.userLoginList.first.accessToken;
       globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer ${accessToken.value}'};
       defaultTerminalID.value = terminalsList.first.data.terminals.first.id;
+
+      await getDenominationData(terminalID: defaultTerminalID.value);
+
       // getTerminalData(
       //     headers: globalHeaders, terminalID: defaultTerminalID.value.isEqual(0) ? 1 : defaultTerminalID.value);
     }
@@ -124,7 +136,7 @@ class HomeController extends GetxController with BaseController {
     var response = await getIPFromInterface(interfaceName: 'Wi-Fi');
     print(response);
 
-    // await getSignalRData(hubConnectURL: 'http://mssql2.ad.circuitmindz.com:9090/philockhub');
+    // await getSignalRData(hubConnectURL: 'https://cargo-chatsupport.circuitmindz.com/agenthub');
 
     // globalAccessToken = HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
     // globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer $globalAccessToken'};
@@ -132,8 +144,6 @@ class HomeController extends GetxController with BaseController {
     // var os = Platform.operatingSystem;
     // var system = Platform.operatingSystemVersion;
     // openSerialPort();
-
-    await getDenominationData(terminalID: defaultTerminalID.value);
   }
 
   // @override
@@ -194,7 +204,7 @@ class HomeController extends GetxController with BaseController {
       {required Map<String, String>? headers,
       required int? terminalID,
       int delay = 5,
-      int iteration = 50,
+      int iteration = 60,
       required String? sCode}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
@@ -224,14 +234,17 @@ class HomeController extends GetxController with BaseController {
             if (sCode == "CASI") {
               if (kDebugMode) print(terminalDataList.first.value);
               var valueRead = terminalDataList.first.value;
-              if (kDebugMode) print(valueRead);
+              if (kDebugMode) print('READ STATUS: $valueRead');
               if (valueRead.isCurrency) {
+                if (kDebugMode) print('READ DENOM: $valueRead');
                 nabasangPera.value == 0
                     ? nabasangPera.value = double.parse(valueRead)
                     : nabasangPera.value = nabasangPera.value + double.parse(valueRead);
-                if (kDebugMode) print(nabasangPera.value);
 
+                if (kDebugMode) print('COMPUTED DENOM: ${nabasangPera.value}');
                 // ADD DENOMINATION COUNT IN DB
+                updateDenominationData(
+                    klaseNgPera: valueRead, iCount: 1, terminalID: defaultTerminalID.value, bCounterIncrement: true);
 
                 // UPDATE THE TERMINAL DATA
                 updateTerminalData(recordID: terminalDataList.first.id, terminalID: terminalDataList.first.terminalId);
@@ -258,49 +271,77 @@ class HomeController extends GetxController with BaseController {
     ).onError(handleError);
   }
 
-  Future<bool> updateDenominationData({required String klaseNgPera, required int iCount}) async {
+  Future<bool> updateDenominationData(
+      {required String klaseNgPera,
+      required int iCount,
+      required int terminalID,
+      required bool bCounterIncrement}) async {
     // ignore: constant_pattern_never_matches_value_type
-    final String fieldsValue;
+    final String docs;
+
+    print(klaseNgPera);
+
     switch (klaseNgPera) {
-      case "20.00":
+      case "20.00" || "20.0" || "20":
         {
-          fieldsValue = Pera.bente.value;
+          iP20.value = bCounterIncrement ? iP20.value + iCount : iP20.value - iCount;
+          docs =
+              'mutation updateDenomination {TerminalDenominations(mutate: {${Pera.bente.value} : ${iP20.value} } where: {TerminalId: $terminalID}) {Ids response}}';
         }
         break;
-      case "50.00":
+      case "50.00" || "50.0" || "50":
         {
-          fieldsValue = Pera.sikwenta.value;
+          iP50.value = bCounterIncrement ? iP50.value + iCount : iP50.value - iCount;
+          docs =
+              'mutation updateDenomination {TerminalDenominations(mutate: {${Pera.tapwe.value} : ${iP50.value} } where: {TerminalId: $terminalID}) {Ids response}}';
         }
         break;
-      case "100.00":
+      case "100.00" || "100.0" || "100":
         {
-          fieldsValue = Pera.isangdaan.value;
+          iP100.value = bCounterIncrement ? iP100.value + iCount : iP100.value - iCount;
+          docs =
+              'mutation updateDenomination {TerminalDenominations(mutate: {${Pera.isangdaan.value} : ${iP100.value} } where: {TerminalId: $terminalID}) {Ids response}}';
         }
         break;
-      case "200.00":
+      case "200.00" || "200.0" || "200":
         {
-          fieldsValue = Pera.dalawangdaan.value;
+          iP200.value = bCounterIncrement ? iP200.value + iCount : iP200.value - iCount;
+          docs =
+              'mutation updateDenomination {TerminalDenominations(mutate: {${Pera.dalawangdaan.value}: ${iP200.value} } where: {TerminalId: $terminalID}) {Ids response}}';
         }
         break;
-      case "500.00":
+      case "500.00" || "500.0" || "500":
         {
-          fieldsValue = Pera.limangdaan.value;
+          iP500.value = bCounterIncrement ? iP500.value + iCount : iP500.value - iCount;
+          docs =
+              'mutation updateDenomination {TerminalDenominations(mutate: {${Pera.limangdaan.value} : ${iP500.value} } where: {TerminalId: $terminalID}) {Ids response}}';
         }
         break;
-      case "1000.00":
+      case "1000.00" || "1000.0" || "1000":
         {
-          fieldsValue = Pera.isanglibo.value;
+          iP1000.value = bCounterIncrement ? iP1000.value + iCount : iP1000.value - iCount;
+          docs =
+              'mutation updateDenomination {TerminalDenominations(mutate: {${Pera.isanglibo.value} : ${iP1000.value} } where: {TerminalId: $terminalID}) {Ids response}}';
         }
         break;
       default:
         {
-          fieldsValue = "Invalid Note";
+          docs =
+              'mutation updateDenomination {TerminalDenominations(mutate: {TerminalId : $terminalID } where: {TerminalId: $terminalID}) {Ids response}}';
         }
         break;
     }
-    print(fieldsValue);
 
-    return true;
+    if (kDebugMode) print(docs);
+
+    var response = GlobalProvider().mutateGraphQLData(documents: docs, accessHeaders: globalHeaders);
+    // ignore: unnecessary_null_comparison
+    if (response != null) {
+      // iTotal.value = iP20.value + iP50.value + iP100.value + iP200.value + iP500.value + iP1000.value;
+      return true;
+    } else {
+      return false;
+    }
   }
 
   Future<void> getSignalRData({required String hubConnectURL}) async {
@@ -484,7 +525,15 @@ class HomeController extends GetxController with BaseController {
 
     try {
       if (response != null) {
-        denominationList.add(response);
+        // denominationList.add(response);
+        iP20.value = response.terminalDenominations[0].p20;
+        iP50.value = response.terminalDenominations[0].p50;
+        iP100.value = response.terminalDenominations[0].p100;
+        iP200.value = response.terminalDenominations[0].p200;
+        iP500.value = response.terminalDenominations[0].p500;
+        iP1000.value = response.terminalDenominations[0].p1000;
+        iTotal.value = response.terminalDenominations[0].total;
+        // print(denominationList.first.terminalDenominations.length);
         return true;
       } else {
         return false;

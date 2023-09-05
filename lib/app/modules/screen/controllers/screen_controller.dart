@@ -115,7 +115,7 @@ class ScreenController extends GetxController with BaseController {
     hostname.value = Platform.localHostname;
 
     // monitorInfo();
-    setDisplayMonitor('DISPLAY2');
+    if (kDebugMode) setDisplayMonitor('DISPLAY2');
 
     // getBDOOpen(
     //     transactionCode: BDOTransaction.sSale,

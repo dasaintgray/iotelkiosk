@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/views/accommodation_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/bookaroom_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/checkout_view.dart';
+import 'package:iotelkiosk/app/modules/home/views/home_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/underdev_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
@@ -23,8 +24,8 @@ import '../controllers/home_controller.dart';
 class TransactionView extends GetView<HomeController> {
   TransactionView({Key? key}) : super(key: key);
 
-  // final hc = Get.find<HomeController>();
-  final hc = Get.put(HomeController());
+  final hc = Get.find<HomeController>();
+  // final hc = Get.put(HomeController());
   final sc = Get.find<ScreenController>();
 
   // final DateTime dtLocalTime = DateTime.now();
@@ -43,8 +44,11 @@ class TransactionView extends GetView<HomeController> {
             // KioskHeader(),
             Scaffold(
               body: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  KioskHeader(),
+                  Obx(() => KioskHeader(
+                        isLive: hc.clockLiveUpdate.value,
+                      )),
                   // SPACE
                   SizedBox(
                     height: 12.h,
@@ -66,7 +70,8 @@ class TransactionView extends GetView<HomeController> {
                         GestureDetector(
                           onTap: () {
                             sc.getMenu(code: 'SLMT', type: 'TITLE');
-                            Get.back();
+                            // Get.back();
+                            Get.off(() => HomeView());
                           },
                           child: Image.asset(
                             'assets/menus/back-arrow.png',
@@ -153,7 +158,7 @@ class TransactionView extends GetView<HomeController> {
                           break;
                         case 1: //CHECK OUT
                           {
-                            Get.to(() => const CheckoutView());
+                            Get.to(() => CheckoutView());
                           }
                           break;
                         case 2: //book a room

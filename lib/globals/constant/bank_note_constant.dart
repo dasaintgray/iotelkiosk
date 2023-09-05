@@ -54,14 +54,14 @@ class BankNoteCommand {
 }
 
 enum Pera {
-  bente("20.00", "p20"),
-  sikwenta("50.00", "p50"),
-  isangdaan("100.00", "p100"),
-  dalawangdaan("200.00", "p200"),
-  limangdaan("500.00", "p500"),
-  isanglibo("1000.00", "p1000");
+  bente(20.00, "p20"),
+  tapwe(50.00, "p50"),
+  isangdaan(100.00, "p100"),
+  dalawangdaan(200.00, "p200"),
+  limangdaan(500.00, "p500"),
+  isanglibo(1000.00, "p1000");
 
-  final String halaga;
+  final double halaga;
   final String value;
 
   const Pera(this.halaga, this.value);

@@ -258,7 +258,7 @@ class GlobalProvider extends BaseController {
     final response = await hasuraConnect.query(qryDenomination, variables: params).catchError(handleError);
 
     if (response != null) {
-      return denominationModelFromJson(jsonEncode(response['data']['TerminalDenominations']));
+      return denominationModelFromJson(jsonEncode(response['data']));
     }
     return null;
   }

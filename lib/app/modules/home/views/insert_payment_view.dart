@@ -31,8 +31,12 @@ class InsertPaymentView extends GetView {
             // KioskHeader(),
             Scaffold(
               body: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  KioskHeader(),
+                  Obx(() => KioskHeader(
+                        isLive: hc.clockLiveUpdate.value,
+                      )),
                   // SPACE
                   SizedBox(
                     height: 12.h,
@@ -206,7 +210,7 @@ class InsertPaymentView extends GetView {
                                       visible: hc.nabasangPera.value != 0.0,
                                       child: Text(
                                         'PHP ${hc.nabasangPera.value.toStringAsFixed(2)}',
-                                        style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                                        style: TextStyle(color: HenryColors.puti, fontSize: 20.sp),
                                       ),
                                     ),
                                   ),

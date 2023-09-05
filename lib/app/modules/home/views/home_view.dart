@@ -40,8 +40,11 @@ class HomeView extends GetView<HomeController> {
             // KioskHeader(),
             Scaffold(
               body: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  KioskHeader(),
+                  Obx(() => KioskHeader(
+                        isLive: hc.clockLiveUpdate.value,
+                      )),
                   // SPACE
                   SizedBox(
                     height: 12.h,
@@ -54,6 +57,7 @@ class HomeView extends GetView<HomeController> {
                   ),
                   // MENU
                   menuLanguage(orientation),
+                  // menuLanguage2(orientation),
                 ],
               ),
             ),
@@ -140,6 +144,71 @@ class HomeView extends GetView<HomeController> {
               ],
             ),
           );
+        },
+      ),
+    );
+  }
+
+  Widget menuLanguage2(Orientation orientation) {
+    return SizedBox(
+      height: orientation == Orientation.portrait ? 45.h : 20.h,
+      width: 75.w,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(25),
+        itemCount: sc.languageList.first.data.languages.length,
+        itemBuilder: (BuildContext context, int index) {
+          return SizedBox(
+            child: GestureDetector(
+              onTap: () {
+                int lID = sc.languageList.first.data.languages[index].id;
+                String sCode = 'ST';
+                sc.selecttedLanguageID.value = sc.languageList.first.data.languages[index].id;
+                sc.selectedLanguageCode.value = sc.languageList.first.data.languages[index].code;
+
+                var response = sc.getMenu(
+                  languageID: lID,
+                  code: sCode,
+                );
+                if (response) {
+                  if (kDebugMode) print('SELECTED LANGUAGE CODE ${sc.selectedLanguageCode.value}');
+                  hc.update();
+                  Get.to(
+                    () => TransactionView(),
+                  );
+                  hc.update();
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(35.0),
+                child: SizedBox(
+                  height: 7.h,
+                  child: sc.languageList.isEmpty
+                      ? null
+                      : Image.asset(
+                          'assets/png/${sc.languageList.first.data.languages[index].flag!}',
+                          fit: BoxFit.fill,
+                          semanticLabel: 'Select Language',
+                        )
+                          .animate()
+                          .fade(duration: HenryGlobal.animationSpeed)
+                          .scale(duration: HenryGlobal.animationSpeed),
+                ),
+              ),
+            ),
+          );
+          // return SizedBox(
+          //   child: Animate(
+          //     child: Center(
+          //       child: Text(
+          //         sc.languageList.first.data.languages[index].description,
+          //         style: TextStyle(
+          //           color: HenryColors.darkGreen,
+          //           fontSize: 15.sp,
+          //         ),
+          //       ).animate().slide(duration: HenryGlobal.animationSpeed).scale(duration: HenryGlobal.animationSpeed),
+          //     ),
+          //   ),
+          // );
         },
       ),
     );

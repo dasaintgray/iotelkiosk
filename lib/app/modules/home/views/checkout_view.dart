@@ -8,7 +8,10 @@ import 'package:iotelkiosk/globals/widgets/kioskheader_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class CheckoutView extends GetView<HomeController> {
-  const CheckoutView({Key? key}) : super(key: key);
+  CheckoutView({Key? key}) : super(key: key);
+
+  final hc = Get.find<HomeController>();
+
   @override
   Widget build(BuildContext context) {
     return Sizer(
@@ -21,8 +24,13 @@ class CheckoutView extends GetView<HomeController> {
                 : CompanyLogo(top: 5.h, bottom: 45.h, left: 45.w, right: 45.w),
             Scaffold(
               body: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  KioskHeader(),
+                  Obx(
+                    () => KioskHeader(
+                      isLive: hc.clockLiveUpdate.value,
+                    ),
+                  ),
                   Container(
                     color: Colors.white,
                     height: 5.h,

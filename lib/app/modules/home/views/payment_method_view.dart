@@ -33,8 +33,11 @@ class PaymentMethodView extends GetView {
             // KioskHeader(),
             Scaffold(
               body: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  KioskHeader(),
+                  Obx(() => KioskHeader(
+                        isLive: hc.clockLiveUpdate.value,
+                      )),
                   // SPACE
                   SizedBox(
                     height: 12.h,

@@ -280,6 +280,27 @@ query denominationData($terminalID: Int!) {
 }
 ''';
 
+String updateDenomination = r'''
+mutation updateDenomination($bente: Int!, $tapwe: Int!, $isangdaan: Int!, $dalawangdaan: Int!, $limangdaan: Int!, $isanglibo: Int!, $total: Int!, $terminalID: Int!) {
+  TerminalDenominations(
+    mutate: {
+      p20: $bente, 
+      p50: $tapwe,
+      p100: $isangdaan,
+      p200: $dalawangdaan,
+      p500: $limangdaan,
+      p1000: $isanglibo,
+      total: $total}
+    where: {TerminalId: $terminalID}
+  ) {
+    Ids
+    response
+  }
+}
+''';
+
+
+
 // MUTATION AREA (INSERT, UPDATE, DELETE)
 // ----------------------------------------------------------------------------------------------------
 
