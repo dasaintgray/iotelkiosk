@@ -31,7 +31,7 @@ class InsertPaymentView extends GetView {
             // KioskHeader(),
             Scaffold(
               body: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Obx(() => KioskHeader(
@@ -105,6 +105,7 @@ class InsertPaymentView extends GetView {
     String roomRate = 'Room Rate';
     String amountDue = 'Amount Due';
     String amountReceivedText = 'Total Amount Received';
+    String roomNumber = 'Room Number';
 
     if (langCode.first.code.toLowerCase() != sc.defaultLanguageCode.value.toLowerCase()) {
       cardDeposit = sc.translateText(
@@ -114,11 +115,11 @@ class InsertPaymentView extends GetView {
     }
 
     return SizedBox(
-      height: orientation == Orientation.portrait ? 49.h : 20.h,
+      height: orientation == Orientation.portrait ? 45.h : 20.h,
       width: 75.w,
       child: Container(
         margin: const EdgeInsets.all(30.0),
-        height: 20.h,
+        height: 15.h,
         width: 20.w,
         decoration: const BoxDecoration(
             color: Colors.black54,
@@ -161,9 +162,9 @@ class InsertPaymentView extends GetView {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      height: 2.h,
-                      width: double.infinity,
+                    Text(
+                      '$roomNumber : ${sc.availRoomList[sc.preSelectedRoomID.value].description}',
+                      style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
                     ),
                     Text(
                       '$roomRate : $denomination ${sc.availRoomList[sc.preSelectedRoomID.value].rate.toStringAsFixed(2)}',
@@ -183,7 +184,7 @@ class InsertPaymentView extends GetView {
                     ),
                     Obx(
                       () => SizedBox(
-                        height: 15.h,
+                        height: 10.h,
                         width: double.infinity,
                         // decoration: const BoxDecoration(
                         //   color: HenryColors.darkGreen,
@@ -210,18 +211,21 @@ class InsertPaymentView extends GetView {
                                       visible: hc.nabasangPera.value != 0.0,
                                       child: Text(
                                         'PHP ${hc.nabasangPera.value.toStringAsFixed(2)}',
-                                        style: TextStyle(color: HenryColors.puti, fontSize: 20.sp),
+                                        style: TextStyle(color: HenryColors.puti, fontSize: 18.sp),
                                       ),
                                     ),
                                   ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: hc.isOverPaymentDetected.value
-                                        ? Text(
-                                            'Change: PHP ${hc.overPayment.value.toStringAsFixed(2)}',
-                                            style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
-                                          )
-                                        : const Text(''),
+                                  Visibility(
+                                    visible: hc.isOverPaymentDetected.value,
+                                    child: Expanded(
+                                      flex: 2,
+                                      child: hc.isOverPaymentDetected.value
+                                          ? Text(
+                                              'Change: PHP ${hc.overPayment.value.toStringAsFixed(2)}',
+                                              style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                                            )
+                                          : const Text(''),
+                                    ),
                                   ),
                                 ],
                               )
@@ -246,11 +250,14 @@ class InsertPaymentView extends GetView {
                       child: MaterialButton(
                         onPressed: () async {
                           sc.isLoading.value = true;
-                          var response = await sc.getTerms(credentialHeaders: hc.globalHeaders);
-                          if (response) {
-                            sc.isLoading.value = false;
-                            Get.to(() => DisclaimerView());
-                          }
+                          sc.getMenu(code: 'DI', type: 'TITLE');
+                          Get.to(() => DisclaimerView());
+
+                          // var response = await sc.getTerms(credentialHeaders: hc.globalHeaders);
+                          // if (response) {
+                          //   sc.isLoading.value = false;
+                          //   Get.to(() => DisclaimerView());
+                          // }
                         },
                         color: HenryColors.darkGreen,
                         padding: const EdgeInsets.all(30),

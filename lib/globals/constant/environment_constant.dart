@@ -54,6 +54,7 @@ class HenryGlobal {
         Id
         description
         code
+        disclaimer 
         flag
       }
     }
@@ -298,8 +299,6 @@ mutation updateDenomination($bente: Int!, $tapwe: Int!, $isangdaan: Int!, $dalaw
   }
 }
 ''';
-
-
 
 // MUTATION AREA (INSERT, UPDATE, DELETE)
 // ----------------------------------------------------------------------------------------------------

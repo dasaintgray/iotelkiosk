@@ -45,18 +45,21 @@ class Language {
     required this.id,
     required this.description,
     required this.code,
+    required this.disclaimer,
     this.flag,
   });
 
   final int id;
   final String description;
   final String code;
+  final String disclaimer;
   String? flag;
 
   factory Language.fromJson(Map<String, dynamic> json) => Language(
         id: json["Id"],
         description: json["description"],
         code: json["code"],
+        disclaimer: json["disclaimer"],
         flag: json["flag"],
       );
 
@@ -64,6 +67,7 @@ class Language {
         "Id": id,
         "description": description,
         "code": code,
+        "disclaimer": disclaimer,
         "flag": flag,
       };
 }

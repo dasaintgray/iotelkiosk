@@ -34,6 +34,7 @@ class AccommodationView extends GetView {
             Scaffold(
               body: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Obx(
                     () => KioskHeader(

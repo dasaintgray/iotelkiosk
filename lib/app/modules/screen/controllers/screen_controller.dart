@@ -1207,21 +1207,21 @@ class ScreenController extends GetxController with BaseController {
   bool getMenu({int? languageID, String? code, String? type, int? indexCode}) {
     pageTrans.clear();
     titleTrans.clear();
+    if (code == 'SLMT') {
+      if (kDebugMode) print(code);
+    }
+
     if (transactionList.isNotEmpty) {
       // TITLE
-      if (type == "TITLE") {
-        titleTrans.addAll(
-            transactionList[0].data.conversion.where((element) => element.code == code && element.type == 'TITLE'));
-      } else {
+      if (type == "TITLE" && code != 'SLMT') {
         titleTrans.addAll(transactionList[0]
             .data
             .conversion
             .where((element) => element.languageId == languageID && element.code == code && element.type == 'TITLE'));
+      } else {
+        titleTrans.addAll(
+            transactionList[0].data.conversion.where((element) => element.code == code && element.type == 'TITLE'));
       }
-      // titleTrans.addAll(transactionList[0]
-      //     .data
-      //     .conversion
-      //     .where((element) => element.languageId == languageID && element.code == code && element.type == 'TITLE'));
       if (kDebugMode) {
         print('TOTAL TITLE : ${titleTrans.length}');
       }
@@ -1234,7 +1234,7 @@ class ScreenController extends GetxController with BaseController {
       );
 
       if (kDebugMode) {
-        print('MENU ITEMS (code: $code | type: $type) : PAGE TRANS: ${pageTrans.length} : INDEX: $indexCode');
+        print('LANGUAGE ID: $languageID MENU ITEMS (code: $code | type: $type) : PAGE TRANS: ${pageTrans.length}');
       }
       return true;
     } else {

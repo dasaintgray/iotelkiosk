@@ -34,6 +34,7 @@ class PaymentMethodView extends GetView {
             Scaffold(
               body: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Obx(() => KioskHeader(
                         isLive: hc.clockLiveUpdate.value,
@@ -87,7 +88,7 @@ class PaymentMethodView extends GetView {
   Widget menuPaymentType(Orientation orientation, {int? languageID, String? code, String? type}) {
     final langCode = sc.languageList.first.data.languages.where((element) => element.id == languageID);
     return Obx(() => SizedBox(
-          height: orientation == Orientation.portrait ? 49.h : 20.h,
+          height: orientation == Orientation.portrait ? 45.h : 20.h,
           width: 75.w,
           child: sc.isLoading.value
               ? Center(
@@ -180,7 +181,6 @@ class PaymentMethodView extends GetView {
 
                                       if (response!) {
                                         // sc.subscribeCashDispenser();
-                                        sc.getMenu(languageID: languageID, code: 'IP', type: 'TITLE');
                                         // initialize the led on cash acceptor
                                         sc.openLEDLibserial(
                                             ledLocationAndStatus: LedOperation.bottomRIGHTLEDON, portName: 'COM1');
@@ -199,6 +199,9 @@ class PaymentMethodView extends GetView {
                                               headers: accessToken!,
                                               terminalID: hc.defaultTerminalID.value,
                                               sCode: 'CASI');
+
+                                          sc.getMenu(languageID: languageID, code: 'IP', type: 'TITLE');
+
                                           hc.update();
                                           Get.to(() => InsertPaymentView());
                                         }

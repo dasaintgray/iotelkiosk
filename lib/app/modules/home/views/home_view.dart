@@ -41,6 +41,7 @@ class HomeView extends GetView<HomeController> {
             Scaffold(
               body: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Obx(() => KioskHeader(
                         isLive: hc.clockLiveUpdate.value,
@@ -115,14 +116,11 @@ class HomeView extends GetView<HomeController> {
                         code: sCode,
                       );
                       if (response) {
-                        // hc.menuIndex.value = 1;
-                        // hc.menuIndex.value++;
                         if (kDebugMode) print('SELECTED LANGUAGE CODE ${sc.selectedLanguageCode.value}');
                         hc.update();
                         Get.to(
                           () => TransactionView(),
                         );
-                        hc.update();
                         // debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
                       }
                     },

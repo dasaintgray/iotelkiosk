@@ -34,6 +34,7 @@ class ScreenView extends GetView<ScreenController> {
             onTap: () {
               if (!sc.isLoading.value) {
                 sc.player.stop();
+                sc.getMenu(code: 'SLMT', type: 'TITLE');
                 Get.to(() => HomeView());
               }
             },

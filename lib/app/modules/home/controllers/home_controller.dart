@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:hasura_connect/hasura_connect.dart';
-import 'package:http/io_client.dart';
 import 'package:iotelkiosk/app/data/models_graphql/terminaldata_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/terminals_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/apiresponse_model.dart';
@@ -108,7 +107,7 @@ class HomeController extends GetxController with BaseController {
     clockLiveUpdate.value = true;
 
     initTimezone();
-    configureSystemIdle(idlingTime: 60);
+    configureSystemIdle(idlingTime: 120);
     await getTerminals();
 
     // startTimer();
@@ -349,18 +348,21 @@ class HomeController extends GetxController with BaseController {
         .withUrl(
             hubConnectURL,
             HttpConnectionOptions(
-              client: IOClient(HttpClient()..badCertificateCallback = (x, y, z) => true),
-              logging: (level, message) => print(message),
-            ))
+                transport: HttpTransportType.longPolling,
+                // client: IOClient(HttpClient()..badCertificateCallback = (x, y, z) => true),
+                // logging: (level, message) => print(message),
+                // logMessageContent: true,
+                // skipNegotiation: true,
+                withCredentials: false))
         .build();
 
     await connection.start();
 
-    connection.on('DataUpdated', (message) {
+    connection.on('Announcement', (message) {
       print(message.toString());
+      print(message?[1].toString());
     });
-
-    // await connection.invoke('SendMessage', args: ['iotelkiosk', 'Jakolista']);
+    // await connection.invoke('Announcement', args: ['iotelkiosk', 'Jakolista']);
   }
 
   Future<String?> convertText(

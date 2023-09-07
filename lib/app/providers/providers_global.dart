@@ -108,7 +108,7 @@ class GlobalProvider extends BaseController {
     final response = await hasuraConnect.query(HenryGlobal.qryLanguage).catchError(handleError);
 
     if (response != null) {
-      hasuraConnect.disconnect();
+      // hasuraConnect.disconnect();
       return languageModelFromJson(jsonEncode(response));
     }
     return null;

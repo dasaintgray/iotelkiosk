@@ -16,24 +16,29 @@ class KioskMenuTitle extends StatelessWidget {
     return SizedBox(
       height: 5.h,
       width: double.infinity,
-      child: FlutterCarousel.builder(
-        itemCount: titleLength,
-        itemBuilder: (BuildContext context, int ctr, int realIndex) {
-          return SizedBox(
-            height: 10.h,
-            width: double.infinity,
-            child: Center(
-              child: Text(titleLength == 1 ? titleTrans.first.translationText : titleTrans[ctr].translationText,
+      child: titleLength == 1
+          ? Center(
+              child: Text(titleTrans.first.translationText,
                   style: TextStyle(color: HenryColors.darkGreen, fontSize: 13.sp)),
+            )
+          : FlutterCarousel.builder(
+              itemCount: titleLength,
+              itemBuilder: (BuildContext context, int ctr, int realIndex) {
+                return SizedBox(
+                  height: 5.h,
+                  width: double.infinity,
+                  child: Center(
+                    child: Text(titleTrans[ctr].translationText,
+                        style: TextStyle(color: HenryColors.darkGreen, fontSize: 13.sp)),
+                  ),
+                );
+              },
+              options: CarouselOptions(
+                  autoPlay: titleLength == 1 ? false : true,
+                  showIndicator: false,
+                  reverse: true,
+                  scrollDirection: Axis.vertical),
             ),
-          );
-        },
-        options: CarouselOptions(
-            autoPlay: titleLength == 1 ? false : true,
-            showIndicator: false,
-            reverse: true,
-            scrollDirection: Axis.vertical),
-      ),
     );
   }
 }

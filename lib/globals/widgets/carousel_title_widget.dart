@@ -14,7 +14,7 @@ class CarouselTitle extends StatelessWidget {
       itemCount: titleTrans.length,
       itemBuilder: (BuildContext context, int ctr, int realIndex) {
         return SizedBox(
-          height: 10.h,
+          height: 5.h,
           width: double.infinity,
           child: Center(
             child: Text(

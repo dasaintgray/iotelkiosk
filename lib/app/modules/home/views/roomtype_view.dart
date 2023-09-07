@@ -34,6 +34,7 @@ class RoomTypeView extends GetView {
             Scaffold(
               body: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Obx(() => KioskHeader(
                         isLive: hc.clockLiveUpdate.value,
@@ -150,7 +151,8 @@ class RoomTypeView extends GetView {
                       var response = await sc.getPaymentType(
                           credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
                       if (response) {
-                        sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SPM');
+                        sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SPM', type: 'TITLE');
+                        if (kDebugMode) print('PAYMENT => LANGUAGE ID: ${sc.selecttedLanguageID.value}');
                         var response = await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: 1);
                         if (kDebugMode) print(response);
 
