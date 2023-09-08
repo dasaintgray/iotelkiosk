@@ -250,7 +250,10 @@ class InsertPaymentView extends GetView {
                       child: MaterialButton(
                         onPressed: () async {
                           sc.isLoading.value = true;
-                          sc.getMenu(code: 'DI', type: 'TITLE');
+                          sc.getMenu(code: 'DI', type: 'TITLE', languageID: languageID);
+
+                          await hc.initializeCamera();
+                          await hc.getSeriesDetails(credentialHeaders: hc.globalHeaders);
                           Get.to(() => DisclaimerView());
 
                           // var response = await sc.getTerms(credentialHeaders: hc.globalHeaders);

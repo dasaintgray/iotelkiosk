@@ -133,7 +133,7 @@ class AccommodationView extends GetView {
                         if (kDebugMode) {
                           print('SELECTED ACCOMMODATION TYPE ID: ${sc.selectedAccommodationTypeID.value}');
                         }
-                        sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SRT');
+                        sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SRT', type: 'TITLE');
                         sc.isLoading.value = false;
                         sc.selectedTransactionType.value = sc.pageTrans[index].translationText;
                         hc.update();

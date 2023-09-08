@@ -315,25 +315,34 @@ mutation hayupsimaster {
 ''';
 
 String updateSeries = r''' 
-mutation updateSeriesDetails($ID: Int!, $DocNo: String!, 
-    $isActive: Boolean!, $modifiedBy: String!, 
-    $modifiedDate: datetime!, $tranDate: datetime!, $reservationDate: datetime!) {
-  update_SeriesDetails(where: {Id: {_eq: $ID}, _and: {docNo: {_eq: $DocNo}}}, 
-  _set: {isActive: $isActive, modifiedBy: $modifiedBy, 
-    modifiedDate: $modifiedDate, tranDate: $tranDate, reservationDate: $reservationDate}) {
-    returning {
-      Id
-      docNo
-      isActive
-      modifiedBy
-      LocationId
-      ModuleId
-      SeriesId
-    }
-    affected_rows
+mutation updateSeriesDetails($bActive: Boolean!, $ID: Int!, $docNo: String!) {
+  SeriesDetails(mutate: {isActive: $bActive}, where: {Id: $ID, docNo: $docNo}) {
+    Ids
+    response
   }
 }
 ''';
+
+// String updateSeries = r'''
+// mutation updateSeriesDetails($ID: Int!, $DocNo: String!,
+//     $isActive: Boolean!, $modifiedBy: String!,
+//     $modifiedDate: datetime!, $tranDate: datetime!, $reservationDate: datetime!) {
+//   update_SeriesDetails(where: {Id: {_eq: $ID}, _and: {docNo: {_eq: $DocNo}}},
+//   _set: {isActive: $isActive, modifiedBy: $modifiedBy,
+//     modifiedDate: $modifiedDate, tranDate: $tranDate, reservationDate: $reservationDate}) {
+//     returning {
+//       Id
+//       docNo
+//       isActive
+//       modifiedBy
+//       LocationId
+//       ModuleId
+//       SeriesId
+//     }
+//     affected_rows
+//   }
+// }
+// ''';
 
 String insertBooking = r'''
   mutation insertBookings(
@@ -395,7 +404,7 @@ mutation addContact($code: String!, $firstName: String!, $lastName: String!, $mi
     mutate: {code: $code, fName: $firstName, lName: $lastName, mName: $middleName, PrefixId: $prefixID, SuffixId: $suffixID, NationalityId: $nationalityID, GenderId: $genderID, Discriminator: $discriminator}
   ) {
     Ids
-    details
+    response
   }
 }
 ''';
@@ -426,18 +435,12 @@ mutation addContact($code: String!, $firstName: String!, $lastName: String!, $mi
 // ''';
 
 String addPhotos = r''' 
-  mutation addPhoto($ContactID: Int!, $isActive: Boolean!, $Photo: String!, $createdDate: datetime!, $createdBy: String!) {
-  insert_ContactPhotoes(objects: {
-    ContactId: $ContactID, 
-    isActive: $isActive, 
-    photo: $Photo,
-    createdDate: $createdDate,
-    createdBy: $createdBy}) {
-    returning {
-      Id
-      createdBy
-    }
-    affected_rows
+mutation addPhoto($ContactID: Int!, $isActive: Boolean!, $Photo: String!) {
+  ContactPhotoes(
+    mutate: {ContactId: $ContactID, isActive: $isActive, photo: $Photo}
+  ) {
+    Ids
+    response
   }
 }
 ''';

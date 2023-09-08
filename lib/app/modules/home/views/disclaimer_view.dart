@@ -1,7 +1,6 @@
-import 'dart:math' as math;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
@@ -44,7 +43,7 @@ class DisclaimerView extends GetView {
                 ),
                 // SPACE
                 SizedBox(
-                  height: 12.h,
+                  height: 10.h,
                 ),
                 // TITLE
                 KioskMenuTitle(titleLength: sc.titleTrans.length, titleTrans: sc.titleTrans),
@@ -56,55 +55,34 @@ class DisclaimerView extends GetView {
                 // menuAccommodationType(orientation, languageID: sc.selecttedLanguageID.value),
                 menuDisclaimer(orientation, context),
 
-                SizedBox(
-                  height: orientation == Orientation.portrait ? 10.h : 2.h,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          var response = sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'ST', type: 'ITEM');
-                          if (response) {
-                            Get.back();
-                          }
-                        },
-                        child: Image.asset(
-                          'assets/menus/back-arrow.png',
-                          fit: BoxFit.cover,
+                Visibility(
+                  visible: false,
+                  child: SizedBox(
+                    height: orientation == Orientation.portrait ? 8.h : 2.h,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            var response =
+                                sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'ST', type: 'ITEM');
+                            if (response) {
+                              Get.back();
+                            }
+                          },
+                          child: Image.asset(
+                            'assets/menus/back-arrow.png',
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      ),
-                      const SizedBox(
-                        width: 50,
-                      ),
-                    ],
+                        const SizedBox(
+                          width: 50,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-
-                // SizedBox(
-                //   height: orientation == Orientation.portrait ? 5.h : 2.h,
-                //   child: Row(
-                //     mainAxisAlignment: MainAxisAlignment.center,
-                //     crossAxisAlignment: CrossAxisAlignment.center,
-                //     children: [
-                //       GestureDetector(
-                //         onTap: () {
-                //           sc.getMenu(code: 'SLMT', type: 'TITLE');
-                //           // hc.update();
-                //           Get.back();
-                //         },
-                //         child: Image.asset(
-                //           'assets/menus/back-arrow.png',
-                //           fit: BoxFit.cover,
-                //           semanticLabel: 'Back to previous menu',
-                //         ),
-                //       ),
-                //       const SizedBox(
-                //         width: 50,
-                //       ),
-                //     ],
-                //   ),
-                // ),
               ],
             ),
           ),
@@ -116,22 +94,24 @@ class DisclaimerView extends GetView {
   Widget menuDisclaimer(Orientation orientation, BuildContext context) {
     final imgKey = GlobalKey();
     return SizedBox(
-      height: orientation == Orientation.portrait ? 49.h : 20.h,
+      height: orientation == Orientation.portrait ? 45.h : 20.h,
       width: 75.w,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Visibility(
-            visible: true,
-            child: SizedBox(
-              height: 5.h,
-              width: 60.w,
-              child: Transform(
-                key: imgKey,
-                alignment: Alignment.center,
-                transform: Matrix4.rotationY(math.pi),
-                child: CameraPlatform.instance.buildPreview(hc.cameraID.value),
+          Obx(
+            () => Visibility(
+              visible: true,
+              child: SizedBox(
+                height: 15.h,
+                width: 60.w,
+                child: Transform(
+                  key: imgKey,
+                  alignment: Alignment.center,
+                  transform: Matrix4.rotationY(math.pi),
+                  child: CameraPlatform.instance.buildPreview(hc.cameraID.value),
+                ),
               ),
             ),
           ),
@@ -142,21 +122,21 @@ class DisclaimerView extends GetView {
           // DISCLAIMER
           sc.languageList.first.data.languages.isNotEmpty
               ? SizedBox(
-                  height: 30.h,
+                  height: 20.h,
                   child: SingleChildScrollView(
                     controller: sc.scrollController,
                     child: Text(
                       sc.languageList.first.data.languages.first.disclaimer,
                       style: TextStyle(
                         color: HenryColors.puti,
-                        fontSize: 4.sp,
+                        fontSize: 3.sp,
                       ),
                     ),
                   ),
                 )
               : const SizedBox(),
           SizedBox(
-            height: 2.h,
+            height: 1.h,
             width: double.infinity,
           ),
           sc.languageList.first.data.languages.isNotEmpty
@@ -169,7 +149,7 @@ class DisclaimerView extends GetView {
                               ),
                               Text(
                                 'Processing, please wait',
-                                style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                                style: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
                               )
                             ],
                           )
@@ -190,8 +170,10 @@ class DisclaimerView extends GetView {
                                   'Authorization': 'Bearer $accessToken'
                                 };
 
-                                var response = await sc.addTransaction(credentialHeaders: headers);
-                                if (response) {
+                                // String? basePhoto = await hc.takePicture(camID: hc.cameraID.value);
+
+                                var response = await hc.addTransaction(credentialHeaders: headers);
+                                if (response == "Success") {
                                   //
                                   hc.isLoading.value = false;
                                 }

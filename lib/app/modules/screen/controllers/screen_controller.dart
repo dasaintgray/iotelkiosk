@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:dart_vlc/dart_vlc.dart';
+// import 'package:dart_vlc_ffi/dart_vlc_ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
@@ -17,14 +18,12 @@ import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/payment_type_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
-import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/translation_terms_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/userlogin_model.dart';
 
-import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/services/base/base_storage.dart';
@@ -58,7 +57,6 @@ class ScreenController extends GetxController with BaseController {
   final languageList = <LanguageModel>[].obs;
   final transactionList = <TransactionModel>[].obs;
   final accommodationTypeList = <AccomTypeModel>[].obs;
-  final seriesDetailsList = <SeriesDetailsModel>[].obs;
   final roomAvailableList = <RoomAvailableModel>[].obs;
   final roomTypeList = <RoomTypesModel>[].obs;
   final paymentTypeList = <PaymentTypeModel>[].obs;
@@ -126,7 +124,7 @@ class ScreenController extends GetxController with BaseController {
     // openLED();
     // openLEDLibserial(ledLocationAndStatus: LedOperation.bottomCENTERLEDON);
 
-    mediaOpen();
+    mediaOpen(useLocal: true);
 
     await userLogin();
     final accessToken = userLoginList.first.accessToken;
@@ -761,17 +759,21 @@ class ScreenController extends GetxController with BaseController {
 
   // -----------------------------------------------------------------------------------------
 
-  void mediaOpen() {
+  void mediaOpen({required bool useLocal}) {
     if (kDebugMode) {
       player.setVolume(0);
     }
     player.open(
-      Playlist(
-        medias: [
-          Media.asset('assets/background/iotel.mp4'),
-          Media.asset('assets/background/iOtelWalkin.mp4'),
-        ],
-      ),
+      useLocal
+          ? Playlist(
+              medias: [
+                Media.asset('assets/background/iotel.mp4'),
+                Media.asset('assets/background/iOtelWalkin.mp4'),
+              ],
+            )
+          : Playlist(medias: [
+              Media.network('https://www.youtube.com/watch?v=Mn254cnduOY&t=1426s', parse: true),
+            ]),
       autoStart: true,
     );
   }
@@ -942,25 +944,6 @@ class ScreenController extends GetxController with BaseController {
     return false;
   }
 
-  Future<bool> getSeriesDetails({required Map<String, String> credentialHeaders}) async {
-    isLoading.value = true;
-
-    final response = await GlobalProvider().fetchSeriesDetails(headers: credentialHeaders);
-
-    try {
-      if (response != null) {
-        seriesDetailsList.add(response);
-        if (kDebugMode) {
-          print(response.data.seriesDetails.first.docNo);
-        }
-        isLoading.value = false;
-        return true;
-      }
-    } finally {
-      isLoading.value = false;
-    }
-    return false;
-  }
 
   Future<bool> getAvailableRooms() async {
     isLoading.value = true;
@@ -1123,54 +1106,6 @@ class ScreenController extends GetxController with BaseController {
 
   // TERMINALS
 
-  //  MUTATION AREA
-  Future addTransaction({required Map<String, String> credentialHeaders}) async {
-    isLoading.value = true;
-    final dtNow = DateTime.now();
-
-    // add contact first
-    // var result = languageList.first.data.languages.where((element) => element.id == selecttedLanguageID.value);
-    // var nationalCode = result.first.code;
-
-    // int? resultID = await GlobalProvider().fetchNationalities(code: nationalCode);
-
-    if (selecttedLanguageID.value != 0) {
-      // selectedNationalities.value = resultID!;
-      String? name = '$hostname-${seriesDetailsList.first.data.seriesDetails.first.docNo}';
-
-      int? contactID = await GlobalProvider().addContacts(
-          code: seriesDetailsList.first.data.seriesDetails.first.docNo,
-          firstName: name,
-          lastName: "Terminal",
-          middleName: 'Kiosk',
-          prefixID: 1,
-          suffixID: 1,
-          nationalityID: selecttedLanguageID.value,
-          genderID: 1,
-          discriminitor: 'Contact',
-          headers: credentialHeaders);
-
-      String? basePhoto = await HomeController().takePicture();
-
-      var response = await GlobalProvider().addContactPhotoes(
-          contactID: contactID, isActive: true, photo: basePhoto, createdDate: dtNow, createdBy: hostname.value);
-
-      if (response) {
-        // update series
-        await GlobalProvider().updateSeriesDetails(
-            idNo: seriesDetailsList.first.data.seriesDetails.first.id,
-            docNo: seriesDetailsList.first.data.seriesDetails.first.docNo,
-            isActive: false,
-            modifiedBy: hostname.value,
-            modifiedDate: dtNow);
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
 
   // TRANSLATION TERMS
   Future<bool> getTerms({required Map<String, String> credentialHeaders, int? languageID}) async {
@@ -1204,16 +1139,16 @@ class ScreenController extends GetxController with BaseController {
   }
 
   // ---------------------------------------------------------------------------------------------------------
-  bool getMenu({int? languageID, String? code, String? type, int? indexCode}) {
+  bool getMenu({int? languageID, String? code, String? type}) {
     pageTrans.clear();
     titleTrans.clear();
-    if (code == 'SLMT') {
+    if (code == 'SRT') {
       if (kDebugMode) print(code);
     }
 
     if (transactionList.isNotEmpty) {
       // TITLE
-      if (type == "TITLE" && code != 'SLMT') {
+      if (code != 'SLMT' && type == "TITLE") {
         titleTrans.addAll(transactionList[0]
             .data
             .conversion
@@ -1234,7 +1169,7 @@ class ScreenController extends GetxController with BaseController {
       );
 
       if (kDebugMode) {
-        print('LANGUAGE ID: $languageID MENU ITEMS (code: $code | type: $type) : PAGE TRANS: ${pageTrans.length}');
+        print('LANGUAGE ID: $languageID MENU ITEMS (code: $code | type: $type) : ITEM TRANS: ${pageTrans.length}');
       }
       return true;
     } else {

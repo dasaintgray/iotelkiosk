@@ -28,7 +28,7 @@ class KioskMenuTitle extends StatelessWidget {
                   height: 5.h,
                   width: double.infinity,
                   child: Center(
-                    child: Text(titleTrans[ctr].translationText,
+                    child: Text(titleTrans[realIndex].translationText,
                         style: TextStyle(color: HenryColors.darkGreen, fontSize: 13.sp)),
                   ),
                 );

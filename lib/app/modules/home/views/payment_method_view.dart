@@ -202,6 +202,8 @@ class PaymentMethodView extends GetView {
 
                                           sc.getMenu(languageID: languageID, code: 'IP', type: 'TITLE');
 
+                                          await hc.getCamera();
+
                                           hc.update();
                                           Get.to(() => InsertPaymentView());
                                         }

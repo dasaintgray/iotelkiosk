@@ -29,9 +29,10 @@ dependencies:
   flutter_form_builder: ^7.8.0
   flutter_datetime_picker: ^1.5.1
   dart_vlc: ^0.4.0
+  # dart_vlc_ffi: ^0.2.0+1
   marquee: ^2.2.3
   flutter_animate: ^4.1.1+1
-  camera_windows: ^0.2.1+6
+  camera_windows: ^0.2.1+8
   translator: ^0.1.7
   ffi: ^2.0.2
   win32: ^5.0.3

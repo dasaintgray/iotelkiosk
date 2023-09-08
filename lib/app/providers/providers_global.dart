@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:hasura_connect/hasura_connect.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
@@ -349,36 +350,45 @@ class GlobalProvider extends BaseController {
     };
 
     // var json = jsonEncode(addParams);
-    // print(json);
+    // if (kDebugMode) print(json);
 
     var response = await hasuraConnect.mutation(insertContacts, variables: addParams).catchError(handleError);
     if (response != null) {
       // var resultList = (response['data']['People']['Ids'] as List);
       var resultList = response['data']['People'];
-
-      int? output = resultList;
-      return output!;
+      if (kDebugMode) print(resultList["Ids"]);
+      List output = resultList["Ids"];
+      if (kDebugMode) print(output[0]);
+      return output[0];
     } else {
       return 0;
     }
   }
 
   Future<bool> addContactPhotoes(
-      {int? contactID, bool? isActive = true, String? photo, DateTime? createdDate, String? createdBy}) async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: HenryGlobal.graphQlHeaders);
+      {int? contactID,
+      bool? isActive = true,
+      String? photo,
+      // DateTime? createdDate,
+      // String? createdBy,
+      required Map<String, String>? accessHeader}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: accessHeader);
 
-    var ngayon = createdDate?.toIso8601String();
-    if (ngayon != null && ngayon.length >= 5) {
-      ngayon = ngayon.substring(0, ngayon.length - 3);
-    }
+    // var ngayon = createdDate?.toIso8601String();
+    // if (ngayon != null && ngayon.length >= 5) {
+    //   ngayon = ngayon.substring(0, ngayon.length - 3);
+    // }
 
     final addParams = {
       "ContactID": contactID,
       "isActive": isActive,
       "Photo": photo,
-      "createdDate": ngayon,
-      "createdBy": createdBy
+      // "createdDate": ngayon,
+      // "createdBy": createdBy
     };
+
+    // var result = jsonEncode(addParams);
+    // if (kDebugMode) print(result);
 
     var response = await hasuraConnect.mutation(addPhotos, variables: addParams).catchError(handleError);
     if (response != null) {
@@ -391,23 +401,31 @@ class GlobalProvider extends BaseController {
   }
 
   Future<bool?> updateSeriesDetails(
-      {int? idNo, String? docNo, bool? isActive, String? modifiedBy, DateTime? modifiedDate}) async {
-    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: HenryGlobal.graphQlHeaders);
+      {int? idNo,
+      String? docNo,
+      bool? isActive,
+      String? modifiedBy,
+      DateTime? modifiedDate,
+      required Map<String, String>? accessHeader}) async {
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: accessHeader);
 
-    var ngayon = modifiedDate?.toIso8601String();
-    if (ngayon != null && ngayon.length >= 5) {
-      ngayon = ngayon.substring(0, ngayon.length - 3);
-    }
+    // var ngayon = modifiedDate?.toIso8601String();
+    // if (ngayon != null && ngayon.length >= 5) {
+    //   ngayon = ngayon.substring(0, ngayon.length - 3);
+    // }
 
     final updateParams = {
       "ID": idNo,
-      "DocNo": docNo,
-      "isActive": isActive,
-      "modifiedBy": modifiedBy,
-      "modifiedDate": ngayon,
-      "tranDate": ngayon,
-      "reservationDate": ngayon
+      "docNo": docNo,
+      "bActive": isActive,
+      // "modifiedBy": modifiedBy,
+      // "modifiedDate": ngayon,
+      // "tranDate": ngayon,
+      // "reservationDate": ngayon
     };
+
+    var jsondata = jsonEncode(updateParams);
+    if (kDebugMode) print(jsondata);
 
     var response = await hasuraConnect.mutation(updateSeries, variables: updateParams).catchError(handleError);
     if (response != null) {

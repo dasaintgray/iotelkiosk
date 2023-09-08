@@ -140,53 +140,51 @@ class TransactionView extends GetView<HomeController> {
                 Positioned(
                   left: 8.w,
                   right: 8.w,
-                  child: Obx(
-                    () => GestureDetector(
-                      onTap: () async {
-                        switch (index) {
-                          case 0: //CHECK IN
-                            {
-                              sc.isLoading.value = true;
-                              var response = await sc.getAccommodation(
-                                  credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
-                              if (response) {
-                                if (kDebugMode) print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
-                                // sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
-                                sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
-                                if (kDebugMode) print(sc.selecttedLanguageID.value);
-                                hc.update();
-                                Get.to(() => AccommodationView());
-                              }
+                  child: GestureDetector(
+                    onTap: () async {
+                      switch (index) {
+                        case 0: //CHECK IN
+                          {
+                            sc.isLoading.value = true;
+                            var response = await sc.getAccommodation(
+                                credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
+                            if (response) {
+                              if (kDebugMode) print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
+                              // sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
+                              sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
+                              if (kDebugMode) print(sc.selecttedLanguageID.value);
+                              hc.update();
+                              Get.to(() => AccommodationView());
                             }
-                            break;
-                          case 1: //CHECK OUT
-                            {
-                              Get.to(() => CheckoutView());
-                            }
-                            break;
-                          case 2: //book a room
-                            {
-                              Get.to(() => BookaroomView());
-                            }
-                            break;
-                          default:
-                            {
-                              Get.to(() => UnderdevView());
-                            }
-                        }
-                      },
-                      child: SizedBox(
-                        height: 7.h,
-                        child: sc.pageTrans.isEmpty
-                            ? null
-                            : Image.asset(
-                                sc.pageTrans[index].images!,
-                                fit: BoxFit.contain,
-                              )
-                                .animate()
-                                .fade(duration: HenryGlobal.animationSpeed)
-                                .scale(duration: HenryGlobal.animationSpeed),
-                      ),
+                          }
+                          break;
+                        case 1: //CHECK OUT
+                          {
+                            Get.to(() => CheckoutView());
+                          }
+                          break;
+                        case 2: //book a room
+                          {
+                            Get.to(() => BookaroomView());
+                          }
+                          break;
+                        default:
+                          {
+                            Get.to(() => UnderdevView());
+                          }
+                      }
+                    },
+                    child: SizedBox(
+                      height: 7.h,
+                      child: sc.pageTrans.isEmpty
+                          ? null
+                          : Image.asset(
+                              sc.pageTrans[index].images!,
+                              fit: BoxFit.contain,
+                            )
+                              .animate()
+                              .fade(duration: HenryGlobal.animationSpeed)
+                              .scale(duration: HenryGlobal.animationSpeed),
                     ),
                   ),
                 ),

@@ -111,12 +111,11 @@ class HomeView extends GetView<HomeController> {
                       sc.selecttedLanguageID.value = sc.languageList.first.data.languages[index].id;
                       sc.selectedLanguageCode.value = sc.languageList.first.data.languages[index].code;
 
-                      var response = sc.getMenu(
-                        languageID: lID,
-                        code: sCode,
-                      );
+                      var response = sc.getMenu(languageID: lID, code: sCode, type: 'TITLE');
                       if (response) {
-                        if (kDebugMode) print('SELECTED LANGUAGE CODE ${sc.selectedLanguageCode.value}');
+                        if (kDebugMode) {
+                          print('SELECTED LANGUAGE CODE: ${sc.selectedLanguageCode.value}');
+                        }
                         hc.update();
                         Get.to(
                           () => TransactionView(),

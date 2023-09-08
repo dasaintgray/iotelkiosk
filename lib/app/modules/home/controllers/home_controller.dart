@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:hasura_connect/hasura_connect.dart';
+import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/terminaldata_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/terminals_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/apiresponse_model.dart';
@@ -74,6 +75,7 @@ class HomeController extends GetxController with BaseController {
   final apiResponseList = <ApiResponseModel>[];
   final terminalsList = <TerminalsModel>[];
   // final denominationList = <DenominationModel>[];
+  final seriesDetailsList = <SeriesDetailsModel>[].obs;
 
   // MAP
   final snapshotData = [];
@@ -130,7 +132,7 @@ class HomeController extends GetxController with BaseController {
   void onReady() async {
     // ignore: unnecessary_overrides
     super.onReady();
-    await getCamera();
+    // await getCamera();
     // await printIPS();
     var response = await getIPFromInterface(interfaceName: 'Wi-Fi');
     print(response);
@@ -470,8 +472,9 @@ class HomeController extends GetxController with BaseController {
     }
   }
 
-  Future<String?> takePicture() async {
-    final XFile pictureFile = await CameraPlatform.instance.takePicture(cameraID.value);
+  Future<String?> takePicture({required int? camID}) async {
+    // final XFile pictureFile = await CameraPlatform.instance.takePicture(cameraID.value);
+    final XFile pictureFile = await CameraPlatform.instance.takePicture(camID!);
     final imgBytes = File(pictureFile.path).readAsBytesSync();
 
     final img64 = base64Encode(imgBytes);
@@ -560,6 +563,78 @@ class HomeController extends GetxController with BaseController {
     } else {
       return false;
     }
+  }
+
+  //  MUTATION AREA
+  Future addTransaction({required Map<String, String> credentialHeaders}) async {
+    isLoading.value = true;
+    // final dtNow = DateTime.now();
+
+    // add contact first
+    // var result = languageList.first.data.languages.where((element) => element.id == selecttedLanguageID.value);
+    // var nationalCode = result.first.code;
+
+    // int? resultID = await GlobalProvider().fetchNationalities(code: nationalCode);
+
+    if (screenController.selecttedLanguageID.value != 0) {
+      // selectedNationalities.value = resultID!;
+      String? name = '${screenController.hostname}-${seriesDetailsList.first.data.seriesDetails.first.docNo}';
+
+      int? contactID = await GlobalProvider().addContacts(
+          code: seriesDetailsList.first.data.seriesDetails.first.docNo,
+          firstName: name,
+          lastName: "Terminal",
+          middleName: 'Kiosk',
+          prefixID: 1,
+          suffixID: 1,
+          nationalityID: screenController.selecttedLanguageID.value,
+          genderID: 1,
+          discriminitor: 'Contact',
+          headers: credentialHeaders);
+
+      // String? basePhoto = await HomeController().takePicture();
+      String? basePhoto = await takePicture(camID: cameraID.value);
+
+      var response = await GlobalProvider()
+          .addContactPhotoes(accessHeader: getAccessToken(), contactID: contactID!, isActive: true, photo: basePhoto);
+
+      if (response) {
+        // update series
+        await GlobalProvider().updateSeriesDetails(
+          accessHeader: getAccessToken(),
+          idNo: seriesDetailsList.first.data.seriesDetails.first.id,
+          docNo: seriesDetailsList.first.data.seriesDetails.first.docNo,
+          isActive: false,
+          // modifiedBy: screenController.hostname.value,
+          // modifiedDate: dtNow,
+        );
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  Future<bool> getSeriesDetails({required Map<String, String> credentialHeaders}) async {
+    isLoading.value = true;
+
+    final response = await GlobalProvider().fetchSeriesDetails(headers: credentialHeaders);
+
+    try {
+      if (response != null) {
+        seriesDetailsList.add(response);
+        if (kDebugMode) {
+          print(response.data.seriesDetails.first.docNo);
+        }
+        isLoading.value = false;
+        return true;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
   }
 
   // void startTimer() {

@@ -61,10 +61,10 @@ packages:
     dependency: "direct main"
     description:
       name: camera_windows
-      sha256: "3203773cf6f0ba817188644058642a786b91af89efc66b74d24a0634c4b1453c"
+      sha256: "128ed4d05ec4da10e1be977e8b37940db607a9d832250ca5fb52d9fa78c72037"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.1+6"
+    version: "0.2.1+8"
   characters:
     dependency: transitive
     description:
