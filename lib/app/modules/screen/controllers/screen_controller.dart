@@ -3,30 +3,18 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:dart_vlc/dart_vlc.dart';
 // import 'package:dart_vlc_ffi/dart_vlc_ffi.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:intl/intl.dart';
 import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
 import 'package:iotelkiosk/globals/constant/bdotransaction_constant.dart';
-import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
-import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
-import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
-import 'package:iotelkiosk/app/data/models_graphql/payment_type_model.dart';
-import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
-import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
-import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/translation_terms_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
-import 'package:iotelkiosk/app/data/models_rest/userlogin_model.dart';
 
 import 'package:iotelkiosk/app/providers/providers_global.dart';
-import 'package:iotelkiosk/globals/constant/environment_constant.dart';
-import 'package:iotelkiosk/globals/services/base/base_storage.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 import 'package:iotelkiosk/globals/services/devices/display_service.dart';
 import 'package:translator/translator.dart';
@@ -38,51 +26,28 @@ class ScreenController extends GetxController with BaseController {
 
   // BOOLEAN
   final isLoading = false.obs;
-  final isBottom = false.obs;
   final isECREmpty = true.obs;
   final isBankNoteReadyToReceive = false.obs;
 
   // STRING
-  final defaultLanguageCode = 'en'.obs;
   final hostname = ''.obs;
-  final sCity = ''.obs;
   final imgUrl = ''.obs;
+  final sCity = ''.obs;
 
   // INTEGER
 
   // LIST or OBJECT DATA
-  final settingsList = <SettingsModel>[].obs;
-  final userLoginList = <UserLoginModel>[].obs;
-
-  final languageList = <LanguageModel>[].obs;
-  final transactionList = <TransactionModel>[].obs;
-  final accommodationTypeList = <AccomTypeModel>[].obs;
   final roomAvailableList = <RoomAvailableModel>[].obs;
-  final roomTypeList = <RoomTypesModel>[].obs;
-  final paymentTypeList = <PaymentTypeModel>[].obs;
-  final availableRoomList = <AvailableRoomsModel>[].obs;
   final translationTermsList = <TranslationTermsModel>[].obs;
 
   final roomsList = [].obs; //DYNAMIC KASI PABABAGO ANG OUTPUT
   final resultList = [].obs;
 
   // TRANSACTION VARIABLE
-  final selecttedLanguageID = 1.obs;
-  final selectedLanguageCode = 'en'.obs;
   final selectedTransactionType = ''.obs;
-  final selectedRoomType = ''.obs;
-  final selectedRoomTypeID = 1.obs;
-  final selectedAccommodationTypeID = 1.obs;
   final selectedNationalities = 77.obs;
-  final selectedPaymentTypeCode = ''.obs;
-  final preSelectedRoomID = 0.obs;
-  final totalAmountDue = 0.0.obs;
 
   // MODEL LIST
-  final pageTrans = <Conversion>[].obs;
-  final titleTrans = <Conversion>[].obs;
-  final btnMessage = <Conversion>[].obs;
-  final availRoomList = <AvailableRoom>[].obs;
   final weatherList = <WeatherModel>[].obs;
 
   // OTHER LIST
@@ -90,9 +55,6 @@ class ScreenController extends GetxController with BaseController {
 
   // OTHERS
   final translator = GoogleTranslator();
-
-  // CONTROLLERS
-  final scrollController = ScrollController();
 
   // DATE
   final dtNow = DateFormat.yMMMMd().format(DateTime.now());
@@ -106,11 +68,15 @@ class ScreenController extends GetxController with BaseController {
   // var ports = <String>[];
   // late SerialPort port;
 
+  // APP LIFE CYCLE ***********************************************************************************
   @override
   void onInit() async {
-    super.onInit();
-
     hostname.value = Platform.localHostname;
+    mediaOpen(useLocal: true);
+    player.play();
+    await getWeather();
+
+    // print(ngayon.toIso8601String());
 
     // monitorInfo();
     if (kDebugMode) setDisplayMonitor('DISPLAY2');
@@ -124,17 +90,9 @@ class ScreenController extends GetxController with BaseController {
     // openLED();
     // openLEDLibserial(ledLocationAndStatus: LedOperation.bottomCENTERLEDON);
 
-    mediaOpen(useLocal: true);
-
-    await userLogin();
-    final accessToken = userLoginList.first.accessToken;
-    final headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'};
-
-    await getWeather();
-    await getSettings();
-
-    await getLanguages(credentialHeaders: headers);
-    await getTransaction(credentialHeaders: headers);
+    // await userLogin();
+    // final accessToken = userLoginList.first.accessToken;
+    // final headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'};
 
     // await getRoomType(credentialHeaders: headers, languageCode: selectedLanguageCode.value);
     // await getSeriesDetails(credentialHeaders: headers);
@@ -149,43 +107,38 @@ class ScreenController extends GetxController with BaseController {
     // await getAccommodation(credentialHeaders: headers, languageCode: langcode);
     // await getPaymentType(credentialHeaders: headers);
 
-    await getAvailableRoomsGraphQL(credentialHeaders: headers, roomTYPEID: 1, accommodationTYPEID: 1);
+    // await getAvailableRoomsGraphQL(credentialHeaders: headers, roomTYPEID: 1, accommodationTYPEID: 1);
     // await getTerminalDataSubs(headers: headers);
     // await getTerminalData(authorizationHeader: headers);
 
     // await getTerms(credentialHeaders: headers, languageID: selecttedLanguageID.value);
+    super.onInit();
   }
 
-  // APP LIFE CYCLE
-  @override
-  void onReady() {
-    super.onReady();
-    scrollController.addListener(
-      () {
-        if (scrollController.position.atEdge) {
-          isBottom.value = scrollController.position.pixels == 0 ? false : true;
-        }
-      },
-    );
-  }
+  // @override
+  // void onReady() {
+  //   super.onReady();
+  // }
 
-  @override
-  void onClose() {
-    super.onClose();
-    scrollController.dispose();
-    // port.close();
-  }
+  // @override
+  // void onClose() {
+  //   super.onClose();
+
+  //   // port.close();
+  // }
+
+  // APP LIFE CYCLE ***********************************************************************************
 
   // ------------------------------------------------------------------------------------------------------
-  // CONTROLLER CODE
+  // CONTROLLERS CODE
 
-  String? getAccessToken() {
-    if (userLoginList.isEmpty) {
-      return null;
-    } else {
-      return userLoginList.first.accessToken;
-    }
-  }
+  // String? getAccessToken() {
+  //   if (userLoginList.isEmpty) {
+  //     return null;
+  //   } else {
+  //     return userLoginList.first.accessToken;
+  //   }
+  // }
 
   Future<bool> getWeather() async {
     isLoading.value = true;
@@ -668,10 +621,10 @@ class ScreenController extends GetxController with BaseController {
     }
   }
 
-  void cardDispenser() {
-    final serialPort = SerialPort.availablePorts;
+  void cardDispenser({required String portNumber}) {
+    // final serialPort = SerialPort.availablePorts;
+    final port = SerialPort(portNumber);
     final portConfig = SerialPortConfig();
-    final port = SerialPort(serialPort.first);
 
     portConfig.baudRate = 9600;
     // portConfig.parity = SerialPortParity.none;
@@ -778,19 +731,6 @@ class ScreenController extends GetxController with BaseController {
     );
   }
 
-  int pickRoom() {
-    final random = Random();
-    if (availRoomList.isNotEmpty) {
-      for (var i = availRoomList.length - 1; i > 0; i++) {
-        var n = random.nextInt(i + 1);
-        if (n != 0) {
-          return n;
-        }
-      }
-    }
-    return 0;
-  }
-
   // SUBSCRIPTION
   // Future<bool?> getTerminalData({required Map<String, String> authorizationHeader}) async {
   //   Map<String, dynamic> variables = {"terminalID": 3, "status": "New", "delay": 5, "iteration": 50};
@@ -808,142 +748,6 @@ class ScreenController extends GetxController with BaseController {
   //   var response = GlobalProvider().terminalDataSubscription(headers: headers);
   //   if (kDebugMode) print('terminal response: ${response.toString()}');
   // }
-
-  Future<bool> getSettings() async {
-    isLoading.value = true;
-
-    final accessToken = await HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
-    final headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'};
-
-    final settingsResponse = await GlobalProvider().fetchSettings(headers: headers);
-
-    try {
-      if (settingsResponse != null) {
-        settingsList.add(settingsResponse);
-
-        // GET CITY
-        final cityIndex = settingsResponse.data.settings.indexWhere((element) => element.code == "CITY");
-        sCity.value = settingsResponse.data.settings[cityIndex].value;
-
-        // DEFAULT LANGUAGE CODE
-        final langIndex =
-            settingsResponse.data.settings.indexWhere((element) => element.code == "EN" || element.value == "English");
-        defaultLanguageCode.value = settingsResponse.data.settings[langIndex].code;
-
-        isLoading.value = false;
-        return true;
-      }
-    } finally {
-      isLoading.value = false;
-    }
-    return false;
-  }
-
-  Future<bool> userLogin() async {
-    isLoading.value = true;
-
-    final userresponse = await GlobalProvider().userLogin();
-    try {
-      if (userresponse != null) {
-        userLoginList.add(userresponse);
-        await HenryStorage.saveToLS(titulo: HenryGlobal.jwtToken, userresponse.accessToken);
-        await HenryStorage.saveToLS(titulo: HenryGlobal.jwtExpire, userresponse.expiresIn);
-        // update();
-        isLoading.value = false;
-        return true;
-      } else {
-        return false;
-      }
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<bool> getLanguages({required Map<String, String> credentialHeaders}) async {
-    isLoading.value = true;
-
-    final response = await GlobalProvider().fetchLanguages(headers: credentialHeaders);
-
-    try {
-      if (response != null) {
-        // var balik = response.data.languages.indexWhere((element) => element.flag == null);
-        response.data.languages.removeWhere((element) => element.flag == null);
-        languageList.add(response);
-
-        if (kDebugMode) {
-          print('Language: ${languageList.first.data.languages.length}');
-        }
-        isLoading.value = false;
-        return true;
-      } else {
-        isLoading.value = false;
-      }
-    } finally {
-      isLoading.value = false;
-    }
-    return false;
-  }
-
-  Future<bool> getTransaction({required Map<String, String> credentialHeaders}) async {
-    isLoading.value = true;
-
-    final response = await GlobalProvider().getTranslation(headers: credentialHeaders);
-    try {
-      if (response != null) {
-        transactionList.add(response);
-        if (kDebugMode) {
-          print('TRANSLATION RECORDS: ${transactionList.first.data.conversion.length}');
-        }
-        getMenu(code: 'SLMT', type: 'TITLE');
-        isLoading.value = false;
-        return true;
-      } else {
-        isLoading.value = false;
-      }
-    } finally {
-      isLoading.value = false;
-    }
-    return false;
-  }
-
-  Future<bool> getAccommodation({required Map<String, String> credentialHeaders, required String? languageCode}) async {
-    // isLoading.value = true;
-
-    final response = await GlobalProvider().fetchAccommodationType(3, headers: credentialHeaders);
-    // const inputHenry = 'Acknowledgement';
-
-    try {
-      if (response != null) {
-        // await translator.translate('sex', from: 'en', to: 'zh-cn').then((value) => print(value));
-        // print(await inputHenry.translate(from: 'en', to: 'ja'));
-
-        accommodationTypeList.add(response);
-
-        if (accommodationTypeList.first.data.accommodationTypes.isNotEmpty &&
-            languageCode != defaultLanguageCode.value.toLowerCase()) {
-          var record = accommodationTypeList.first.data.accommodationTypes.length;
-          for (var ctr = 0; ctr < record; ctr++) {
-            var textTranslated = await translator.translate(
-                accommodationTypeList.first.data.accommodationTypes[ctr].description,
-                from: defaultLanguageCode.value.toLowerCase(),
-                to: languageCode!);
-            accommodationTypeList.first.data.accommodationTypes[ctr].translatedText = textTranslated.text;
-          }
-          accommodationTypeList.refresh();
-        }
-
-        if (kDebugMode) {
-          print('TOTAL ACCOMMODATION: ${accommodationTypeList.first.data.accommodationTypes.length}');
-        }
-        isLoading.value = false;
-        return true;
-      }
-    } finally {
-      // isLoading.value = false;
-    }
-    return false;
-  }
-
 
   Future<bool> getAvailableRooms() async {
     isLoading.value = true;
@@ -973,52 +777,6 @@ class ScreenController extends GetxController with BaseController {
     return false;
   }
 
-  Future<bool?> getAvailableRoomsGraphQL(
-      {required Map<String, String> credentialHeaders,
-      required int? roomTYPEID,
-      required int? accommodationTYPEID}) async {
-    // isLoading.value = true;
-
-    final dtnow = DateTime.now();
-
-    final response = await GlobalProvider().fetchAvailableRoomsGraphQL(
-        agentID: 1,
-        roomTypeID: roomTYPEID,
-        accommodationTypeID: accommodationTYPEID == 0 ? 1 : accommodationTYPEID,
-        startDate: dtnow,
-        endDate: dtnow,
-        headers: credentialHeaders);
-
-    try {
-      if (response != null) {
-        availableRoomList.clear(); //clear first
-        availableRoomList.add(response);
-        availableRoomList.shuffle();
-
-        availRoomList.clear(); //clear first
-        availRoomList.addAll(availableRoomList.first.data.availableRooms.toList());
-        preSelectedRoomID.value = pickRoom();
-
-        if (preSelectedRoomID.value != 0) {
-          totalAmountDue.value =
-              availRoomList[preSelectedRoomID.value].rate + availRoomList[preSelectedRoomID.value].serviceCharge;
-        }
-
-        if (kDebugMode) {
-          print('Available Room Orig: ${availableRoomList.first.data.availableRooms.length}');
-          print('Available Room Shuffle: ${availRoomList.length}');
-        }
-
-        return true;
-      } else {
-        // isLoading.value = false;
-        return false;
-      }
-    } finally {
-      // isLoading.value = false;
-    }
-  }
-
   Future<bool> getRooms({required Map<String, String> credentialHeaders}) async {
     isLoading.value = true;
 
@@ -1045,67 +803,7 @@ class ScreenController extends GetxController with BaseController {
     return false;
   }
 
-  // PAYMENT TYPE
-  Future<bool> getPaymentType({required Map<String, String> credentialHeaders, required String? languageCode}) async {
-    isLoading.value = true;
-
-    final response = await GlobalProvider().fetchPaymentType(headers: credentialHeaders);
-
-    try {
-      if (response != null) {
-        paymentTypeList.add(response);
-
-        if (paymentTypeList.first.data.paymentTypes.isNotEmpty &&
-            languageCode != defaultLanguageCode.value.toLowerCase()) {
-          for (var ctr = 0; ctr < paymentTypeList.first.data.paymentTypes.length; ctr++) {
-            var textTranslated = await translator.translate(paymentTypeList.first.data.paymentTypes[ctr].description,
-                from: defaultLanguageCode.value.toLowerCase(), to: languageCode!.toLowerCase());
-            paymentTypeList.first.data.paymentTypes[ctr].translatedText = textTranslated.text;
-          }
-          paymentTypeList.refresh();
-        }
-
-        if (kDebugMode) print('Payment Type: ${paymentTypeList.first.data.paymentTypes.length}');
-
-        return true;
-      } else {
-        return false;
-      }
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  // ROOM TYPE
-  Future<bool> getRoomType({required Map<String, String> credentialHeaders, required String? languageCode}) async {
-    isLoading.value = true;
-
-    final response = await GlobalProvider().fetchRoomTypes(headers: credentialHeaders, limit: 2);
-
-    try {
-      if (response != null) {
-        roomTypeList.add(response);
-
-        if (roomTypeList.first.data.roomTypes.isNotEmpty && languageCode != defaultLanguageCode.value.toLowerCase()) {
-          var record = roomTypeList.first.data.roomTypes.length;
-          for (var ctr = 0; ctr < record; ctr++) {
-            var textTranslated = await translator.translate(roomTypeList.first.data.roomTypes[ctr].description,
-                from: defaultLanguageCode.value.toLowerCase(), to: languageCode!);
-            roomTypeList.first.data.roomTypes[ctr].translatedText = textTranslated.text;
-          }
-          roomTypeList.refresh();
-        }
-
-        return true;
-      }
-    } finally {
-      isLoading.value = false;
-    }
-    return false;
-  }
-
   // TERMINALS
-
 
   // TRANSLATION TERMS
   Future<bool> getTerms({required Map<String, String> credentialHeaders, int? languageID}) async {
@@ -1137,47 +835,6 @@ class ScreenController extends GetxController with BaseController {
     });
     return '';
   }
-
-  // ---------------------------------------------------------------------------------------------------------
-  bool getMenu({int? languageID, String? code, String? type}) {
-    pageTrans.clear();
-    titleTrans.clear();
-    if (code == 'SRT') {
-      if (kDebugMode) print(code);
-    }
-
-    if (transactionList.isNotEmpty) {
-      // TITLE
-      if (code != 'SLMT' && type == "TITLE") {
-        titleTrans.addAll(transactionList[0]
-            .data
-            .conversion
-            .where((element) => element.languageId == languageID && element.code == code && element.type == 'TITLE'));
-      } else {
-        titleTrans.addAll(
-            transactionList[0].data.conversion.where((element) => element.code == code && element.type == 'TITLE'));
-      }
-      if (kDebugMode) {
-        print('TOTAL TITLE : ${titleTrans.length}');
-      }
-      // ITEM LABEL
-      pageTrans.addAll(
-        transactionList[0]
-            .data
-            .conversion
-            .where((element) => element.languageId == languageID && element.code == code && element.type == 'ITEM'),
-      );
-
-      if (kDebugMode) {
-        print('LANGUAGE ID: $languageID MENU ITEMS (code: $code | type: $type) : ITEM TRANS: ${pageTrans.length}');
-      }
-      return true;
-    } else {
-      return false;
-    }
-    // return true;
-  }
-  // ---------------------------------------------------------------------------------------------------------
 }
 
 typedef Resolution = ({int width, int height});

@@ -2,21 +2,36 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:hasura_connect/hasura_connect.dart';
+import 'package:intl/intl.dart';
+import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/payment_type_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/terminaldata_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/terminals_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/apiresponse_model.dart';
+import 'package:iotelkiosk/app/data/models_rest/cardissueresponse_model.dart';
+import 'package:iotelkiosk/app/data/models_rest/userlogin_model.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/app/modules/screen/views/screen_view.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
+import 'package:iotelkiosk/globals/constant/api_constant.dart';
 import 'package:iotelkiosk/globals/constant/bank_note_constant.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
+import 'package:iotelkiosk/globals/constant/settings_constant.dart';
+import 'package:iotelkiosk/globals/services/base/base_storage.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 import 'package:signalr_core/signalr_core.dart';
 import 'package:system_idle/system_idle.dart';
@@ -42,6 +57,7 @@ class HomeController extends GetxController with BaseController {
   final isConfirmReady = false.obs;
   final isOverPaymentDetected = false.obs;
   final clockLiveUpdate = false.obs;
+  final isBottom = false.obs;
 
   // INT
   final menuIndex = 0.obs;
@@ -64,18 +80,48 @@ class HomeController extends GetxController with BaseController {
   final cameraList = [].obs;
   final isInitialized = false.obs;
   final cameraID = 0.obs;
+
   late Size previewSize;
 
-  final accessToken = ''.obs;
+  // final accessToken = ''.obs;
   final defaultTerminalID = 0.obs;
-  late final Map<String, String> globalHeaders;
+  // final Map<String, String> globalHeaders;
 
   // LIST
+  // final denominationList = <DenominationModel>[];
   final terminalDataList = <TerminalDataModel>[].obs;
   final apiResponseList = <ApiResponseModel>[];
   final terminalsList = <TerminalsModel>[];
-  // final denominationList = <DenominationModel>[];
   final seriesDetailsList = <SeriesDetailsModel>[].obs;
+  final issueResponseList = <CardIssueResponseModel>[];
+
+  final settingsList = <SettingsModel>[].obs;
+  final paymentTypeList = <PaymentTypeModel>[].obs;
+  final roomTypeList = <RoomTypesModel>[].obs;
+  final languageList = <LanguageModel>[].obs;
+  final userLoginList = <UserLoginModel>[].obs;
+  final availableRoomList = <AvailableRoomsModel>[].obs;
+  final availRoomList = <AvailableRoom>[].obs;
+  final accommodationTypeList = <AccomTypeModel>[].obs;
+
+  final transactionList = <TransactionModel>[].obs;
+  final pageTrans = <Conversion>[].obs;
+  final titleTrans = <Conversion>[].obs;
+  final btnMessage = <Conversion>[].obs;
+
+  // TRANSACTION VARIABLE
+  final selectedAccommodationTypeID = 1.obs;
+  final selectedLanguageCode = 'en'.obs;
+  final selecttedLanguageID = 1.obs;
+  final selectedRoomType = ''.obs;
+  final selectedRoomTypeID = 1.obs;
+  final preSelectedRoomID = 0.obs;
+  final totalAmountDue = 0.0.obs;
+
+  final selectedPaymentTypeCode = ''.obs;
+  final serviceResponseStatusMessages = ''.obs;
+
+  final sCity = ''.obs;
 
   // MAP
   final snapshotData = [];
@@ -98,33 +144,49 @@ class HomeController extends GetxController with BaseController {
   late TextEditingController textEditingController = TextEditingController();
   // ScreenController screenController = Get.put(ScreenController());
   // final ScreenController screenController = Get.find<ScreenController>();
+
   final ScreenController screenController = Get.put(ScreenController());
+
   final SystemIdle systemIdle = SystemIdle.instance;
   final translator = GoogleTranslator();
 
+  // SCROLL CONTROLLERS
+  final scrollController = ScrollController();
+  var accessTOKEN = <String, String>{};
+
   @override
   void onInit() async {
+    await userLogin();
     super.onInit();
 
-    clockLiveUpdate.value = true;
+    accessTOKEN = (await getAccessToken())!;
 
     initTimezone();
     configureSystemIdle(idlingTime: 120);
-    await getTerminals();
 
-    // startTimer();
-    if (screenController.userLoginList.isNotEmpty) {
-      accessToken.value = screenController.userLoginList.first.accessToken;
-      globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer ${accessToken.value}'};
-      defaultTerminalID.value = terminalsList.first.data.terminals.first.id;
+    await getSettings();
 
-      await getDenominationData(terminalID: defaultTerminalID.value);
-
-      // getTerminalData(
-      //     headers: globalHeaders, terminalID: defaultTerminalID.value.isEqual(0) ? 1 : defaultTerminalID.value);
+    var iFNAME = getSettingsValue(elementCode: SettingConstant.networkInterface);
+    String? ipaResponse;
+    if (iFNAME != null) {
+      ipaResponse = await getIPFromInterface(interfaceName: iFNAME);
+      ipaResponse == null ? ipaResponse = await getIPFromInterface(interfaceName: 'Wi-Fi') : null;
     }
 
-    nabasangPera.value = 0;
+    await getTerminals(ipAddress: ipaResponse, accessHeader: accessTOKEN);
+
+    await getTransaction(credentialHeaders: accessTOKEN);
+    await getLanguages(credentialHeaders: accessTOKEN);
+    await getDenominationData(terminalID: defaultTerminalID.value);
+    await getAvailableRoomsGraphQL(credentialHeaders: accessTOKEN, roomTYPEID: 1, accommodationTYPEID: 1);
+
+    // startTimer();
+    // if (userLoginList.isNotEmpty) {
+    //   accessToken.value = userLoginList.first.accessToken;
+    //   globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer ${accessToken.value}'};
+    //   // getTerminalData(
+    //   //     headers: globalHeaders, terminalID: defaultTerminalID.value.isEqual(0) ? 1 : defaultTerminalID.value);
+    // }
     // await getTerms(credentialHeaders: headers, languageID: 6);
   }
 
@@ -134,25 +196,105 @@ class HomeController extends GetxController with BaseController {
     super.onReady();
     // await getCamera();
     // await printIPS();
-    var response = await getIPFromInterface(interfaceName: 'Wi-Fi');
-    print(response);
-
     // await getSignalRData(hubConnectURL: 'https://cargo-chatsupport.circuitmindz.com/agenthub');
-
     // globalAccessToken = HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
     // globalHeaders = {'Content-Type': 'application/json', 'Authorization': 'Bearer $globalAccessToken'};
-
     // var os = Platform.operatingSystem;
     // var system = Platform.operatingSystemVersion;
     // openSerialPort();
+    clockLiveUpdate.value = true;
+    nabasangPera.value = 0;
+
+    scrollController.addListener(
+      () {
+        if (scrollController.position.atEdge) {
+          isBottom.value = scrollController.position.pixels == 0 ? false : true;
+        }
+      },
+    );
   }
 
-  // @override
-  // void onClose() {
-  //   super.onClose();
-  //   // stopTimer();
-  //   // screenController.dispose();
-  // }
+  @override
+  void onClose() {
+    super.onClose();
+    scrollController.dispose();
+    // stopTimer();
+    // screenController.dispose();
+  }
+
+  // ---------------------------------------------------------------------------------------------------------
+  bool getMenu({int? languageID, String? code, String? type}) {
+    pageTrans.clear();
+    titleTrans.clear();
+    if (code == 'SRT') {
+      if (kDebugMode) print(code);
+    }
+
+    if (transactionList.isNotEmpty) {
+      // TITLE
+      if (code != 'SLMT' && type == "TITLE") {
+        titleTrans.addAll(transactionList[0]
+            .data
+            .conversion
+            .where((element) => element.languageId == languageID && element.code == code && element.type == 'TITLE'));
+      } else {
+        titleTrans.addAll(
+            transactionList[0].data.conversion.where((element) => element.code == code && element.type == 'TITLE'));
+      }
+      if (kDebugMode) {
+        print('TOTAL TITLE : ${titleTrans.length}');
+      }
+      // ITEM LABEL
+      pageTrans.addAll(
+        transactionList[0]
+            .data
+            .conversion
+            .where((element) => element.languageId == languageID && element.code == code && element.type == 'ITEM'),
+      );
+
+      if (kDebugMode) {
+        print('LANGUAGE ID: $languageID MENU ITEMS (code: $code | type: $type) : ITEM TRANS: ${pageTrans.length}');
+      }
+      return true;
+    } else {
+      return false;
+    }
+    // return true;
+  }
+  // ---------------------------------------------------------------------------------------------------------
+
+  int pickRoom() {
+    final random = Random();
+    if (availRoomList.isNotEmpty) {
+      for (var i = availRoomList.length - 1; i > 0; i++) {
+        var n = random.nextInt(i + 1);
+        if (n != 0) {
+          return n;
+        }
+      }
+    }
+    return 0;
+  }
+
+  Future<bool> userLogin() async {
+    isLoading.value = true;
+
+    final userresponse = await GlobalProvider().userLogin();
+    try {
+      if (userresponse != null) {
+        userLoginList.add(userresponse);
+        await HenryStorage.saveToLS(titulo: HenryGlobal.jwtToken, userresponse.accessToken);
+        await HenryStorage.saveToLS(titulo: HenryGlobal.jwtExpire, userresponse.expiresIn);
+        // update();
+        isLoading.value = false;
+        return true;
+      } else {
+        return false;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void initTimezone() {
     tzd.initializeTimeZones();
@@ -188,13 +330,11 @@ class HomeController extends GetxController with BaseController {
     return null;
   }
 
-  Map<String, String>? getAccessToken() {
-    if (screenController.userLoginList.isNotEmpty) {
-      accessToken.value = screenController.userLoginList.first.accessToken;
-      Map<String, String> globalToken = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${accessToken.value}'
-      };
+  Future<Map<String, String>?> getAccessToken() async {
+    var accessToken = await HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
+    if (accessToken != null) {
+      // accessToken = accessToken;
+      Map<String, String> globalToken = {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'};
       return globalToken;
     } else {
       return null;
@@ -250,11 +390,11 @@ class HomeController extends GetxController with BaseController {
                 // UPDATE THE TERMINAL DATA
                 updateTerminalData(recordID: terminalDataList.first.id, terminalID: terminalDataList.first.terminalId);
 
-                if (nabasangPera.value >= screenController.totalAmountDue.value) {
-                  if (nabasangPera.value == screenController.totalAmountDue.value) {
+                if (nabasangPera.value >= totalAmountDue.value) {
+                  if (nabasangPera.value == totalAmountDue.value) {
                     isOverPaymentDetected.value = false;
                   } else {
-                    overPayment.value = nabasangPera.value - screenController.totalAmountDue.value;
+                    overPayment.value = nabasangPera.value - totalAmountDue.value;
                     isOverPaymentDetected.value = true;
                   }
                   isConfirmReady.value = true;
@@ -335,7 +475,8 @@ class HomeController extends GetxController with BaseController {
 
     if (kDebugMode) print(docs);
 
-    var response = GlobalProvider().mutateGraphQLData(documents: docs, accessHeaders: globalHeaders);
+    var accessToken = await getAccessToken();
+    var response = GlobalProvider().mutateGraphQLData(documents: docs, accessHeaders: accessToken);
     // ignore: unnecessary_null_comparison
     if (response != null) {
       // iTotal.value = iP20.value + iP50.value + iP100.value + iP200.value + iP500.value + iP1000.value;
@@ -387,7 +528,7 @@ class HomeController extends GetxController with BaseController {
         print('SYSTEM IDLE?: $event');
       }
       screenController.player.play(); //play the video
-      screenController.getMenu(code: 'SLMT', type: 'TITLE'); //go back to main selection
+      getMenu(code: 'SLMT', type: 'TITLE'); //go back to main selection
       isIdleActive.value = event;
       //CLOSE THE HOMECONTROLLER INTO THE MEMORY AND STAY THE SCREENCONTROLLER ALIVE
       // Get.off(() => ScreenView());
@@ -485,16 +626,58 @@ class HomeController extends GetxController with BaseController {
       return '';
     }
   }
-
   // END OF INITIALIZING CAMERAS
 
   Future<bool?> cashDispenserCommand({required String? sCommand, required int? iTerminalID}) async {
-    isLoading.value = true;
+    // isLoading.value = true;
     final cashResponse =
         await GlobalProvider().cashDispenserCommand(cashCommand: sCommand!.toUpperCase(), iTerminalID: iTerminalID!);
+    print(cashResponse?.message.toString());
+    print(cashResponse?.statuscode.toString());
+
     try {
-      if (cashResponse != null) {
-        apiResponseList.add(cashResponse);
+      if (cashResponse?.statuscode == 200) {
+        apiResponseList.add(cashResponse!);
+        serviceResponseStatusMessages.value = apiResponseList.first.message!;
+        return true;
+      } else {
+        return false;
+      }
+    } finally {
+      // isLoading.value = false;
+    }
+  }
+
+  Future<bool> issueCard(
+      {required String? command,
+      required int? iTerminalID,
+      required String? roomNo,
+      required String checkInTime,
+      required String checkOuttime,
+      required String? guestName,
+      String? commonDoor,
+      String? liftReader}) async {
+    isLoading.value = true;
+
+    final bodyPayload = {
+      "RoomNo": roomNo,
+      "CheckInDateTime": checkInTime,
+      "CheckOutDateTime": checkOuttime,
+      "OverrideKeys": "",
+      "GuestName": guestName,
+      "CommonDoor": commonDoor,
+      "LiftReader": liftReader,
+    };
+
+    var jdata = jsonEncode(bodyPayload);
+    print(jdata);
+
+    final issueResponse =
+        await GlobalProvider().issueRoomCard(cardCommand: command, iTerminalID: iTerminalID, bodyPayload: bodyPayload);
+
+    try {
+      if (issueResponse != null) {
+        issueResponseList.add(issueResponse);
         return true;
       } else {
         return false;
@@ -504,15 +687,17 @@ class HomeController extends GetxController with BaseController {
     }
   }
 
-  Future<bool?> getTerminals() async {
+  Future<bool?> getTerminals({required String? ipAddress, required Map<String, String>? accessHeader}) async {
     // final response = await GlobalProvider().fetchGraphQLData(documents: qryTerminals, headers: getAccessToken());
     isLoading.value = true;
-    Map<String, String>? accessHeaders = getAccessToken();
-    final response = await GlobalProvider().fetchTerminals(headers: accessHeaders!);
+    // final Map<String, String>? accessHeaders = await getAccessToken();
+    final response = await GlobalProvider().fetchTerminals(headers: accessHeader!, ipAddress: ipAddress);
+
     try {
       if (response != null) {
         terminalsList.add(response);
-        print(terminalsList.first.data.terminals.first.code);
+        defaultTerminalID.value = terminalsList.first.data.terminals.first.id;
+        print('TERMINAL ID: ${defaultTerminalID.value}');
         return true;
       } else {
         return false;
@@ -524,7 +709,7 @@ class HomeController extends GetxController with BaseController {
 
   Future<bool?> getDenominationData({required int terminalID}) async {
     isLoading.value = true;
-    Map<String, String>? accessHeaders = getAccessToken();
+    Map<String, String>? accessHeaders = await getAccessToken();
 
     final response = await GlobalProvider().fetchDenominationData(headers: accessHeaders!, terminalID: terminalID);
 
@@ -553,7 +738,7 @@ class HomeController extends GetxController with BaseController {
   Future<bool?> updateTerminalData({required int recordID, required int terminalID}) async {
     Map<String, dynamic> params = {"STATUS": "READ", "ID": recordID, "TerminalID": terminalID};
 
-    var accessToken = getAccessToken();
+    var accessToken = await getAccessToken();
 
     var response = await GlobalProvider()
         .mutateGraphQLData(documents: updateTerminalDataGraphQL, variables: params, accessHeaders: accessToken);
@@ -567,18 +752,10 @@ class HomeController extends GetxController with BaseController {
 
   //  MUTATION AREA
   Future addTransaction({required Map<String, String> credentialHeaders}) async {
-    isLoading.value = true;
-    // final dtNow = DateTime.now();
-
-    // add contact first
-    // var result = languageList.first.data.languages.where((element) => element.id == selecttedLanguageID.value);
-    // var nationalCode = result.first.code;
-
-    // int? resultID = await GlobalProvider().fetchNationalities(code: nationalCode);
-
-    if (screenController.selecttedLanguageID.value != 0) {
+    if (selecttedLanguageID.value != 0) {
       // selectedNationalities.value = resultID!;
       String? name = '${screenController.hostname}-${seriesDetailsList.first.data.seriesDetails.first.docNo}';
+      DateTime? dtNow = DateTime.now();
 
       int? contactID = await GlobalProvider().addContacts(
           code: seriesDetailsList.first.data.seriesDetails.first.docNo,
@@ -587,7 +764,7 @@ class HomeController extends GetxController with BaseController {
           middleName: 'Kiosk',
           prefixID: 1,
           suffixID: 1,
-          nationalityID: screenController.selecttedLanguageID.value,
+          nationalityID: selecttedLanguageID.value,
           genderID: 1,
           discriminitor: 'Contact',
           headers: credentialHeaders);
@@ -595,20 +772,101 @@ class HomeController extends GetxController with BaseController {
       // String? basePhoto = await HomeController().takePicture();
       String? basePhoto = await takePicture(camID: cameraID.value);
 
+      // var accessToken = await getAccessToken();
+
       var response = await GlobalProvider()
-          .addContactPhotoes(accessHeader: getAccessToken(), contactID: contactID!, isActive: true, photo: basePhoto);
+          .addContactPhotoes(accessHeader: accessTOKEN, contactID: contactID!, isActive: true, photo: basePhoto);
 
       if (response) {
         // update series
         await GlobalProvider().updateSeriesDetails(
-          accessHeader: getAccessToken(),
+          accessHeader: accessTOKEN,
           idNo: seriesDetailsList.first.data.seriesDetails.first.id,
           docNo: seriesDetailsList.first.data.seriesDetails.first.docNo,
           isActive: false,
-          // modifiedBy: screenController.hostname.value,
-          // modifiedDate: dtNow,
+          tranDate: DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow),
         );
-        return true;
+        // print(response);
+
+        // ======================================================================================
+        // addBooking
+        var durationValue = accommodationTypeList.first.data.accommodationTypes
+            .where((element) => element.id == selectedAccommodationTypeID.value);
+
+        final int intValue = durationValue.first.valueMax.toInt();
+
+        // CHECK IF THE VALUE MAX
+        DateTime endtime = intValue == 1 ? dtNow.add(Duration(days: intValue)) : dtNow.add(Duration(hours: intValue));
+
+        String startDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
+        String endDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(endtime);
+
+        // hc.availRoomList[hc.preSelectedRoomID.value].description
+        var moduleResponse =
+            settingsList.first.data.settings.where((element) => element.code == SettingConstant.bookingModuleID);
+        await getSeriesDetails(credentialHeaders: accessTOKEN, moduleID: int.parse(moduleResponse.first.value));
+
+        final bookingParams = {
+          "isActive": true,
+          "docNo": seriesDetailsList.first.data.seriesDetails.first.docNo,
+          "accommodationTypeID": selectedAccommodationTypeID.value,
+          "agentID": 1,
+          "bookingStatusID": 2,
+          "cutOffID": 1,
+          "roomTypeID": selectedRoomTypeID.value,
+          "actualStartDate": startDateTime,
+          "bed": 1,
+          "endDate": endDateTime,
+          "numPax": 2,
+          "startDate": startDateTime,
+          "roomRate": availRoomList[preSelectedRoomID.value].rate,
+          "roomID": int.parse(availRoomList[preSelectedRoomID.value].id),
+          "discountAMT": 0.0,
+          "isWithBreakfast": false,
+          "isDoNotDesturb": false,
+          "serviceCharge": availRoomList[preSelectedRoomID.value].serviceCharge,
+          "contactID": contactID
+        };
+
+        // var jsondata = jsonEncode(bookingParams);
+        // print(jsondata);
+
+        var bookingResponse = await GlobalProvider()
+            .mutateGraphQLData(documents: addBooking, variables: bookingParams, accessHeaders: credentialHeaders);
+        if (bookingResponse != null) {
+          print(bookingResponse);
+          await GlobalProvider().updateSeriesDetails(
+            accessHeader: accessTOKEN,
+            idNo: seriesDetailsList.first.data.seriesDetails.first.id,
+            docNo: seriesDetailsList.first.data.seriesDetails.first.docNo,
+            isActive: false,
+            tranDate: DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow),
+          );
+
+          // PROCESSING PAYMENT;
+          // BOOKING CHARGES & CHARGES
+
+          // PRINTING CARD
+          // 202309081129
+          // DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
+          await issueCard(
+            command: APIConstant.issueCard,
+            iTerminalID: defaultTerminalID.value,
+            roomNo: availRoomList[preSelectedRoomID.value].code,
+            checkInTime: DateFormat('yyyyMMddHHmm').format(dtNow),
+            checkOuttime: DateFormat('yyyyMMddHHmm').format(endtime),
+            guestName: name,
+            commonDoor: "01",
+            liftReader: "010101",
+          );
+
+          isLoading.value = false;
+          return true;
+        }
+        // await issueCard(command: 'PICD', iTerminalID: 1, roomNo: roomNo, checkInTime: checkInTime, checkOuttime: checkOuttime, guestName: guestName)
+        // if (updateResponse!) {
+        //   isLoading.value = false;
+        // }
       } else {
         return false;
       }
@@ -617,10 +875,13 @@ class HomeController extends GetxController with BaseController {
     }
   }
 
-  Future<bool> getSeriesDetails({required Map<String, String> credentialHeaders}) async {
+  Future<bool> getSeriesDetails({required Map<String, String> credentialHeaders, required int moduleID}) async {
     isLoading.value = true;
+    seriesDetailsList.clear();
 
-    final response = await GlobalProvider().fetchSeriesDetails(headers: credentialHeaders);
+    final Map<String, dynamic> params = {"moduleID": moduleID};
+
+    final response = await GlobalProvider().fetchSeriesDetails(headers: credentialHeaders, params: params);
 
     try {
       if (response != null) {
@@ -630,6 +891,237 @@ class HomeController extends GetxController with BaseController {
         }
         isLoading.value = false;
         return true;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
+  }
+
+  Future<bool> getAccommodation({required Map<String, String> credentialHeaders, required String? languageCode}) async {
+    // isLoading.value = true;
+
+    final response = await GlobalProvider().fetchAccommodationType(6, headers: credentialHeaders);
+    // const inputHenry = 'Acknowledgement';
+
+    try {
+      if (response != null) {
+        // await translator.translate('sex', from: 'en', to: 'zh-cn').then((value) => print(value));
+        // print(await inputHenry.translate(from: 'en', to: 'ja'));
+
+        accommodationTypeList.add(response);
+
+        if (accommodationTypeList.first.data.accommodationTypes.isNotEmpty &&
+            languageCode != selectedLanguageCode.value.toLowerCase()) {
+          var record = accommodationTypeList.first.data.accommodationTypes.length;
+
+          for (var ctr = 0; ctr < record; ctr++) {
+            var textTranslated = await translator.translate(
+                accommodationTypeList.first.data.accommodationTypes[ctr].description,
+                from: selectedLanguageCode.value.toLowerCase(),
+                to: languageCode!);
+            accommodationTypeList.first.data.accommodationTypes[ctr].translatedText = textTranslated.text;
+          }
+          accommodationTypeList.refresh();
+        }
+
+        if (kDebugMode) {
+          print('TOTAL ACCOMMODATION: ${accommodationTypeList.first.data.accommodationTypes.length}');
+        }
+        isLoading.value = false;
+        return true;
+      }
+    } finally {
+      // isLoading.value = false;
+    }
+    return false;
+  }
+
+  Future<bool> getSettings() async {
+    isLoading.value = true;
+
+    final accessToken = await HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
+    final headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'};
+
+    final settingsResponse = await GlobalProvider().fetchSettings(headers: headers);
+
+    try {
+      if (settingsResponse != null) {
+        settingsList.add(settingsResponse);
+
+        // GET CITY
+        final cityIndex = settingsResponse.data.settings.indexWhere((element) => element.code == "CITY");
+        sCity.value = settingsResponse.data.settings[cityIndex].value;
+
+        // DEFAULT LANGUAGE CODE
+        final langIndex =
+            settingsResponse.data.settings.indexWhere((element) => element.code == "EN" || element.value == "English");
+        selectedLanguageCode.value = settingsResponse.data.settings[langIndex].code;
+
+        isLoading.value = false;
+        return true;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
+  }
+
+  String? getSettingsValue({required String elementCode}) {
+    if (settingsList.first.data.settings.isNotEmpty) {
+      final settingsValue = settingsList.first.data.settings.where((element) => element.code == elementCode);
+
+      if (settingsValue.isNotEmpty) {
+        return settingsValue.first.value;
+      }
+    }
+    return null;
+  }
+
+  // PAYMENT TYPE
+  Future<bool> getPaymentType({required Map<String, String> credentialHeaders, required String? languageCode}) async {
+    isLoading.value = true;
+
+    final response = await GlobalProvider().fetchPaymentType(headers: credentialHeaders);
+
+    try {
+      if (response != null) {
+        paymentTypeList.add(response);
+
+        if (paymentTypeList.first.data.paymentTypes.isNotEmpty &&
+            languageCode != selectedLanguageCode.value.toLowerCase()) {
+          for (var ctr = 0; ctr < paymentTypeList.first.data.paymentTypes.length; ctr++) {
+            var textTranslated = await translator.translate(paymentTypeList.first.data.paymentTypes[ctr].description,
+                from: selectedLanguageCode.value.toLowerCase(), to: languageCode!.toLowerCase());
+            paymentTypeList.first.data.paymentTypes[ctr].translatedText = textTranslated.text;
+          }
+          paymentTypeList.refresh();
+        }
+
+        if (kDebugMode) print('Payment Type: ${paymentTypeList.first.data.paymentTypes.length}');
+
+        return true;
+      } else {
+        return false;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ROOM TYPE
+  Future<bool> getRoomType({required Map<String, String> credentialHeaders, required String? languageCode}) async {
+    isLoading.value = true;
+
+    final response = await GlobalProvider().fetchRoomTypes(headers: credentialHeaders, limit: 2);
+
+    try {
+      if (response != null) {
+        roomTypeList.add(response);
+
+        if (roomTypeList.first.data.roomTypes.isNotEmpty && languageCode != selectedLanguageCode.value.toLowerCase()) {
+          var record = roomTypeList.first.data.roomTypes.length;
+          for (var ctr = 0; ctr < record; ctr++) {
+            var textTranslated = await translator.translate(roomTypeList.first.data.roomTypes[ctr].description,
+                from: selectedLanguageCode.value.toLowerCase(), to: languageCode!);
+            roomTypeList.first.data.roomTypes[ctr].translatedText = textTranslated.text;
+          }
+          roomTypeList.refresh();
+        }
+
+        return true;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
+  }
+
+  Future<bool> getLanguages({required Map<String, String> credentialHeaders}) async {
+    isLoading.value = true;
+
+    final response = await GlobalProvider().fetchLanguages(headers: credentialHeaders);
+
+    try {
+      if (response != null) {
+        // var balik = response.data.languages.indexWhere((element) => element.flag == null);
+        response.data.languages.removeWhere((element) => element.flag == null);
+        languageList.add(response);
+
+        if (kDebugMode) {
+          print('Language: ${languageList.first.data.languages.length}');
+        }
+        isLoading.value = false;
+        return true;
+      } else {
+        isLoading.value = false;
+      }
+    } finally {
+      isLoading.value = false;
+    }
+    return false;
+  }
+
+  Future<bool?> getAvailableRoomsGraphQL(
+      {required Map<String, String> credentialHeaders,
+      required int? roomTYPEID,
+      required int? accommodationTYPEID}) async {
+    // isLoading.value = true;
+
+    final dtnow = DateTime.now();
+
+    final response = await GlobalProvider().fetchAvailableRoomsGraphQL(
+        agentID: 1,
+        roomTypeID: roomTYPEID,
+        accommodationTypeID: accommodationTYPEID == 0 ? 1 : accommodationTYPEID,
+        startDate: dtnow,
+        endDate: dtnow,
+        headers: credentialHeaders);
+
+    try {
+      if (response != null) {
+        availableRoomList.clear(); //clear first
+        availableRoomList.add(response);
+        availableRoomList.shuffle();
+
+        availRoomList.clear(); //clear first
+        availRoomList.addAll(availableRoomList.first.data.availableRooms.toList());
+        preSelectedRoomID.value = pickRoom();
+
+        if (preSelectedRoomID.value != 0) {
+          totalAmountDue.value =
+              availRoomList[preSelectedRoomID.value].rate + availRoomList[preSelectedRoomID.value].serviceCharge;
+        }
+
+        if (kDebugMode) {
+          print('Available Room Orig: ${availableRoomList.first.data.availableRooms.length}');
+          print('Available Room Shuffle: ${availRoomList.length}');
+        }
+        return true;
+      } else {
+        // isLoading.value = false;
+        return false;
+      }
+    } finally {
+      // isLoading.value = false;
+    }
+  }
+
+  Future<bool> getTransaction({required Map<String, String> credentialHeaders}) async {
+    isLoading.value = true;
+
+    final response = await GlobalProvider().getTranslation(headers: credentialHeaders);
+    try {
+      if (response != null) {
+        transactionList.add(response);
+        if (kDebugMode) {
+          print('TRANSLATION RECORDS: ${transactionList.first.data.conversion.length}');
+        }
+        getMenu(code: 'SLMT', type: 'TITLE');
+        isLoading.value = false;
+        return true;
+      } else {
+        isLoading.value = false;
       }
     } finally {
       isLoading.value = false;

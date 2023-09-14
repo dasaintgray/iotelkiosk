@@ -84,12 +84,12 @@ class BookaroomView extends GetView {
                         height: 5.h,
                         width: double.infinity,
                         child: CarouselTitle(
-                          titleTrans: sc.titleTrans,
+                          titleTrans: hc.titleTrans,
                           textStyle: TextStyle(color: HenryColors.darkGreen, fontSize: 15.sp),
                         ),
                       ),
                       // menuRoomType(orientation, languageID: sc.selecttedLanguageID.value),
-                      menuBookARoom(orientation, languageID: sc.selecttedLanguageID.value),
+                      menuBookARoom(orientation, languageID: hc.selecttedLanguageID.value),
                       SizedBox(
                         height: orientation == Orientation.portrait ? 10.h : 2.h,
                         child: Row(
@@ -99,7 +99,7 @@ class BookaroomView extends GetView {
                             GestureDetector(
                               onTap: () {
                                 var response =
-                                    sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'ST', type: 'ITEM');
+                                    hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST', type: 'ITEM');
                                 if (response) {
                                   Get.back();
                                 }
@@ -127,16 +127,16 @@ class BookaroomView extends GetView {
   }
 
   menuBookARoom(Orientation orientation, {int? languageID, String? code, String? type}) {
-    final langCode = sc.languageList.first.data.languages.where((element) => element.id == languageID);
+    final langCode = hc.languageList.first.data.languages.where((element) => element.id == languageID);
 
     return SizedBox(
       height: orientation == Orientation.portrait ? 45.h : 20.h,
       width: 75.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),
-        itemCount: sc.roomTypeList.first.data.roomTypes.length,
+        itemCount: hc.roomTypeList.first.data.roomTypes.length,
         itemBuilder: (BuildContext context, int index) {
-          var imageFilename = 'assets/menus/${sc.roomTypeList.first.data.roomTypes[index].code.toLowerCase()}.png';
+          var imageFilename = 'assets/menus/${hc.roomTypeList.first.data.roomTypes[index].code.toLowerCase()}.png';
           return SizedBox(
             height: 10.h,
             child: Stack(
@@ -160,9 +160,9 @@ class BookaroomView extends GetView {
                             ),
                           )
                         : Text(
-                            langCode.first.code.toLowerCase() == sc.defaultLanguageCode.value.toLowerCase()
-                                ? sc.roomTypeList.first.data.roomTypes[index].description.toUpperCase()
-                                : sc.roomTypeList.first.data.roomTypes[index].translatedText!,
+                            langCode.first.code.toLowerCase() == hc.selectedLanguageCode.value.toLowerCase()
+                                ? hc.roomTypeList.first.data.roomTypes[index].description.toUpperCase()
+                                : hc.roomTypeList.first.data.roomTypes[index].translatedText!,
                             style: TextStyle(
                               color: HenryColors.darkGreen,
                               fontSize: 12.sp,
@@ -178,18 +178,18 @@ class BookaroomView extends GetView {
                   right: 8.w,
                   child: GestureDetector(
                     onTap: () async {
-                      sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
-                      sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
-                      var response = await sc.getAccommodation(
-                          credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
+                      hc.selectedRoomType.value = hc.roomTypeList.first.data.roomTypes[index].code;
+                      hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
+                      var response = await hc.getAccommodation(
+                          credentialHeaders: hc.accessTOKEN, languageCode: hc.selectedLanguageCode.value);
                       if (response) {
-                        if (kDebugMode) print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
+                        if (kDebugMode) print('SELECTED ROOM TYPE ID: ${hc.selectedRoomTypeID.value}');
                         // Get.to(() => AccommodationView());
                       }
                     },
                     child: SizedBox(
                       height: 7.h,
-                      child: sc.roomTypeList.first.data.roomTypes.isEmpty
+                      child: hc.roomTypeList.first.data.roomTypes.isEmpty
                           ? null
                           : Image.asset(imageFilename, fit: BoxFit.contain)
                               .animate()

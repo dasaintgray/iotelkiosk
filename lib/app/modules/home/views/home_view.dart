@@ -51,7 +51,7 @@ class HomeView extends GetView<HomeController> {
                     height: 12.h,
                   ),
                   // TITLE
-                  KioskMenuTitle(titleLength: sc.titleTrans.length, titleTrans: sc.titleTrans),
+                  KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
                   // SPACE
                   SizedBox(
                     height: 2.h,
@@ -74,7 +74,7 @@ class HomeView extends GetView<HomeController> {
       width: 75.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),
-        itemCount: sc.languageList.first.data.languages.length,
+        itemCount: hc.languageList.first.data.languages.length,
         itemBuilder: (BuildContext context, int index) {
           return SizedBox(
             height: 10.h,
@@ -88,7 +88,7 @@ class HomeView extends GetView<HomeController> {
                     child: Animate(
                       child: Center(
                         child: Text(
-                          sc.languageList.first.data.languages[index].description,
+                          hc.languageList.first.data.languages[index].description,
                           style: TextStyle(
                             color: HenryColors.darkGreen,
                             fontSize: 15.sp,
@@ -106,15 +106,15 @@ class HomeView extends GetView<HomeController> {
                   right: 8.w,
                   child: GestureDetector(
                     onTap: () {
-                      int lID = sc.languageList.first.data.languages[index].id;
+                      int lID = hc.languageList.first.data.languages[index].id;
                       String sCode = 'ST';
-                      sc.selecttedLanguageID.value = sc.languageList.first.data.languages[index].id;
-                      sc.selectedLanguageCode.value = sc.languageList.first.data.languages[index].code;
+                      hc.selecttedLanguageID.value = hc.languageList.first.data.languages[index].id;
+                      hc.selectedLanguageCode.value = hc.languageList.first.data.languages[index].code;
 
-                      var response = sc.getMenu(languageID: lID, code: sCode, type: 'TITLE');
+                      var response = hc.getMenu(languageID: lID, code: sCode, type: 'TITLE');
                       if (response) {
                         if (kDebugMode) {
-                          print('SELECTED LANGUAGE CODE: ${sc.selectedLanguageCode.value}');
+                          print('SELECTED LANGUAGE CODE: ${hc.selectedLanguageCode.value}');
                         }
                         hc.update();
                         Get.to(
@@ -125,10 +125,10 @@ class HomeView extends GetView<HomeController> {
                     },
                     child: SizedBox(
                       height: 7.h,
-                      child: sc.languageList.isEmpty
+                      child: hc.languageList.isEmpty
                           ? null
                           : Image.asset(
-                              'assets/png/${sc.languageList.first.data.languages[index].flag!}',
+                              'assets/png/${hc.languageList.first.data.languages[index].flag!}',
                               fit: BoxFit.fill,
                               semanticLabel: 'Select Language',
                             )
@@ -152,22 +152,22 @@ class HomeView extends GetView<HomeController> {
       width: 75.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25),
-        itemCount: sc.languageList.first.data.languages.length,
+        itemCount: hc.languageList.first.data.languages.length,
         itemBuilder: (BuildContext context, int index) {
           return SizedBox(
             child: GestureDetector(
               onTap: () {
-                int lID = sc.languageList.first.data.languages[index].id;
+                int lID = hc.languageList.first.data.languages[index].id;
                 String sCode = 'ST';
-                sc.selecttedLanguageID.value = sc.languageList.first.data.languages[index].id;
-                sc.selectedLanguageCode.value = sc.languageList.first.data.languages[index].code;
+                hc.selecttedLanguageID.value = hc.languageList.first.data.languages[index].id;
+                hc.selectedLanguageCode.value = hc.languageList.first.data.languages[index].code;
 
-                var response = sc.getMenu(
+                var response = hc.getMenu(
                   languageID: lID,
                   code: sCode,
                 );
                 if (response) {
-                  if (kDebugMode) print('SELECTED LANGUAGE CODE ${sc.selectedLanguageCode.value}');
+                  if (kDebugMode) print('SELECTED LANGUAGE CODE ${hc.selectedLanguageCode.value}');
                   hc.update();
                   Get.to(
                     () => TransactionView(),
@@ -179,10 +179,10 @@ class HomeView extends GetView<HomeController> {
                 padding: const EdgeInsets.all(35.0),
                 child: SizedBox(
                   height: 7.h,
-                  child: sc.languageList.isEmpty
+                  child: hc.languageList.isEmpty
                       ? null
                       : Image.asset(
-                          'assets/png/${sc.languageList.first.data.languages[index].flag!}',
+                          'assets/png/${hc.languageList.first.data.languages[index].flag!}',
                           fit: BoxFit.fill,
                           semanticLabel: 'Select Language',
                         )

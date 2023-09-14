@@ -46,13 +46,13 @@ class AccommodationView extends GetView {
                     height: 12.h,
                   ),
                   // TITLE
-                  KioskMenuTitle(titleLength: sc.titleTrans.length, titleTrans: sc.titleTrans),
+                  KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
                   // SPACE
                   SizedBox(
                     height: 2.h,
                   ),
                   // MENU
-                  menuAccommodationType(orientation, languageID: sc.selecttedLanguageID.value),
+                  menuAccommodationType(orientation, languageID: hc.selecttedLanguageID.value),
 
                   SizedBox(
                     height: orientation == Orientation.portrait ? 5.h : 2.h,
@@ -62,7 +62,7 @@ class AccommodationView extends GetView {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            sc.getMenu(code: 'SLMT', type: 'TITLE');
+                            hc.getMenu(code: 'SLMT', type: 'TITLE');
                             // hc.update();
                             Get.back();
                           },
@@ -88,14 +88,14 @@ class AccommodationView extends GetView {
   }
 
   Widget menuAccommodationType(Orientation orientation, {int? languageID, String? code, String? type}) {
-    final langCode = sc.languageList.first.data.languages.where((element) => element.id == languageID);
+    final langCode = hc.languageList.first.data.languages.where((element) => element.id == languageID);
 
     return SizedBox(
       height: orientation == Orientation.portrait ? 49.h : 20.h,
       width: 75.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),
-        itemCount: sc.accommodationTypeList.first.data.accommodationTypes.length,
+        itemCount: hc.accommodationTypeList.first.data.accommodationTypes.length,
         physics: const ClampingScrollPhysics(),
         itemBuilder: (BuildContext context, int index) {
           return SizedBox(
@@ -109,9 +109,9 @@ class AccommodationView extends GetView {
                   child: SizedBox(
                     width: 10.w,
                     child: Text(
-                      langCode.first.code.toLowerCase() == sc.defaultLanguageCode.value.toLowerCase()
-                          ? sc.accommodationTypeList.first.data.accommodationTypes[index].description.toUpperCase()
-                          : sc.accommodationTypeList.first.data.accommodationTypes[index].translatedText!,
+                      langCode.first.code.toLowerCase() == hc.selectedLanguageCode.value.toLowerCase()
+                          ? hc.accommodationTypeList.first.data.accommodationTypes[index].description.toUpperCase()
+                          : hc.accommodationTypeList.first.data.accommodationTypes[index].translatedText!,
                       style: TextStyle(
                         color: HenryColors.darkGreen,
                         fontSize: 12.sp,
@@ -124,27 +124,27 @@ class AccommodationView extends GetView {
                   right: 8.w,
                   child: GestureDetector(
                     onTap: () async {
-                      sc.isLoading.value = true;
-                      var response = await sc.getRoomType(
-                          credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
+                      hc.isLoading.value = true;
+                      var response = await hc.getRoomType(
+                          credentialHeaders: hc.accessTOKEN, languageCode: hc.selectedLanguageCode.value);
                       if (response) {
-                        sc.selectedAccommodationTypeID.value =
-                            sc.accommodationTypeList.first.data.accommodationTypes[index].id;
+                        hc.selectedAccommodationTypeID.value =
+                            hc.accommodationTypeList.first.data.accommodationTypes[index].id;
                         if (kDebugMode) {
-                          print('SELECTED ACCOMMODATION TYPE ID: ${sc.selectedAccommodationTypeID.value}');
+                          print('SELECTED ACCOMMODATION TYPE ID: ${hc.selectedAccommodationTypeID.value}');
                         }
-                        sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SRT', type: 'TITLE');
-                        sc.isLoading.value = false;
-                        sc.selectedTransactionType.value = sc.pageTrans[index].translationText;
+                        hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SRT', type: 'TITLE');
+                        hc.isLoading.value = false;
+                        sc.selectedTransactionType.value = hc.pageTrans[index].translationText;
                         hc.update();
                         Get.to(() => RoomTypeView());
                       }
                     },
                     child: SizedBox(
                       height: 7.h,
-                      child: sc.accommodationTypeList.first.data.accommodationTypes.isNotEmpty
+                      child: hc.accommodationTypeList.first.data.accommodationTypes.isNotEmpty
                           ? Image.asset(
-                                  'assets/menus/hour${sc.accommodationTypeList.first.data.accommodationTypes[index].seq}.png',
+                                  'assets/menus/hour${hc.accommodationTypeList.first.data.accommodationTypes[index].seq}.png',
                                   fit: BoxFit.contain)
                               .animate()
                               .fade(duration: HenryGlobal.animationSpeed)

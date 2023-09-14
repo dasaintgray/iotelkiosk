@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hasura_connect/hasura_connect.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/cutoff_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/denomination_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/payment_type_model.dart';
@@ -14,6 +15,7 @@ import 'package:iotelkiosk/app/data/models_graphql/terminals_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/translation_terms_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/apiresponse_model.dart';
+import 'package:iotelkiosk/app/data/models_rest/cardissueresponse_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/userlogin_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/weather_model.dart';
@@ -61,8 +63,29 @@ class GlobalProvider extends BaseController {
         .catchError(handleError);
 
     if (response != null) {
-      // return apiResponseModelFromJson(jsonEncode(response));
-      return apiResponseModelFromJson(response);
+      var resdata = jsonDecode(response);
+      if (resdata["statuscode"] == 200) {
+        // return apiResponseModelFromJson(jsonDecode(response));
+        return apiResponseModelFromJson(response);
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+
+  Future<CardIssueResponseModel?> issueRoomCard(
+      {required String? cardCommand, required int? iTerminalID, Map<String, dynamic>? bodyPayload}) async {
+    final sCommand = '?command=${cardCommand!.toUpperCase()}&Terminal=$iTerminalID';
+    final sendpoint = HenryGlobal.iotelEndPoint + sCommand;
+
+    final request = await HenryBaseClient()
+        .postRequest(HenryGlobal.iotelURI, sendpoint, bodyPayload!, httpHeaders: HenryGlobal.iotelHeaders)
+        .catchError(handleError);
+
+    if (request != null) {
+      return cardIssueResponseModelFromJson(request);
     } else {
       return null;
     }
@@ -124,6 +147,8 @@ class GlobalProvider extends BaseController {
       required Map<String, String> headers}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
+    // String sDate = startDate?.toIso8601String().substring(0, startDate.toIso8601String().length - 3),
+
     final params = {
       "agentID": agentID,
       "roomTypeID": roomTypeID,
@@ -168,12 +193,13 @@ class GlobalProvider extends BaseController {
     return null;
   }
 
-  Future<SeriesDetailsModel?> fetchSeriesDetails({required Map<String, String> headers}) async {
+  Future<SeriesDetailsModel?> fetchSeriesDetails(
+      {required Map<String, String> headers, Map<String, dynamic>? params}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
-    final response = await hasuraConnect.query(qrySeriesDetails).catchError(handleError);
+    final response = await hasuraConnect.query(qrySeriesDetails, variables: params).catchError(handleError);
     if (response != null) {
-      // return seriesDetailsModelFromJson(response);
-      return SeriesDetailsModel.fromJson(response);
+      return seriesDetailsModelFromJson(jsonEncode(response));
+      // return SeriesDetailsModel.fromJson(response);
     }
     return null;
   }
@@ -208,7 +234,7 @@ class GlobalProvider extends BaseController {
     final params = {"code": code};
 
     final response = await hasuraConnect.query(qryNationalities, variables: params).catchError(handleError);
-    if (response != null) {
+    if (response["data"]["Nationalities"] != "[]") {
       var resultList = (response['data']['Nationalities'] as List);
       int? output = resultList[0]['Id'];
       return output!;
@@ -219,12 +245,15 @@ class GlobalProvider extends BaseController {
 
   Future<PaymentTypeModel?> fetchPaymentType({required Map<String, String> headers}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
-
     final response = await hasuraConnect.query(qryPaymentType).catchError(handleError);
-    if (response != null) {
+
+    // print(response["data"]["PaymentTypes"] == "[]");
+
+    if (response["data"]["PaymentTypes"] == "[]") {
+      return null;
+    } else {
       return paymentTypeModelFromJson(jsonEncode(response));
     }
-    return null;
   }
 
   Future<TranslationTermsModel?> fetchTerms({required Map<String, String> headers, required int? langID}) async {
@@ -239,15 +268,18 @@ class GlobalProvider extends BaseController {
     return null;
   }
 
-  Future<TerminalsModel?> fetchTerminals({required Map<String, String> headers}) async {
+  Future<TerminalsModel?> fetchTerminals({required Map<String, String> headers, required String? ipAddress}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
-    final response = await hasuraConnect.query(qryTerminals).catchError(handleError);
+    final params = {"ipa": ipAddress};
+    final response = await hasuraConnect.query(qryTerminals, variables: params).catchError(handleError);
 
-    if (response != null) {
+    bool resdata = response["data"]["Terminals"] != "[]";
+    if (resdata) {
       return terminalsModelFromJson(jsonEncode(response));
+    } else {
+      return null;
     }
-    return null;
   }
 
   Future<DenominationModel?> fetchDenominationData(
@@ -257,11 +289,28 @@ class GlobalProvider extends BaseController {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
     final response = await hasuraConnect.query(qryDenomination, variables: params).catchError(handleError);
+    // print(response["data"]["TerminalDenominations"]);
 
-    if (response != null) {
+    if (response["data"]["TerminalDenominations"] == "[]") {
       return denominationModelFromJson(jsonEncode(response['data']));
+    } else {
+      return null;
     }
-    return null;
+  }
+
+  // CUT OFF
+  Future fetchCutOffData({required Map<String, String> headers, required bool isActive}) async {
+    final params = {"isActive": isActive};
+
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
+
+    final cutOffResponse = await hasuraConnect.query(getCutOffs, variables: params).catchError(handleError);
+
+    if (cutOffResponse["data"]["CutOffs"] == "[]") {
+      return cutOffModelFromJson(jsonEncode(cutOffResponse["data"]));
+    } else {
+      return null;
+    }
   }
 
   // DYNAMIC AND GLOBAL FETCH ON ALL QUERY
@@ -352,14 +401,11 @@ class GlobalProvider extends BaseController {
     // var json = jsonEncode(addParams);
     // if (kDebugMode) print(json);
 
-    var response = await hasuraConnect.mutation(insertContacts, variables: addParams).catchError(handleError);
-    if (response != null) {
-      // var resultList = (response['data']['People']['Ids'] as List);
-      var resultList = response['data']['People'];
-      if (kDebugMode) print(resultList["Ids"]);
-      List output = resultList["Ids"];
-      if (kDebugMode) print(output[0]);
-      return output[0];
+    var addResponse = await hasuraConnect.mutation(insertContacts, variables: addParams).catchError(handleError);
+    if (addResponse['data']['People']["response"] == "Success") {
+      var resultList = addResponse['data']['People']["Ids"] as List;
+      if (kDebugMode) print(resultList[0]);
+      return resultList[0];
     } else {
       return 0;
     }
@@ -401,11 +447,10 @@ class GlobalProvider extends BaseController {
   }
 
   Future<bool?> updateSeriesDetails(
-      {int? idNo,
-      String? docNo,
-      bool? isActive,
-      String? modifiedBy,
-      DateTime? modifiedDate,
+      {required int? idNo,
+      required String? docNo,
+      required bool? isActive,
+      required String? tranDate,
       required Map<String, String>? accessHeader}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: accessHeader);
 
@@ -414,15 +459,7 @@ class GlobalProvider extends BaseController {
     //   ngayon = ngayon.substring(0, ngayon.length - 3);
     // }
 
-    final updateParams = {
-      "ID": idNo,
-      "docNo": docNo,
-      "bActive": isActive,
-      // "modifiedBy": modifiedBy,
-      // "modifiedDate": ngayon,
-      // "tranDate": ngayon,
-      // "reservationDate": ngayon
-    };
+    final updateParams = {"ID": idNo, "docNo": docNo, "bActive": isActive, "tranDate": tranDate};
 
     var jsondata = jsonEncode(updateParams);
     if (kDebugMode) print(jsondata);

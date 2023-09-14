@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/disclaimer_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
+import 'package:iotelkiosk/globals/constant/settings_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
 import 'package:iotelkiosk/globals/widgets/kioskbi_widget.dart';
@@ -42,13 +43,13 @@ class InsertPaymentView extends GetView {
                     height: 12.h,
                   ),
                   // TITLE
-                  KioskMenuTitle(titleLength: sc.titleTrans.length, titleTrans: sc.titleTrans),
+                  KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
                   // SPACE
                   SizedBox(
                     height: 2.h,
                   ),
                   // MENU
-                  menuInsertPayment(orientation, languageID: sc.selecttedLanguageID.value),
+                  menuInsertPayment(orientation, languageID: hc.selecttedLanguageID.value),
 
                   SizedBox(
                     height: orientation == Orientation.portrait ? 10.h : 2.h,
@@ -65,7 +66,7 @@ class InsertPaymentView extends GetView {
                                   recordID: hc.terminalDataList.first.id,
                                   terminalID: hc.terminalDataList.first.terminalId);
 
-                              var response = sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'ST');
+                              var response = hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST');
                               if (response) Get.back();
                             }
                           },
@@ -90,10 +91,10 @@ class InsertPaymentView extends GetView {
   }
 
   Widget menuInsertPayment(Orientation orientation, {required int? languageID}) {
-    final langCode = sc.languageList.first.data.languages.where((element) => element.id == languageID);
+    final langCode = hc.languageList.first.data.languages.where((element) => element.id == languageID);
 
     final selectedPaymentType =
-        sc.paymentTypeList.first.data.paymentTypes.where((element) => element.code == sc.selectedPaymentTypeCode.value);
+        hc.paymentTypeList.first.data.paymentTypes.where((element) => element.code == hc.selectedPaymentTypeCode.value);
 
     if (kDebugMode) {
       print('${selectedPaymentType.first.description} : ${selectedPaymentType.first.translatedText}');
@@ -107,10 +108,10 @@ class InsertPaymentView extends GetView {
     String amountReceivedText = 'Total Amount Received';
     String roomNumber = 'Room Number';
 
-    if (langCode.first.code.toLowerCase() != sc.defaultLanguageCode.value.toLowerCase()) {
+    if (langCode.first.code.toLowerCase() != hc.selectedLanguageCode.value.toLowerCase()) {
       cardDeposit = sc.translateText(
           sourceText: cardDeposit,
-          fromLang: sc.defaultLanguageCode.value.toLowerCase(),
+          fromLang: hc.selectedLanguageCode.value.toLowerCase(),
           toLang: langCode.first.code.toLowerCase());
     }
 
@@ -145,7 +146,7 @@ class InsertPaymentView extends GetView {
                 flex: 1,
                 child: Center(
                   child: Text(
-                    langCode.first.code.toLowerCase() == sc.defaultLanguageCode.value.toLowerCase()
+                    langCode.first.code.toLowerCase() == hc.selectedLanguageCode.value.toLowerCase()
                         ? selectedPaymentType.first.description.toUpperCase()
                         : selectedPaymentType.first.translatedText!,
                     style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
@@ -163,19 +164,19 @@ class InsertPaymentView extends GetView {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$roomNumber : ${sc.availRoomList[sc.preSelectedRoomID.value].description}',
+                      '$roomNumber : ${hc.availRoomList[hc.preSelectedRoomID.value].description}',
                       style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
                     ),
                     Text(
-                      '$roomRate : $denomination ${sc.availRoomList[sc.preSelectedRoomID.value].rate.toStringAsFixed(2)}',
+                      '$roomRate : $denomination ${hc.availRoomList[hc.preSelectedRoomID.value].rate.toStringAsFixed(2)}',
                       style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
                     ),
                     Text(
-                      '$cardDeposit : $denomination ${sc.availRoomList[sc.preSelectedRoomID.value].serviceCharge.toStringAsFixed(2)}',
+                      '$cardDeposit : $denomination ${hc.availRoomList[hc.preSelectedRoomID.value].serviceCharge.toStringAsFixed(2)}',
                       style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
                     ),
                     Text(
-                      '$amountDue : $denomination ${sc.totalAmountDue.toStringAsFixed(2)}',
+                      '$amountDue : $denomination ${hc.totalAmountDue.toStringAsFixed(2)}',
                       style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
                     ),
                     SizedBox(
@@ -249,23 +250,20 @@ class InsertPaymentView extends GetView {
                     child: Center(
                       child: MaterialButton(
                         onPressed: () async {
-                          sc.isLoading.value = true;
-                          sc.getMenu(code: 'DI', type: 'TITLE', languageID: languageID);
-
+                          hc.isLoading.value = true;
+                          hc.getMenu(code: 'DI', type: 'TITLE', languageID: languageID);
                           await hc.initializeCamera();
-                          await hc.getSeriesDetails(credentialHeaders: hc.globalHeaders);
-                          Get.to(() => DisclaimerView());
 
-                          // var response = await sc.getTerms(credentialHeaders: hc.globalHeaders);
-                          // if (response) {
-                          //   sc.isLoading.value = false;
-                          //   Get.to(() => DisclaimerView());
-                          // }
+                          var moduleResponse = hc.settingsList.first.data.settings
+                              .where((element) => element.code == SettingConstant.contactModuleID);
+                          await hc.getSeriesDetails(
+                              credentialHeaders: hc.accessTOKEN, moduleID: int.parse(moduleResponse.first.value));
+                          Get.to(() => DisclaimerView());
                         },
                         color: HenryColors.darkGreen,
                         padding: const EdgeInsets.all(30),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
-                        // AGREE BUTTON
+                        // CONFIRM BUTTON
                         child: Text(
                           '   Confirm   ',
                           style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),

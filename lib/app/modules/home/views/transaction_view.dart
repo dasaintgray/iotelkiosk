@@ -55,7 +55,7 @@ class TransactionView extends GetView<HomeController> {
                     height: 12.h,
                   ),
                   // TITLE
-                  KioskMenuTitle(titleLength: sc.titleTrans.length, titleTrans: sc.titleTrans),
+                  KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
                   // SPACE
                   SizedBox(
                     height: 2.h,
@@ -70,7 +70,7 @@ class TransactionView extends GetView<HomeController> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            sc.getMenu(code: 'SLMT', type: 'TITLE');
+                            hc.getMenu(code: 'SLMT', type: 'TITLE');
                             // Get.back();
                             Get.off(() => HomeView());
                           },
@@ -101,7 +101,7 @@ class TransactionView extends GetView<HomeController> {
       width: 75.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),
-        itemCount: sc.pageTrans.length,
+        itemCount: hc.pageTrans.length,
         itemBuilder: (BuildContext context, int index) {
           return SizedBox(
             height: 10.h,
@@ -126,7 +126,7 @@ class TransactionView extends GetView<HomeController> {
                             ),
                           )
                         : Text(
-                            sc.pageTrans[index].translationText,
+                            hc.pageTrans[index].translationText,
                             style: TextStyle(
                               color: HenryColors.darkGreen,
                               fontSize: 12.sp,
@@ -145,14 +145,14 @@ class TransactionView extends GetView<HomeController> {
                       switch (index) {
                         case 0: //CHECK IN
                           {
-                            sc.isLoading.value = true;
-                            var response = await sc.getAccommodation(
-                                credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
+                            hc.isLoading.value = true;
+                            var response = await hc.getAccommodation(
+                                credentialHeaders: hc.accessTOKEN, languageCode: hc.selectedLanguageCode.value);
                             if (response) {
-                              if (kDebugMode) print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
+                              if (kDebugMode) print('SELECTED ROOM TYPE ID: ${hc.selectedRoomTypeID.value}');
                               // sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
-                              sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
-                              if (kDebugMode) print(sc.selecttedLanguageID.value);
+                              hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
+                              if (kDebugMode) print(hc.selecttedLanguageID.value);
                               hc.update();
                               Get.to(() => AccommodationView());
                             }
@@ -176,10 +176,10 @@ class TransactionView extends GetView<HomeController> {
                     },
                     child: SizedBox(
                       height: 7.h,
-                      child: sc.pageTrans.isEmpty
+                      child: hc.pageTrans.isEmpty
                           ? null
                           : Image.asset(
-                              sc.pageTrans[index].images!,
+                              hc.pageTrans[index].images!,
                               fit: BoxFit.contain,
                             )
                               .animate()

@@ -69,7 +69,7 @@ class HenryBaseClient {
   }
 
   // POST
-  Future<dynamic> postRequest(String baseURL, String endpoint, Map<String, String> bodyPayload,
+  Future<dynamic> postRequest(String baseURL, String endpoint, Map<String, dynamic> bodyPayload,
       {dynamic httpHeaders}) async {
     var uriEndpoint = Uri.parse(baseURL + endpoint);
     var request = http.Request("POST", uriEndpoint);

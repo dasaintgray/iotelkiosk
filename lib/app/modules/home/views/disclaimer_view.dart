@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
+import 'package:iotelkiosk/app/modules/home/views/printing_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
@@ -46,43 +47,18 @@ class DisclaimerView extends GetView {
                   height: 10.h,
                 ),
                 // TITLE
-                KioskMenuTitle(titleLength: sc.titleTrans.length, titleTrans: sc.titleTrans),
+                KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
                 // SPACE
                 SizedBox(
                   height: 2.h,
+                  child: Text(
+                    'Please scroll up the disclaimer',
+                    style: TextStyle(color: HenryColors.puti, fontSize: 3.sp),
+                  ),
                 ),
                 // MENU
                 // menuAccommodationType(orientation, languageID: sc.selecttedLanguageID.value),
-                menuDisclaimer(orientation, context),
-
-                Visibility(
-                  visible: false,
-                  child: SizedBox(
-                    height: orientation == Orientation.portrait ? 8.h : 2.h,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            var response =
-                                sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'ST', type: 'ITEM');
-                            if (response) {
-                              Get.back();
-                            }
-                          },
-                          child: Image.asset(
-                            'assets/menus/back-arrow.png',
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 50,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                Expanded(child: menuDisclaimer(orientation, context)),
               ],
             ),
           ),
@@ -102,7 +78,7 @@ class DisclaimerView extends GetView {
         children: [
           Obx(
             () => Visibility(
-              visible: true,
+              visible: false,
               child: SizedBox(
                 height: 15.h,
                 width: 60.w,
@@ -120,76 +96,92 @@ class DisclaimerView extends GetView {
             width: double.infinity,
           ),
           // DISCLAIMER
-          sc.languageList.first.data.languages.isNotEmpty
-              ? SizedBox(
-                  height: 20.h,
-                  child: SingleChildScrollView(
-                    controller: sc.scrollController,
-                    child: Text(
-                      sc.languageList.first.data.languages.first.disclaimer,
-                      style: TextStyle(
-                        color: HenryColors.puti,
-                        fontSize: 3.sp,
-                      ),
-                    ),
-                  ),
-                )
-              : const SizedBox(),
-          SizedBox(
-            height: 1.h,
-            width: double.infinity,
-          ),
-          sc.languageList.first.data.languages.isNotEmpty
-              ? Obx(() => SizedBox(
-                    child: hc.isLoading.value
-                        ? Column(
-                            children: [
-                              const CircularProgressIndicator.adaptive(
-                                backgroundColor: HenryColors.puti,
-                              ),
-                              Text(
-                                'Processing, please wait',
-                                style: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
-                              )
-                            ],
-                          )
-                        : Visibility(
-                            visible: sc.isBottom.value,
-                            child: MaterialButton(
-                              onPressed: () async {
-                                hc.isLoading.value = true;
-                                // var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
-                                final handle =
-                                    imgKey.currentContext?.findAncestorWidgetOfExactType<SizedBox>().hashCode;
-                                if (kDebugMode) {
-                                  print('Picture Handle: $handle');
-                                }
-                                final accessToken = sc.userLoginList.first.accessToken;
-                                final headers = {
-                                  'Content-Type': 'application/json',
-                                  'Authorization': 'Bearer $accessToken'
-                                };
 
-                                // String? basePhoto = await hc.takePicture(camID: hc.cameraID.value);
-
-                                var response = await hc.addTransaction(credentialHeaders: headers);
-                                if (response == "Success") {
-                                  //
-                                  hc.isLoading.value = false;
-                                }
-                              },
-                              color: HenryColors.darkGreen,
-                              padding: const EdgeInsets.all(30),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
-                              // AGREE BUTTON
-                              child: Text(
-                                'Agree',
-                                style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
-                              ),
+          Visibility(
+            visible: hc.languageList.first.data.languages.isNotEmpty,
+            child: Obx(
+              () => Expanded(
+                flex: 8,
+                child: SizedBox(
+                  height: 35.h,
+                  child: hc.isLoading.value
+                      ? Column(
+                          children: [
+                            const CircularProgressIndicator.adaptive(
+                              backgroundColor: HenryColors.puti,
+                            ),
+                            Text(
+                              'Processing, please wait',
+                              style: TextStyle(color: HenryColors.puti, fontSize: 15.sp),
+                            )
+                          ],
+                        )
+                      : SingleChildScrollView(
+                          controller: hc.scrollController,
+                          child: Text(
+                            hc.languageList.first.data.languages.first.disclaimer,
+                            style: TextStyle(
+                              color: HenryColors.puti,
+                              fontSize: 5.sp,
                             ),
                           ),
-                  ))
-              : const SizedBox(),
+                        ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 2.h,
+            width: double.infinity,
+          ),
+          Obx(
+            () => Visibility(
+              visible: hc.isBottom.value,
+              child: Expanded(
+                flex: 1,
+                child: SizedBox(
+                  height: 2.h,
+                  width: 30.w,
+                  child: MaterialButton(
+                    onPressed: () async {
+                      hc.isLoading.value = true;
+                      // var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
+                      final handle = imgKey.currentContext?.findAncestorWidgetOfExactType<SizedBox>().hashCode;
+                      if (kDebugMode) print('Picture Handle: $handle');
+                      hc.getMenu(code: 'SLMT', type: 'TITLE');
+
+                      await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: hc.defaultTerminalID.value);
+                      // print(dispenseResponse);
+
+                      var response = await hc.addTransaction(credentialHeaders: hc.accessTOKEN);
+
+                      if (response) {
+                        hc.isLoading.value = false;
+                        hc.disposeCamera();
+                        Get.to(() => PrintingView());
+                        // PRINTING OF CARDS AND DISPLAY INFO OF ROOMS
+                      }
+                    },
+                    color: HenryColors.darkGreen,
+                    padding: const EdgeInsets.all(30),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
+                    // AGREE BUTTON
+                    child: Text(
+                      'Agree',
+                      style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: SizedBox(
+              height: 1.h,
+              width: double.infinity,
+            ),
+          ),
         ],
       ),
     );

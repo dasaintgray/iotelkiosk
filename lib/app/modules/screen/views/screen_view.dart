@@ -3,6 +3,7 @@ import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/home_view.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:marquee/marquee.dart';
@@ -16,6 +17,7 @@ class ScreenView extends GetView<ScreenController> {
   // CONTROLLER
   // final sc = Get.find<ScreenController>();
   final sc = Get.put(ScreenController());
+  final hc = Get.put(HomeController());
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class ScreenView extends GetView<ScreenController> {
             onTap: () {
               if (!sc.isLoading.value) {
                 sc.player.stop();
-                sc.getMenu(code: 'SLMT', type: 'TITLE');
+                hc.getMenu(code: 'SLMT', type: 'TITLE');
                 Get.to(() => HomeView());
               }
             },
@@ -125,7 +127,7 @@ class ScreenView extends GetView<ScreenController> {
                         child: sc.isLoading.value
                             ? const CircularProgressIndicator.adaptive()
                             : Marquee(
-                                text: '${sc.availRoomList.length} Available Rooms as of today ${sc.dtNow}',
+                                text: '${hc.availRoomList.length} Available Rooms as of today ${sc.dtNow}',
                                 // HenryGlobal.longText,
                                 // style: const TextStyle(color: HenryColors.puti),
                                 scrollAxis: Axis.vertical,

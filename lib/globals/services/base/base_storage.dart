@@ -35,8 +35,8 @@ class HenryStorage {
     return GetStorage().write(titulo!, tokenValue);
   }
 
-  static readListFromLS({String? titulo = "token"}) {
-    return GetStorage().read(titulo!);
+  static readListFromLS({String? titulo = "token"}) async {
+    return await GetStorage().read(titulo!);
   }
 
   static readFromLS({String? titulo = "token"}) async {

@@ -9,12 +9,12 @@ ApiResponseModel apiResponseModelFromJson(String str) => ApiResponseModel.fromJs
 String apiResponseModelToJson(ApiResponseModel data) => json.encode(data.toJson());
 
 class ApiResponseModel {
-  String message;
-  int statuscode;
+  String? message;
+  int? statuscode;
 
   ApiResponseModel({
-    required this.message,
-    required this.statuscode,
+    this.message,
+    this.statuscode,
   });
 
   factory ApiResponseModel.fromJson(Map<String, dynamic> json) => ApiResponseModel(

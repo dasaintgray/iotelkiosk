@@ -82,7 +82,7 @@ class UnderdevView extends GetView {
                       height: 5.h,
                       width: double.infinity,
                       child: CarouselTitle(
-                        titleTrans: sc.titleTrans,
+                        titleTrans: hc.titleTrans,
                         textStyle: TextStyle(color: HenryColors.darkGreen, fontSize: 15.sp),
                       ),
                     ),
@@ -96,7 +96,7 @@ class UnderdevView extends GetView {
                           GestureDetector(
                             onTap: () {
                               var response =
-                                  sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'ST', type: 'ITEM');
+                                  hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST', type: 'ITEM');
                               if (response) {
                                 Get.back();
                               }

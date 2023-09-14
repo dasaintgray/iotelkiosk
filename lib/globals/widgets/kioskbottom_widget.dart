@@ -24,7 +24,7 @@ class KioskBottom extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    sc.getMenu(code: 'SLMT', type: 'TITLE');
+                    hc.getMenu(code: 'SLMT', type: 'TITLE');
                     Get.back();
                   },
                   child: Image.asset(

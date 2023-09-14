@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -5,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/insert_payment_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
+import 'package:iotelkiosk/globals/constant/api_constant.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/led_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
@@ -44,13 +46,13 @@ class PaymentMethodView extends GetView {
                     height: 12.h,
                   ),
                   // TITLE
-                  KioskMenuTitle(titleLength: sc.titleTrans.length, titleTrans: sc.titleTrans),
+                  KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
                   // SPACE
                   SizedBox(
                     height: 2.h,
                   ),
                   // MENU
-                  menuPaymentType(orientation, languageID: sc.selecttedLanguageID.value),
+                  menuPaymentType(orientation, languageID: hc.selecttedLanguageID.value),
                   Obx(() => Visibility(
                         visible: !sc.isLoading.value,
                         child: SizedBox(
@@ -61,7 +63,7 @@ class PaymentMethodView extends GetView {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  var response = sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'ST');
+                                  var response = hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST');
                                   if (response) Get.back();
                                 },
                                 child: Image.asset(
@@ -86,11 +88,11 @@ class PaymentMethodView extends GetView {
   }
 
   Widget menuPaymentType(Orientation orientation, {int? languageID, String? code, String? type}) {
-    final langCode = sc.languageList.first.data.languages.where((element) => element.id == languageID);
+    final langCode = hc.languageList.first.data.languages.where((element) => element.id == languageID);
     return Obx(() => SizedBox(
           height: orientation == Orientation.portrait ? 45.h : 20.h,
           width: 75.w,
-          child: sc.isLoading.value
+          child: hc.isLoading.value
               ? Center(
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
@@ -116,7 +118,7 @@ class PaymentMethodView extends GetView {
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(25.0),
-                  itemCount: sc.paymentTypeList.first.data.paymentTypes.length,
+                  itemCount: hc.paymentTypeList.first.data.paymentTypes.length,
                   physics: const ClampingScrollPhysics(),
                   itemBuilder: (BuildContext context, int index) {
                     return SizedBox(
@@ -146,10 +148,10 @@ class PaymentMethodView extends GetView {
                                         ),
                                       )
                                     : Text(
-                                        langCode.first.code.toLowerCase() == sc.defaultLanguageCode.value.toLowerCase()
-                                            ? sc.paymentTypeList.first.data.paymentTypes[index].description
+                                        langCode.first.code.toLowerCase() == hc.selectedLanguageCode.value.toLowerCase()
+                                            ? hc.paymentTypeList.first.data.paymentTypes[index].description
                                                 .toUpperCase()
-                                            : sc.paymentTypeList.first.data.paymentTypes[index].translatedText!,
+                                            : hc.paymentTypeList.first.data.paymentTypes[index].translatedText!,
                                         style: TextStyle(
                                           color: HenryColors.darkGreen,
                                           fontSize: 12.sp,
@@ -170,41 +172,49 @@ class PaymentMethodView extends GetView {
                                   // CASH
                                   case 0:
                                     {
-                                      sc.isLoading.value = true;
-                                      sc.selectedPaymentTypeCode.value =
-                                          sc.paymentTypeList.first.data.paymentTypes[index].code;
+                                      hc.isLoading.value = true;
+                                      hc.selectedPaymentTypeCode.value =
+                                          hc.paymentTypeList.first.data.paymentTypes[index].code;
 
-                                      var response = await sc.getAvailableRoomsGraphQL(
-                                          credentialHeaders: hc.globalHeaders,
-                                          roomTYPEID: sc.selectedRoomTypeID.value,
-                                          accommodationTYPEID: sc.selectedAccommodationTypeID.value);
+                                      var response = await hc.getAvailableRoomsGraphQL(
+                                          credentialHeaders: hc.accessTOKEN,
+                                          roomTYPEID: hc.selectedRoomTypeID.value,
+                                          accommodationTYPEID: hc.selectedAccommodationTypeID.value);
 
                                       if (response!) {
                                         // sc.subscribeCashDispenser();
                                         // initialize the led on cash acceptor
-                                        sc.openLEDLibserial(
-                                            ledLocationAndStatus: LedOperation.bottomRIGHTLEDON, portName: 'COM1');
+                                        final String ledPort;
+                                        if (kDebugMode) {
+                                          ledPort = "COM1";
+                                        } else {
+                                          ledPort = "COM8";
+                                        }
 
-                                        var cashresponse =
-                                            await hc.cashDispenserCommand(sCommand: 'CASA', iTerminalID: 1);
+                                        sc.openLEDLibserial(
+                                            ledLocationAndStatus: LedOperation.bottomRIGHTLEDON, portName: ledPort);
+                                        // hc.defaultTerminalID.value = hc.terminalsList.first.data.terminals.first.id;
+
+                                        var cashresponse = await hc.cashDispenserCommand(
+                                            sCommand: APIConstant.cashPoolingStart,
+                                            iTerminalID: hc.defaultTerminalID.value);
                                         if (cashresponse!) {
                                           sc.openLEDLibserial(
-                                              ledLocationAndStatus: LedOperation.bottomRIGHTLEDOFF, portName: 'COM1');
-                                          sc.isLoading.value = false;
+                                              ledLocationAndStatus: LedOperation.bottomRIGHTLEDOFF, portName: ledPort);
+                                          hc.isLoading.value = false;
                                           // CHECK ANG TERMINAL DATA DITO
-                                          hc.defaultTerminalID.value = hc.terminalsList.first.data.terminals.first.id;
 
-                                          var accessToken = hc.getAccessToken();
+                                          var accessToken = await hc.getAccessToken();
                                           hc.getTerminalData(
                                               headers: accessToken!,
                                               terminalID: hc.defaultTerminalID.value,
                                               sCode: 'CASI');
 
-                                          sc.getMenu(languageID: languageID, code: 'IP', type: 'TITLE');
+                                          hc.getMenu(languageID: languageID, code: 'IP', type: 'TITLE');
 
                                           await hc.getCamera();
 
-                                          hc.update();
+                                          // hc.update();
                                           Get.to(() => InsertPaymentView());
                                         }
                                       }
@@ -221,7 +231,7 @@ class PaymentMethodView extends GetView {
                               },
                               child: SizedBox(
                                 height: 7.h,
-                                child: sc.paymentTypeList.first.data.paymentTypes.isNotEmpty
+                                child: hc.paymentTypeList.first.data.paymentTypes.isNotEmpty
                                     ? Image.asset('assets/menus/payment${index + 1}.png', fit: BoxFit.contain)
                                         .animate()
                                         .fade(duration: HenryGlobal.animationSpeed)

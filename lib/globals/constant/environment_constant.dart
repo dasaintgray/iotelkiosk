@@ -109,7 +109,7 @@ query getSettings {
 
 String qryAccomodationType = r"""
   query getAccomType($limit: Int!) {
-    AccommodationTypes(sortby: {by: "asc", sort: "seq"}, where: {limit: $limit}) {
+    AccommodationTypes(sortby: {by: "asc", sort: "seq"}, where: {limit: $limit, isActive: true}) {
       Id
       valueMin
       valueMax
@@ -149,9 +149,9 @@ String qryGetRooms = """query GetRooms {
 }""";
 
 String qrySeriesDetails = r"""
-query getSeriesDetails {
+query getSeriesDetails($moduleID: Int!) {
   SeriesDetails(
-    where: {ModuleId: 5, isActive: true, limit: 1}
+    where: {ModuleId: $moduleID, isActive: true, limit: 1}
     sortby: {by: "asc", sort: "Id"}
   ) {
     Id
@@ -246,15 +246,17 @@ query getPaymentType {
 }
 ''';
 
-String qryTerms = r'''query getTerms($languageID: Int!) {
+String qryTerms = r'''
+query getTerms($languageID: Int!) {
   TranslationTerms(where: {LanguageId: $languageID}) {
     LanguageId
     translationText
   }
 }''';
 
-String qryTerminals = r'''query getTerminals {
-  Terminals {
+String qryTerminals = r'''
+query getTerminals($ipa: String!) {
+  Terminals(where: {ipAddress: $ipa}) {
     Id
     description
     code
@@ -277,6 +279,18 @@ query denominationData($terminalID: Int!) {
     p1000
     total
     TerminalId
+  }
+}
+''';
+
+String getCutOffs = r'''
+query getCutOffs($isActive: Boolean!) {
+  CutOffs(where: {isActive: $isActive}) {
+    Id
+    LocationId
+    isActive
+    startDate
+    endDate
   }
 }
 ''';
@@ -473,6 +487,57 @@ subscription terminalData($terminalID: Int!, $status: String!, $delay: Int!, $it
     modifiedDate
     Id
     TerminalId
+  }
+}
+''';
+
+String addBooking = r'''
+mutation addBookings(
+  $isActive: Boolean!, 
+  $docNo: String!, 
+  $accommodationTypeID: Int!,
+  $agentID: Int!,
+  $bookingStatusID: Int!,
+  $cutOffID: Int!,
+  $roomTypeID: Int!,
+  $actualStartDate: DateTime!,
+  $bed: Int!,
+  $endDate: DateTime!,
+  $numPax: Int!,
+  $startDate: DateTime!,
+  $roomRate: Float!,
+  $roomID: Int!,
+  $discountAMT: Float!,
+  $isWithBreakfast: Boolean!,
+  $isDoNotDesturb: Boolean!,
+  $serviceCharge: Float!,
+  $contactID: Int!
+) {
+  Bookings(
+    mutate: {
+      isActive: $isActive, 
+      docNo: $docNo, 
+      AccommodationTypeId: $accommodationTypeID, 
+      AgentId: $agentID, 
+      BookingStatusId: $bookingStatusID, 
+      CutOffId: $cutOffID, 
+      RoomTypeId: $roomTypeID, 
+      actualStartDate: $actualStartDate, 
+      bed: $bed, 
+      endDate: $endDate, 
+      numPax: $numPax, 
+      startDate: $startDate, 
+      roomRate: $roomRate, 
+      RoomId: $roomID,
+      discountAmount: $discountAMT,
+      isWithBreakfast: $isWithBreakfast,
+      isDoNotDesturb: $isDoNotDesturb,
+      serviceCharge: $serviceCharge,
+      ContactId: $contactID
+    }
+  ) {
+    Ids
+    response
   }
 }
 ''';

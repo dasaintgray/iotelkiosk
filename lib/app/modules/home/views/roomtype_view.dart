@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/payment_method_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
+import 'package:iotelkiosk/globals/constant/api_constant.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
@@ -44,13 +45,13 @@ class RoomTypeView extends GetView {
                     height: 12.h,
                   ),
                   // TITLE
-                  KioskMenuTitle(titleLength: sc.titleTrans.length, titleTrans: sc.titleTrans),
+                  KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
                   // SPACE
                   SizedBox(
                     height: 2.h,
                   ),
                   // MENU
-                  menuRoomType(orientation, languageID: sc.selecttedLanguageID.value),
+                  menuRoomType(orientation, languageID: hc.selecttedLanguageID.value),
                   SizedBox(
                     height: orientation == Orientation.portrait ? 5.h : 2.h,
                     child: Row(
@@ -59,7 +60,7 @@ class RoomTypeView extends GetView {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            sc.getMenu(code: 'SLMT', type: 'TITLE');
+                            hc.getMenu(code: 'SLMT', type: 'TITLE');
                             hc.update();
                             Get.back();
                           },
@@ -85,16 +86,16 @@ class RoomTypeView extends GetView {
   }
 
   Widget menuRoomType(Orientation orientation, {int? languageID, String? code, String? type}) {
-    final langCode = sc.languageList.first.data.languages.where((element) => element.id == languageID);
+    final langCode = hc.languageList.first.data.languages.where((element) => element.id == languageID);
     // bool isTranslate = langCode.first.code.toLowerCase() != sc.defaultLanguageCode.value.toLowerCase();
     return SizedBox(
       height: orientation == Orientation.portrait ? 45.h : 20.h,
       width: 75.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),
-        itemCount: sc.roomTypeList.first.data.roomTypes.length,
+        itemCount: hc.roomTypeList.first.data.roomTypes.length,
         itemBuilder: (BuildContext context, int index) {
-          var imageFilename = 'assets/menus/${sc.roomTypeList.first.data.roomTypes[index].code.toLowerCase()}.png';
+          var imageFilename = 'assets/menus/${hc.roomTypeList.first.data.roomTypes[index].code.toLowerCase()}.png';
           return SizedBox(
             height: 10.h,
             child: Stack(
@@ -103,32 +104,34 @@ class RoomTypeView extends GetView {
                   left: 25.w,
                   top: 35,
                   right: 10.w,
-                  child: SizedBox(
-                    width: 10.w,
-                    child: sc.isLoading.value
-                        ? Center(
-                            child: Column(
-                              children: [
-                                const CircularProgressIndicator.adaptive(),
-                                Text(
-                                  'Loading, please wait..',
-                                  style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
-                                )
-                              ],
-                            ),
-                          )
-                        : Text(
-                            langCode.first.code.toLowerCase() == sc.defaultLanguageCode.value.toLowerCase()
-                                ? sc.roomTypeList.first.data.roomTypes[index].description.toUpperCase()
-                                : sc.roomTypeList.first.data.roomTypes[index].translatedText!,
-                            style: TextStyle(
-                              color: HenryColors.darkGreen,
-                              fontSize: 12.sp,
-                            ),
-                          )
-                            .animate()
-                            .fade(duration: HenryGlobal.animationSpeed)
-                            .scale(duration: HenryGlobal.animationSpeed),
+                  child: Obx(
+                    () => SizedBox(
+                      width: 10.w,
+                      child: hc.isLoading.value
+                          ? Center(
+                              child: Column(
+                                children: [
+                                  const CircularProgressIndicator.adaptive(),
+                                  Text(
+                                    'Loading, please wait..',
+                                    style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                                  )
+                                ],
+                              ),
+                            )
+                          : Text(
+                              langCode.first.code.toLowerCase() == hc.selectedLanguageCode.value.toLowerCase()
+                                  ? hc.roomTypeList.first.data.roomTypes[index].description.toUpperCase()
+                                  : hc.roomTypeList.first.data.roomTypes[index].translatedText!,
+                              style: TextStyle(
+                                color: HenryColors.darkGreen,
+                                fontSize: 12.sp,
+                              ),
+                            )
+                              .animate()
+                              .fade(duration: HenryGlobal.animationSpeed)
+                              .scale(duration: HenryGlobal.animationSpeed),
+                    ),
                   ),
                 ),
                 Positioned(
@@ -136,33 +139,23 @@ class RoomTypeView extends GetView {
                   right: 8.w,
                   child: GestureDetector(
                     onTap: () async {
-                      // sc.isLoading.value = true;
-                      // sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
-                      // sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
-                      // var response = await sc.getAccommodation(
-                      //     credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
-                      // if (response) {
-                      //   if (kDebugMode) print('SELECTED ROOM TYPE ID: ${sc.selectedRoomTypeID.value}');
-                      //   Get.to(() => AccommodationView());
-                      // }
-
-                      sc.isLoading.value = true;
-                      sc.selectedRoomTypeID.value = sc.roomTypeList.first.data.roomTypes[index].id;
-                      var response = await sc.getPaymentType(
-                          credentialHeaders: hc.globalHeaders, languageCode: sc.selectedLanguageCode.value);
+                      hc.isLoading.value = true;
+                      hc.selectedRoomTypeID.value = hc.roomTypeList.first.data.roomTypes[index].id;
+                      var response = await hc.getPaymentType(
+                          credentialHeaders: hc.accessTOKEN, languageCode: hc.selectedLanguageCode.value);
                       if (response) {
-                        sc.getMenu(languageID: sc.selecttedLanguageID.value, code: 'SPM', type: 'TITLE');
-                        if (kDebugMode) print('PAYMENT => LANGUAGE ID: ${sc.selecttedLanguageID.value}');
-                        var response = await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: 1);
-                        if (kDebugMode) print(response);
+                        hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SPM', type: 'TITLE');
+                        if (kDebugMode) print('PAYMENT => LANGUAGE ID: ${hc.selecttedLanguageID.value}');
+                        await hc.cashDispenserCommand(
+                            sCommand: APIConstant.cashPoolingStop, iTerminalID: hc.defaultTerminalID.value);
 
-                        hc.update();
+                        hc.isLoading.value = false;
                         Get.to(() => PaymentMethodView());
                       }
                     },
                     child: SizedBox(
                       height: 7.h,
-                      child: sc.roomTypeList.first.data.roomTypes.isEmpty
+                      child: hc.roomTypeList.first.data.roomTypes.isEmpty
                           ? null
                           : Image.asset(imageFilename, fit: BoxFit.contain)
                               .animate()
