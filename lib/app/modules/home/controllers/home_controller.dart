@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:get/get.dart';
 import 'package:hasura_connect/hasura_connect.dart';
 import 'package:intl/intl.dart';
@@ -30,6 +31,7 @@ import 'package:iotelkiosk/app/providers/providers_global.dart';
 import 'package:iotelkiosk/globals/constant/api_constant.dart';
 import 'package:iotelkiosk/globals/constant/bank_note_constant.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
+import 'package:iotelkiosk/globals/constant/led_constant.dart';
 import 'package:iotelkiosk/globals/constant/settings_constant.dart';
 import 'package:iotelkiosk/globals/services/base/base_storage.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
@@ -669,8 +671,8 @@ class HomeController extends GetxController with BaseController {
       "LiftReader": liftReader,
     };
 
-    var jdata = jsonEncode(bodyPayload);
-    print(jdata);
+    // var jdata = jsonEncode(bodyPayload);
+    // print(jdata);
 
     final issueResponse =
         await GlobalProvider().issueRoomCard(cardCommand: command, iTerminalID: iTerminalID, bodyPayload: bodyPayload);
@@ -760,8 +762,8 @@ class HomeController extends GetxController with BaseController {
       int? contactID = await GlobalProvider().addContacts(
           code: seriesDetailsList.first.data.seriesDetails.first.docNo,
           firstName: name,
-          lastName: "Terminal",
-          middleName: 'Kiosk',
+          lastName: "Terminal ${defaultTerminalID.value}",
+          middleName: 'Guest',
           prefixID: 1,
           suffixID: 1,
           nationalityID: selecttedLanguageID.value,
@@ -849,6 +851,16 @@ class HomeController extends GetxController with BaseController {
           // PRINTING CARD
           // 202309081129
           // DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
+
+          final String ledPort;
+          if (kDebugMode) {
+            ledPort = "COM1";
+          } else {
+            ledPort = "COM8";
+          }
+
+          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.topRIGHTLEDON);
+
           await issueCard(
             command: APIConstant.issueCard,
             iTerminalID: defaultTerminalID.value,
@@ -859,6 +871,7 @@ class HomeController extends GetxController with BaseController {
             commonDoor: "01",
             liftReader: "010101",
           );
+          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.topRIGHTLEDOFF);
 
           isLoading.value = false;
           return true;
@@ -1127,6 +1140,36 @@ class HomeController extends GetxController with BaseController {
       isLoading.value = false;
     }
     return false;
+  }
+
+  // ============ SERIAL COMMUNICATION ===========================
+  void openLEDLibserial({String ledLocationAndStatus = '', required String? portName}) {
+    // final serialPort = SerialPort.availablePorts;
+    final portConfig = SerialPortConfig();
+    final port = SerialPort(portName!);
+    portConfig.baudRate = 9600;
+    portConfig.parity = SerialPortParity.none;
+
+    if (port.isOpen) {
+      port.close();
+    } else {
+      if (kDebugMode) print('Connected to: ${port.name}');
+    }
+
+    port.openWrite();
+    // Encode the string using a specific encoding (e.g., ASCII)
+    List<int> encodedBytes = ascii.encode(ledLocationAndStatus);
+    // Create a Uint8List from the encoded bytes
+    Uint8List uint8List = Uint8List.fromList(encodedBytes);
+
+    if (uint8List.isNotEmpty) {
+      port.write(uint8List);
+    }
+
+    if (port.isOpen) {
+      port.close();
+      // exit(-1);
+    }
   }
 
   // void startTimer() {

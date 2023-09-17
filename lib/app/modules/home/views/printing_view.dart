@@ -41,25 +41,29 @@ class PrintingView extends GetView {
                   width: double.infinity,
                 ),
                 SizedBox(
-                  height: 20.h,
+                  height: 40.h,
                   width: double.infinity,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
+                      Text(
+                        'ROOM# ${hc.issueResponseList.first.data.first.roomNumber}',
+                        style: TextStyle(color: HenryColors.puti, fontSize: 20.sp),
+                      ),
                       Text(
                         'CARD# ${hc.issueResponseList.first.data.first.cardNumber}',
                         style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
                       ),
                       Text(
-                        'ROOM# ${hc.issueResponseList.first.data.first.roomNumber}',
+                        'CHECK IN \n${hc.issueResponseList.first.data.first.checkinDate}',
                         style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                        textAlign: TextAlign.center,
                       ),
                       Text(
-                        'CHECK IN : ${hc.issueResponseList.first.data.first.checkinDate}',
+                        'CHECK OUT \n${hc.issueResponseList.first.data.first.checkoutDate}',
                         style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
-                      ),
-                      Text(
-                        'CHECK OUT : ${hc.issueResponseList.first.data.first.checkoutDate}',
-                        style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                        textAlign: TextAlign.center,
                       ),
                       Text(
                         'Enjoy your stay.',
@@ -69,6 +73,10 @@ class PrintingView extends GetView {
                   ),
                 ),
                 // SPACE
+                SizedBox(
+                  height: 5.h,
+                  width: double.infinity,
+                ),
                 SizedBox(
                   height: 8.h,
                   width: 35.w,
