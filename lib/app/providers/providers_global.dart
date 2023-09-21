@@ -373,7 +373,8 @@ class GlobalProvider extends BaseController {
 
     var response = await hasuraConnect.mutation(documents!, variables: variables).catchError(handleError);
     if (response != null) {
-      return jsonEncode(response);
+      // return jsonEncode(response);
+      return response;
     } else {
       return null;
     }

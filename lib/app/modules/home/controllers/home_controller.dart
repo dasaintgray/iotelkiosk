@@ -121,6 +121,7 @@ class HomeController extends GetxController with BaseController {
   final selectedRoomTypeID = 1.obs;
   final preSelectedRoomID = 0.obs;
   final totalAmountDue = 0.0.obs;
+  final generatedBookingID = 0.obs;
 
   final selectedPaymentTypeCode = ''.obs;
   final serviceResponseStatusMessages = ''.obs;
@@ -207,6 +208,7 @@ class HomeController extends GetxController with BaseController {
     // var os = Platform.operatingSystem;
     // var system = Platform.operatingSystemVersion;
     // openSerialPort();
+
     clockLiveUpdate.value = true;
     nabasangPera.value = 0;
 
@@ -836,11 +838,17 @@ class HomeController extends GetxController with BaseController {
 
         // var jsondata = jsonEncode(bookingParams);
         // print(jsondata);
-
+        // INSERT BOOKING
         var bookingResponse = await GlobalProvider()
             .mutateGraphQLData(documents: addBooking, variables: bookingParams, accessHeaders: credentialHeaders);
-        if (bookingResponse != null) {
-          print(bookingResponse);
+        final saveResponse = bookingResponse['data']['Bookings']['response'];
+        final bookingIDResponse = bookingResponse['data']['Bookings']['Ids'];
+        // print(bookingIDResponse);
+        // print(bookingIDResponse[0]);
+
+        if (saveResponse == "Success") {
+          generatedBookingID.value = bookingIDResponse[0];
+
           await GlobalProvider().updateSeriesDetails(
             accessHeader: accessTOKEN,
             idNo: seriesDetailsList.first.data.seriesDetails.first.id,
@@ -850,21 +858,34 @@ class HomeController extends GetxController with BaseController {
           );
 
           // PROCESSING PAYMENT;
-          // BOOKING CHARGES & CHARGES
+          // insert all Charges into Booking Charges
+          // BOOKING CHARGES
+          for (var x = 0; x < chargesList.first.data.charges.length; x++) {
+            bool isRoomBa = chargesList.first.data.charges[x].code == "Room" ? true : false;
+            final bookingChargesParams = {
+              "iBookingID": generatedBookingID.value,
+              "iChargeID": chargesList.first.data.charges[x].id,
+              "isForDebit": chargesList.first.data.charges[x].isForDebit,
+              "quantity": 1,
+              "rate": isRoomBa ? availRoomList[preSelectedRoomID.value].rate : chargesList.first.data.charges[x].rate,
+              "tranDate": startDateTime
+            };
 
+            await GlobalProvider().mutateGraphQLData(
+                documents: addBookingCharges, variables: bookingChargesParams, accessHeaders: credentialHeaders);
+            // final saveResponse = bookingResponse['data']['Bookings']['response'];
+            // if (saveResponse == "Success") {
+            //   print(bcRequest);
+            // }
+          }
+
+          final String ledPort;
+          ledPort = kDebugMode ? "COM1" : "COM8";
+
+          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.topRIGHTLEDON);
           // PRINTING CARD
           // 202309081129
           // DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
-
-          final String ledPort;
-          if (kDebugMode) {
-            ledPort = "COM1";
-          } else {
-            ledPort = "COM8";
-          }
-
-          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.topRIGHTLEDON);
-
           await issueCard(
             command: APIConstant.issueCard,
             iTerminalID: defaultTerminalID.value,

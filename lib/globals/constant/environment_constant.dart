@@ -297,7 +297,10 @@ query getCutOffs($isActive: Boolean!) {
 
 String getCharges = r'''
 query getCharges($isDefault: Boolean!, $isActive: Boolean) {
-  Charges(where: {isDefault: $isDefault, isActive: $isActive}) {
+  Charges(
+    where: {isDefault: $isDefault, isActive: $isActive}
+    sortby: {by: "asc", sort: "seq"}
+  ) {
     Id
     locationID
     seq
@@ -309,6 +312,8 @@ query getCharges($isDefault: Boolean!, $isActive: Boolean) {
     description
     isAllowEditQty
     isForCheckOut
+    isForDebit
+    code
   }
 }
 ''';
@@ -559,3 +564,28 @@ mutation addBookings(
   }
 }
 ''';
+
+String addBookingCharges = r'''
+mutation addBookingCharges(
+  $iBookingID: Int!,
+  $iChargeID: Int!,
+  $isForDebit: Boolean!,
+  $quantity: Int!,
+  $rate: Float!,
+  $tranDate: DateTime!
+) {
+  BookingCharges(
+    mutate: {
+      BookingId: $iBookingID, 
+      ChargeId: $iChargeID, 
+      isForDebit: $isForDebit, 
+      quantity: $quantity, 
+      rate: $rate, 
+      tranDate: $tranDate}
+  ) {
+    Ids
+    response
+  }
+}
+''';
+

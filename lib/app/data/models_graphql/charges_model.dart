@@ -52,6 +52,8 @@ class Charge {
   final String description;
   final bool isAllowEditQty;
   final bool isForCheckOut;
+  final bool isForDebit;
+  String? code;
 
   Charge({
     required this.id,
@@ -65,6 +67,8 @@ class Charge {
     required this.description,
     required this.isAllowEditQty,
     required this.isForCheckOut,
+    required this.isForDebit,
+    this.code,
   });
 
   factory Charge.fromJson(Map<String, dynamic> json) => Charge(
@@ -79,6 +83,8 @@ class Charge {
         description: json["description"],
         isAllowEditQty: json["isAllowEditQty"],
         isForCheckOut: json["isForCheckOut"],
+        isForDebit: json["isForDebit"],
+        code: json["code"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -93,5 +99,7 @@ class Charge {
         "description": description,
         "isAllowEditQty": isAllowEditQty,
         "isForCheckOut": isForCheckOut,
+        "isForDebit": isForDebit,
+        "code": code,
       };
 }
