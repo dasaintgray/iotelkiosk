@@ -28,8 +28,6 @@ class ScreenView extends GetView<ScreenController> {
         }
       },
     );
-    // hc.startTimer();
-
     return Sizer(
       builder: (BuildContext context, Orientation orientation, DeviceType deviceType) {
         return Obx(
@@ -71,7 +69,7 @@ class ScreenView extends GetView<ScreenController> {
                           fit: BoxFit.fill,
                           player: sc.player,
                           showControls: false,
-                          filterQuality: FilterQuality.high,
+                          filterQuality: FilterQuality.medium,
                         ),
                       ),
 

@@ -224,7 +224,7 @@ class PaymentMethodView extends GetView {
                                     {
                                       Get.defaultDialog(
                                         title: "Information",
-                                        content: const Text('No POS MCR Device Detected'),
+                                        content: const Text('No Device Detected'),
                                       );
                                     }
                                 }

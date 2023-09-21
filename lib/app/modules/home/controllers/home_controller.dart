@@ -14,6 +14,7 @@ import 'package:hasura_connect/hasura_connect.dart';
 import 'package:intl/intl.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/charges_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/payment_type_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
@@ -105,6 +106,7 @@ class HomeController extends GetxController with BaseController {
   final availableRoomList = <AvailableRoomsModel>[].obs;
   final availRoomList = <AvailableRoom>[].obs;
   final accommodationTypeList = <AccomTypeModel>[].obs;
+  final chargesList = <ChargesModel>[];
 
   final transactionList = <TransactionModel>[].obs;
   final pageTrans = <Conversion>[].obs;
@@ -181,6 +183,7 @@ class HomeController extends GetxController with BaseController {
     await getLanguages(credentialHeaders: accessTOKEN);
     await getDenominationData(terminalID: defaultTerminalID.value);
     await getAvailableRoomsGraphQL(credentialHeaders: accessTOKEN, roomTYPEID: 1, accommodationTYPEID: 1);
+    await getCharges(credentialHeaders: accessTOKEN, isActive: true, isDefault: true);
 
     // startTimer();
     // if (userLoginList.isNotEmpty) {
@@ -702,6 +705,7 @@ class HomeController extends GetxController with BaseController {
         print('TERMINAL ID: ${defaultTerminalID.value}');
         return true;
       } else {
+        if (kDebugMode) defaultTerminalID.value = 1;
         return false;
       }
     } finally {
@@ -1118,6 +1122,18 @@ class HomeController extends GetxController with BaseController {
     } finally {
       // isLoading.value = false;
     }
+  }
+
+  Future<bool?> getCharges(
+      {required Map<String, String> credentialHeaders, required bool? isActive, required bool? isDefault}) async {
+    final chargesResponse =
+        await GlobalProvider().fetchChargesData(headers: credentialHeaders, isActive: isActive, isDefault: isDefault);
+
+    if (chargesResponse != null) {
+      chargesList.add(chargesResponse);
+      return true;
+    }
+    return false;
   }
 
   Future<bool> getTransaction({required Map<String, String> credentialHeaders}) async {

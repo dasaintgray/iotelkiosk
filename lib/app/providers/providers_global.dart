@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hasura_connect/hasura_connect.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/charges_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/cutoff_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/denomination_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
@@ -274,12 +275,11 @@ class GlobalProvider extends BaseController {
     final params = {"ipa": ipAddress};
     final response = await hasuraConnect.query(qryTerminals, variables: params).catchError(handleError);
 
-    bool resdata = response["data"]["Terminals"] != "[]";
-    if (resdata) {
+    var terminalResponse = response["data"]["Terminals"];
+    if (terminalResponse.toString() != '[]') {
       return terminalsModelFromJson(jsonEncode(response));
-    } else {
-      return null;
     }
+    return null;
   }
 
   Future<DenominationModel?> fetchDenominationData(
@@ -291,8 +291,21 @@ class GlobalProvider extends BaseController {
     final response = await hasuraConnect.query(qryDenomination, variables: params).catchError(handleError);
     // print(response["data"]["TerminalDenominations"]);
 
-    if (response["data"]["TerminalDenominations"] == "[]") {
+    if (response["data"]["TerminalDenominations"].toString() != "[]") {
       return denominationModelFromJson(jsonEncode(response['data']));
+    } else {
+      return null;
+    }
+  }
+
+  Future<ChargesModel?> fetchChargesData(
+      {required Map<String, String> headers, required bool? isActive, required bool? isDefault}) async {
+    final params = {"isDefault": isActive, "isActive": isDefault};
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
+
+    final response = await hasuraConnect.query(getCharges, variables: params).catchError(handleError);
+    if (response['data']['Charges'].toString() != "[]") {
+      return chargesModelFromJson(jsonEncode(response));
     } else {
       return null;
     }
@@ -306,7 +319,7 @@ class GlobalProvider extends BaseController {
 
     final cutOffResponse = await hasuraConnect.query(getCutOffs, variables: params).catchError(handleError);
 
-    if (cutOffResponse["data"]["CutOffs"] == "[]") {
+    if (cutOffResponse["data"]["CutOffs"].toString() != "[]") {
       return cutOffModelFromJson(jsonEncode(cutOffResponse["data"]));
     } else {
       return null;

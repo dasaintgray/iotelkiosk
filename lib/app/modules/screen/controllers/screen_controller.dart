@@ -160,10 +160,13 @@ class ScreenController extends GetxController with BaseController {
   }
 
   void getBDOOpen(
-      {required String transactionCode, required String pricePerRoom, required String messageResponseIndicator}) {
+      {required String transactionCode,
+      required String pricePerRoom,
+      required String messageResponseIndicator,
+      required String bdoPort}) {
     // final serialPort = SerialPort.availablePorts;
     final portConfig = SerialPortConfig();
-    final port = SerialPort("COM1");
+    final port = SerialPort(bdoPort);
     List<String> responseCodeList = ['0000', '0101', 'NDND', 'EDED', 'ENEN', 'TOTO', 'NANA'];
 
     portConfig.baudRate = 9600;
@@ -417,10 +420,10 @@ class ScreenController extends GetxController with BaseController {
     return packet;
   }
 
-  void getMoneydispenser() {
-    final serialPort = SerialPort.availablePorts;
+  void getMoneydispenser({required String moneyDispenserPort}) {
+    // final serialPort = SerialPort.availablePorts;
     final portConfig = SerialPortConfig();
-    final port = SerialPort(serialPort.first);
+    final port = SerialPort(moneyDispenserPort);
 
     portConfig.baudRate = 9600;
     // portConfig.parity = SerialPortParity.none;
@@ -459,7 +462,7 @@ class ScreenController extends GetxController with BaseController {
     // var crcHEX = '$sTransaction$crcL$crcH'.toUpperCase();
     if (!port.openReadWrite()) {
       // if (kDebugMode) print(SerialPort.lastError);
-      if (kDebugMode) print('The port ${serialPort.first} is opened by other');
+      if (kDebugMode) print('The port $moneyDispenserPort is opened by other');
       // exit(-
     }
     if (kDebugMode) print(port.isOpen ? "Port is open" : "Port is closed");

@@ -14,7 +14,7 @@ class KioskMenuTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 5.h,
+      height: 4.h,
       width: double.infinity,
       child: titleLength == 1
           ? Center(

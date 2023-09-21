@@ -295,6 +295,24 @@ query getCutOffs($isActive: Boolean!) {
 }
 ''';
 
+String getCharges = r'''
+query getCharges($isDefault: Boolean!, $isActive: Boolean) {
+  Charges(where: {isDefault: $isDefault, isActive: $isActive}) {
+    Id
+    locationID
+    seq
+    isActive
+    isAllowEdit
+    rate
+    isDefault
+    useFormula
+    description
+    isAllowEditQty
+    isForCheckOut
+  }
+}
+''';
+
 String updateDenomination = r'''
 mutation updateDenomination($bente: Int!, $tapwe: Int!, $isangdaan: Int!, $dalawangdaan: Int!, $limangdaan: Int!, $isanglibo: Int!, $total: Int!, $terminalID: Int!) {
   TerminalDenominations(

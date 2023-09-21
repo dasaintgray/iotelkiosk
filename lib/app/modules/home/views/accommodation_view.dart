@@ -55,6 +55,9 @@ class AccommodationView extends GetView {
                   menuAccommodationType(orientation, languageID: hc.selecttedLanguageID.value),
 
                   SizedBox(
+                    height: 3.h,
+                  ),
+                  SizedBox(
                     height: orientation == Orientation.portrait ? 5.h : 2.h,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -72,9 +75,6 @@ class AccommodationView extends GetView {
                             semanticLabel: 'Back to previous menu',
                           ),
                         ),
-                        const SizedBox(
-                          width: 50,
-                        ),
                       ],
                     ),
                   ),
@@ -91,7 +91,7 @@ class AccommodationView extends GetView {
     final langCode = hc.languageList.first.data.languages.where((element) => element.id == languageID);
 
     return SizedBox(
-      height: orientation == Orientation.portrait ? 49.h : 20.h,
+      height: orientation == Orientation.portrait ? 43.h : 20.h,
       width: 75.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),
