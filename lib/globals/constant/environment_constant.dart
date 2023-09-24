@@ -283,7 +283,7 @@ query denominationData($terminalID: Int!) {
 }
 ''';
 
-String getCutOffs = r'''
+String qryCutOffs = r'''
 query getCutOffs($isActive: Boolean!) {
   CutOffs(where: {isActive: $isActive}) {
     Id
@@ -314,6 +314,40 @@ query getCharges($isDefault: Boolean!, $isActive: Boolean) {
     isForCheckOut
     isForDebit
     code
+  }
+}
+''';
+
+String qryChargesV2 = r'''
+query getChargesV2($code: String!) {
+  Charges(sortby: {by: "asc", sort: "seq"}, where: {code: $code}) {
+    Id
+    locationID
+    seq
+    isActive
+    isAllowEdit
+    rate
+    isDefault
+    useFormula
+    description
+    isAllowEditQty
+    isForCheckOut
+    isForDebit
+    code
+  }
+}
+''';
+
+String qryCashPositions = r'''
+query getCashPosition($userName: String!) {
+  CashPositions(where: {username: $userName}) {
+    Id
+    startDate
+    endDate
+    begBalance
+    endBalance
+    username
+    CutOffId
   }
 }
 ''';
@@ -589,3 +623,44 @@ mutation addBookingCharges(
 }
 ''';
 
+String addPayments = r'''
+mutation addPayments($cutOffID: Int!, $balance: Float!, $bookingNo: String!, 
+  $discount: Int!, $discountAmount: Float!, $dueDate: DateTime!, $totalAmount: Float,
+  $totalPaid: Float!, $totalQuantity: Int!, $tranDate: DateTime!, $vat: Int!, 
+  $vatAmount: Float!, $invoiceNo: String!, $cashPosition: Int!, $chargeID: Int!
+) {
+  Payments(
+    mutate: {
+      CutOffId: $cutOffID, 
+      balance: $balance, 
+      bookingNo: $bookingNo, 
+      discount: $discount, 
+      discountAmount: $discountAmount, 
+      dueDate: $dueDate, 
+      totalAmount: $totalAmount, 
+      totalPaid: $totalPaid, 
+      totalQuantity: $totalQuantity, 
+      tranDate: $tranDate, 
+      vat: $vat, 
+      vatAmount: $vatAmount, 
+      invoiceNo: $invoiceNo,
+      cashPositionID: $cashPosition,
+      chargeID: $chargeID
+      }
+  ) {
+    Ids
+    response
+  }
+}
+''';
+
+String addPaymentDetails = r'''
+mutation addPaymentDetails($amount: Float!, $paymentID: Int!, $paymentTypeID: Int!) {
+  PaymentDetails(
+    mutate: {amount: $amount, paymentID: $paymentID, paymentTypeID: $paymentTypeID}
+  ) {
+    Ids
+    response
+  }
+}
+''';

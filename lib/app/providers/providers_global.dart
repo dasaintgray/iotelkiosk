@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hasura_connect/hasura_connect.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/cashpositions_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/charges_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/cutoff_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/denomination_model.dart';
@@ -317,7 +318,7 @@ class GlobalProvider extends BaseController {
 
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
 
-    final cutOffResponse = await hasuraConnect.query(getCutOffs, variables: params).catchError(handleError);
+    final cutOffResponse = await hasuraConnect.query(qryCutOffs, variables: params).catchError(handleError);
 
     if (cutOffResponse["data"]["CutOffs"].toString() != "[]") {
       return cutOffModelFromJson(jsonEncode(cutOffResponse["data"]));
@@ -326,15 +327,45 @@ class GlobalProvider extends BaseController {
     }
   }
 
+  // CASH POSITIONS
+  Future<CashPositionModel?> fetchCashPositions(
+      {required Map<String, String> headers, required String? username}) async {
+    final params = {"userName": username!};
+
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
+
+    final response = await hasuraConnect.query(qryCashPositions, variables: params).catchError(handleError);
+    if (response["data"]["CashPositions"].toString() != "[]") {
+      return cashPositionModelFromJson(jsonEncode(response));
+    }
+    return null;
+  }
+
+  Future<ChargesModel?> fetchChargesV2({required Map<String, String> headers, required String? code}) async {
+    final params = {"code": code};
+
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
+    final response = await hasuraConnect.query(qryChargesV2, variables: params).catchError(handleError);
+
+    if (response["data"]["Charges"].toString() != "[]") {
+      return chargesModelFromJson(jsonEncode(response));
+    }
+    return null;
+  }
+
   // DYNAMIC AND GLOBAL FETCH ON ALL QUERY
   //  -----------------------------------------------------------------------------------------------------
   Future<dynamic> executeGraphQLData(
-      {String? documents, Map<String, dynamic>? params, Map<String, String>? headers}) async {
+      {String? documents, Map<String, dynamic>? params, Map<String, String>? headers, bool? isConvert}) async {
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: HenryGlobal.graphQlHeaders);
 
     final response = await hasuraConnect.query(documents!, variables: params, headers: headers).catchError(handleError);
     if (response != null) {
-      return jsonEncode(response);
+      if (isConvert!) {
+        return jsonEncode(response);
+      } else {
+        return response;
+      }
     } else {
       return null;
     }

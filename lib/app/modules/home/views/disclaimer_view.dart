@@ -97,39 +97,40 @@ class DisclaimerView extends GetView {
           ),
           // DISCLAIMER
 
-          Visibility(
-            visible: hc.languageList.first.data.languages.isNotEmpty,
-            child: Obx(
-              () => Expanded(
-                flex: 8,
-                child: SizedBox(
-                  height: 35.h,
-                  child: hc.isLoading.value
-                      ? Column(
-                          children: [
-                            const CircularProgressIndicator.adaptive(
-                              backgroundColor: HenryColors.puti,
-                            ),
-                            Text(
-                              'Processing, please wait',
+          Obx(
+            () => Expanded(
+              flex: 8,
+              child: SizedBox(
+                height: 35.h,
+                child: hc.isLoading.value
+                    ? Column(
+                        children: [
+                          const CircularProgressIndicator.adaptive(
+                            backgroundColor: HenryColors.puti,
+                          ),
+                          Center(
+                            child: Text(
+                              hc.statusMessage.value,
                               style: TextStyle(color: HenryColors.puti, fontSize: 15.sp),
-                            )
-                          ],
-                        )
-                      : SingleChildScrollView(
-                          controller: hc.scrollController,
-                          child: Text(
-                            hc.languageList.first.data.languages.first.disclaimer,
-                            style: TextStyle(
-                              color: HenryColors.puti,
-                              fontSize: 5.sp,
+                              textAlign: TextAlign.center,
                             ),
+                          )
+                        ],
+                      )
+                    : SingleChildScrollView(
+                        controller: hc.scrollController,
+                        child: Text(
+                          hc.languageList.first.data.languages.first.disclaimer,
+                          style: TextStyle(
+                            color: HenryColors.puti,
+                            fontSize: 5.sp,
                           ),
                         ),
-                ),
+                      ),
               ),
             ),
           ),
+
           SizedBox(
             height: 2.h,
             width: double.infinity,
@@ -151,13 +152,14 @@ class DisclaimerView extends GetView {
                       hc.getMenu(code: 'SLMT', type: 'TITLE');
 
                       await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: hc.defaultTerminalID.value);
+                      hc.statusMessage.value = 'Issuing Command to Cash Dispenser';
                       // print(dispenseResponse);
 
                       var response = await hc.addTransaction(credentialHeaders: hc.accessTOKEN);
 
                       if (response) {
-                        hc.isLoading.value = false;
                         hc.disposeCamera();
+                        hc.isLoading.value = false;
                         Get.to(() => PrintingView());
                         // PRINTING OF CARDS AND DISPLAY INFO OF ROOMS
                       }

@@ -105,7 +105,7 @@ class PaymentMethodView extends GetView {
                             strokeWidth: 5.sp, valueColor: const AlwaysStoppedAnimation<Color>(HenryColors.puti)),
                       ),
                       Text(
-                        'Initializing \nCash Acceptor Device \nplease wait ....',
+                        hc.statusMessage.value,
                         style: TextStyle(color: HenryColors.darkGreen, fontSize: 20.sp),
                         textAlign: TextAlign.center,
                       ),
@@ -185,11 +185,13 @@ class PaymentMethodView extends GetView {
                                         // sc.subscribeCashDispenser();
                                         // initialize the led on cash acceptor
                                         final String ledPort;
-                                        if (kDebugMode) {
-                                          ledPort = "COM1";
-                                        } else {
-                                          ledPort = "COM8";
-                                        }
+                                        // if (kDebugMode) {
+                                        //   ledPort = "COM1";
+                                        // } else {
+                                        //   ledPort = "COM8";
+                                        // }
+
+                                        ledPort = kDebugMode ? "COM1" : "COM8";
 
                                         sc.openLEDLibserial(
                                             ledLocationAndStatus: LedOperation.bottomRIGHTLEDON, portName: ledPort);

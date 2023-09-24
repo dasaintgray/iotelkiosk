@@ -256,8 +256,11 @@ class InsertPaymentView extends GetView {
 
                           var moduleResponse = hc.settingsList.first.data.settings
                               .where((element) => element.code == SettingConstant.contactModuleID);
-                          await hc.getSeriesDetails(
-                              credentialHeaders: hc.accessTOKEN, moduleID: int.parse(moduleResponse.first.value));
+                          hc.contactNumber.value = (await hc.getSeriesDetails(
+                              credentialHeaders: hc.accessTOKEN, moduleID: int.parse(moduleResponse.first.value)))!;
+
+                          hc.statusMessage.value = "Processing... please wait..";
+
                           Get.to(() => DisclaimerView());
                         },
                         color: HenryColors.darkGreen,

@@ -79,7 +79,7 @@ class ScreenController extends GetxController with BaseController {
     // print(ngayon.toIso8601String());
 
     // monitorInfo();
-    if (kDebugMode) setDisplayMonitor('DISPLAY2');
+    if (kDebugMode) setDisplayMonitor('DISPLAY3');
 
     // getBDOOpen(
     //     transactionCode: BDOTransaction.sSale,
@@ -703,7 +703,7 @@ class ScreenController extends GetxController with BaseController {
     // Create a Uint8List from the encoded bytes
     Uint8List uint8List = Uint8List.fromList(encodedBytes);
 
-    port.write(uint8List);
+    if (port.isOpen) port.write(uint8List);
 
     if (port.isOpen) {
       port.close();
@@ -723,8 +723,8 @@ class ScreenController extends GetxController with BaseController {
       useLocal
           ? Playlist(
               medias: [
-                Media.asset('assets/background/iotel.mp4'),
                 Media.asset('assets/background/iOtelWalkin.mp4'),
+                Media.asset('assets/background/iotel.mp4'),
               ],
             )
           : Playlist(medias: [
