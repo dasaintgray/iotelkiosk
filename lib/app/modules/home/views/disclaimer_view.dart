@@ -97,16 +97,24 @@ class DisclaimerView extends GetView {
           ),
           // DISCLAIMER
 
-          Obx(
-            () => Expanded(
-              flex: 8,
-              child: SizedBox(
+          Expanded(
+            flex: 8,
+            child: Obx(
+              () => SizedBox(
                 height: 35.h,
                 child: hc.isLoading.value
                     ? Column(
                         children: [
-                          const CircularProgressIndicator.adaptive(
-                            backgroundColor: HenryColors.puti,
+                          SizedBox(
+                            height: 10.h,
+                            width: 18.w,
+                            child: const CircularProgressIndicator.adaptive(
+                              backgroundColor: HenryColors.puti,
+                            ),
+                          ),
+                          SizedBox(
+                            height: 5.h,
+                            width: double.infinity,
                           ),
                           Center(
                             child: Text(
@@ -117,13 +125,16 @@ class DisclaimerView extends GetView {
                           )
                         ],
                       )
-                    : SingleChildScrollView(
-                        controller: hc.scrollController,
-                        child: Text(
-                          hc.languageList.first.data.languages.first.disclaimer,
-                          style: TextStyle(
-                            color: HenryColors.puti,
-                            fontSize: 5.sp,
+                    : Visibility(
+                        visible: !hc.isDisclaimerClick.value,
+                        child: SingleChildScrollView(
+                          controller: hc.scrollController,
+                          child: Text(
+                            hc.languageList.first.data.languages.first.disclaimer,
+                            style: TextStyle(
+                              color: HenryColors.puti,
+                              fontSize: 5.sp,
+                            ),
                           ),
                         ),
                       ),
@@ -143,30 +154,40 @@ class DisclaimerView extends GetView {
                 child: SizedBox(
                   height: 2.h,
                   width: 30.w,
-                  child: MaterialButton(
-                    onPressed: () async {
-                      hc.isLoading.value = true;
-                      // var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
-                      final handle = imgKey.currentContext?.findAncestorWidgetOfExactType<SizedBox>().hashCode;
-                      if (kDebugMode) print('Picture Handle: $handle');
-                      hc.getMenu(code: 'SLMT', type: 'TITLE');
+                  child: ElevatedButton(
+                    onPressed: hc.isButtonActive.value
+                        ? () async {
+                            hc.isButtonActive.value = false;
+                            hc.isBottom.value = false;
+                            hc.isDisclaimerClick.value = true;
+                            hc.isLoading.value = true;
+                            // var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
+                            final handle = imgKey.currentContext?.findAncestorWidgetOfExactType<SizedBox>().hashCode;
+                            if (kDebugMode) print('Picture Handle: $handle');
+                            hc.getMenu(code: 'SLMT', type: 'TITLE');
 
-                      await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: hc.defaultTerminalID.value);
-                      hc.statusMessage.value = 'Issuing Command to Cash Dispenser';
-                      // print(dispenseResponse);
+                            // await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: hc.defaultTerminalID.value);
+                            // hc.statusMessage.value = 'Issuing Command to Cash Dispenser';
+                            // print(dispenseResponse);
 
-                      var response = await hc.addTransaction(credentialHeaders: hc.accessTOKEN);
+                            var response = await hc.addTransaction(credentialHeaders: hc.accessTOKEN);
 
-                      if (response) {
-                        hc.disposeCamera();
-                        hc.isLoading.value = false;
-                        Get.to(() => PrintingView());
-                        // PRINTING OF CARDS AND DISPLAY INFO OF ROOMS
-                      }
-                    },
-                    color: HenryColors.darkGreen,
-                    padding: const EdgeInsets.all(30),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
+                            if (response) {
+                              hc.disposeCamera();
+                              hc.isLoading.value = false;
+                              Get.to(() => PrintingView());
+                              // PRINTING OF CARDS AND DISPLAY INFO OF ROOMS
+                            }
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: HenryColors.darkGreen,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      shadowColor: Colors.black26.withOpacity(0.5),
+                    ),
                     // AGREE BUTTON
                     child: Text(
                       'Agree',

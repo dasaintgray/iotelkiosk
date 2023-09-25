@@ -82,6 +82,7 @@ class PrintingView extends GetView {
                   width: 35.w,
                   child: MaterialButton(
                     onPressed: () {
+                      hc.setBackToDefaultValue();
                       Get.off(() => HomeView());
                     },
                     color: HenryColors.darkGreen,

@@ -60,15 +60,14 @@ class InsertPaymentView extends GetView {
                         GestureDetector(
                           onTap: () async {
                             // STOP THE CASH DISPENSER IF RUNNING
-                            var cashDResponse = await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: 1);
-                            if (cashDResponse!) {
-                              await hc.updateTerminalData(
-                                  recordID: hc.terminalDataList.first.id,
-                                  terminalID: hc.terminalDataList.first.terminalId);
+                            // var cashDResponse = await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: 1);
+                            // if (cashDResponse!) {}
+                            await hc.updateTerminalData(
+                                recordID: hc.terminalDataList.first.id,
+                                terminalID: hc.terminalDataList.first.terminalId);
 
-                              var response = hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST');
-                              if (response) Get.back();
-                            }
+                            var response = hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST');
+                            if (response) Get.back();
                           },
                           child: Image.asset(
                             'assets/menus/back-arrow.png',
@@ -248,24 +247,34 @@ class InsertPaymentView extends GetView {
                   child: Expanded(
                     flex: 2,
                     child: Center(
-                      child: MaterialButton(
-                        onPressed: () async {
-                          hc.isLoading.value = true;
-                          hc.getMenu(code: 'DI', type: 'TITLE', languageID: languageID);
-                          await hc.initializeCamera();
+                      child: ElevatedButton(
+                        onPressed: hc.isButtonActive.value
+                            ? () async {
+                                hc.isButtonActive.value = false;
+                                hc.isLoading.value = true;
+                                hc.getMenu(code: 'DI', type: 'TITLE', languageID: languageID);
+                                await hc.initializeCamera();
 
-                          var moduleResponse = hc.settingsList.first.data.settings
-                              .where((element) => element.code == SettingConstant.contactModuleID);
-                          hc.contactNumber.value = (await hc.getSeriesDetails(
-                              credentialHeaders: hc.accessTOKEN, moduleID: int.parse(moduleResponse.first.value)))!;
+                                var moduleResponse = hc.settingsList.first.data.settings
+                                    .where((element) => element.code == SettingConstant.contactModuleID);
+                                hc.contactNumber.value = (await hc.getSeriesDetails(
+                                    credentialHeaders: hc.accessTOKEN,
+                                    moduleID: int.parse(moduleResponse.first.value)))!;
 
-                          hc.statusMessage.value = "Processing... please wait..";
+                                hc.statusMessage.value = "Processing... please wait..";
+                                hc.isButtonActive.value = true;
 
-                          Get.to(() => DisclaimerView());
-                        },
-                        color: HenryColors.darkGreen,
-                        padding: const EdgeInsets.all(30),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
+                                Get.to(() => DisclaimerView());
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: HenryColors.darkGreen,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(60),
+                          ),
+                          padding: const EdgeInsets.all(40),
+                          shadowColor: Colors.black26.withOpacity(0.5),
+                        ),
                         // CONFIRM BUTTON
                         child: Text(
                           '   Confirm   ',

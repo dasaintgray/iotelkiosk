@@ -61,7 +61,7 @@ class GlobalProvider extends BaseController {
     final sCommand = '?command=${cashCommand!.toUpperCase()}&Terminal=$iTerminalID';
     final sendpoint = HenryGlobal.iotelEndPoint + sCommand;
     final response = await HenryBaseClient()
-        .getRequest(HenryGlobal.iotelURI, sendpoint, HenryGlobal.iotelHeaders)
+        .getRequest(HenryGlobal.iotelURI, sendpoint, HenryGlobal.serviceHeaders)
         .catchError(handleError);
 
     if (response != null) {
@@ -83,7 +83,7 @@ class GlobalProvider extends BaseController {
     final sendpoint = HenryGlobal.iotelEndPoint + sCommand;
 
     final request = await HenryBaseClient()
-        .postRequest(HenryGlobal.iotelURI, sendpoint, bodyPayload!, httpHeaders: HenryGlobal.iotelHeaders)
+        .postRequest(HenryGlobal.iotelURI, sendpoint, bodyPayload!, httpHeaders: HenryGlobal.serviceHeaders)
         .catchError(handleError);
 
     if (request != null) {

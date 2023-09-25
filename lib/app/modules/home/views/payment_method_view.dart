@@ -175,6 +175,8 @@ class PaymentMethodView extends GetView {
                                       hc.isLoading.value = true;
                                       hc.selectedPaymentTypeCode.value =
                                           hc.paymentTypeList.first.data.paymentTypes[index].code;
+                                      hc.selectedPaymentTypeID.value =
+                                          hc.paymentTypeList.first.data.paymentTypes[index].id;
 
                                       var response = await hc.getAvailableRoomsGraphQL(
                                           credentialHeaders: hc.accessTOKEN,

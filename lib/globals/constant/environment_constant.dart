@@ -44,7 +44,7 @@ class HenryGlobal {
   // IOTEL HARDWARE API
   static const iotelURI = 'http://qckkiosk1.ad.circuitmindz.com:6969';
   static const iotelEndPoint = '/processcommand';
-  static var iotelHeaders = {"API_KEY": "#CMRJG\$@05062023!"};
+  static var serviceHeaders = {"API_KEY": "#CMRJG\$@05062023!"};
 
   static const userEP = '/api/users/login';
 

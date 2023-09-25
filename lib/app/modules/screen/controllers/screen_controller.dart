@@ -79,7 +79,7 @@ class ScreenController extends GetxController with BaseController {
     // print(ngayon.toIso8601String());
 
     // monitorInfo();
-    if (kDebugMode) setDisplayMonitor('DISPLAY3');
+    if (kDebugMode) setDisplayMonitor('DISPLAY2');
 
     // getBDOOpen(
     //     transactionCode: BDOTransaction.sSale,
