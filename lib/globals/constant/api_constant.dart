@@ -11,4 +11,9 @@ class APIConstant {
   // CARD
   static const String issueCard = 'PICD';
   static const String readCard = 'PRDC';
+  static const String revokeCard = 'PRVC';
+  static const String ejectCard = 'PREJ';
+
+  // PRINTING
+  static const String printReceipt = 'PRCT';
 }

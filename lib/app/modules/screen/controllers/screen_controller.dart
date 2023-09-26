@@ -624,45 +624,45 @@ class ScreenController extends GetxController with BaseController {
     }
   }
 
-  void cardDispenser({required String portNumber}) {
-    // final serialPort = SerialPort.availablePorts;
-    final port = SerialPort(portNumber);
-    final portConfig = SerialPortConfig();
+  // void cardDispenser({required String portNumber}) {
+  //   // final serialPort = SerialPort.availablePorts;
+  //   final port = SerialPort(portNumber);
+  //   final portConfig = SerialPortConfig();
 
-    portConfig.baudRate = 9600;
-    // portConfig.parity = SerialPortParity.none;
-    // portConfig.bits = 1;
-    // portConfig.stopBits = 1;
+  //   portConfig.baudRate = 9600;
+  //   // portConfig.parity = SerialPortParity.none;
+  //   // portConfig.bits = 1;
+  //   // portConfig.stopBits = 1;
 
-    if (!port.openReadWrite()) {
-      if (kDebugMode) print(SerialPort.lastError);
-      // exit(-1);
-    }
+  //   if (!port.openReadWrite()) {
+  //     if (kDebugMode) print(SerialPort.lastError);
+  //     // exit(-1);
+  //   }
 
-    var sendCmd = '02 00 00 00 02 52 46 03 00';
-    Uint8List byteAP = Uint8List.fromList(HEX.decode(sendCmd));
+  //   var sendCmd = '02 00 00 00 02 52 46 03 00';
+  //   Uint8List byteAP = Uint8List.fromList(HEX.decode(sendCmd));
 
-    port.write(byteAP);
+  //   port.write(byteAP);
 
-    if (kDebugMode) print('${port.name} is open');
+  //   if (kDebugMode) print('${port.name} is open');
 
-    int readBuffer = 512;
+  //   int readBuffer = 512;
 
-    while (port.isOpen) {
-      Uint8List bytesRead = port.read(readBuffer, timeout: 60);
+  //   while (port.isOpen) {
+  //     Uint8List bytesRead = port.read(readBuffer, timeout: 60);
 
-      if (bytesRead.isNotEmpty) {
-        if (kDebugMode) print('BYTES READ DECIMAL: $bytesRead');
-        if (kDebugMode) print('BYTES READ HEX: ${HEX.encode(bytesRead).toUpperCase()}');
-        var asciiTable = String.fromCharCodes(bytesRead);
-        if (kDebugMode) print('ASCII: $asciiTable');
-      }
+  //     if (bytesRead.isNotEmpty) {
+  //       if (kDebugMode) print('BYTES READ DECIMAL: $bytesRead');
+  //       if (kDebugMode) print('BYTES READ HEX: ${HEX.encode(bytesRead).toUpperCase()}');
+  //       var asciiTable = String.fromCharCodes(bytesRead);
+  //       if (kDebugMode) print('ASCII: $asciiTable');
+  //     }
 
-      if (bytesRead.isEmpty) {
-        port.close();
-      }
-    }
-  }
+  //     if (bytesRead.isEmpty) {
+  //       port.close();
+  //     }
+  //   }
+  // }
 
   // void openLED() {
   //   final serialPort = winsp.SerialPort.getAvailablePorts();
@@ -684,32 +684,32 @@ class ScreenController extends GetxController with BaseController {
   //   }
   // }
 
-  void openLEDLibserial({String ledLocationAndStatus = '', required String? portName}) {
-    // final serialPort = SerialPort.availablePorts;
-    final portConfig = SerialPortConfig();
-    final port = SerialPort(portName!);
-    portConfig.baudRate = 9600;
-    portConfig.parity = SerialPortParity.none;
+  // void openLEDLibserial({String ledLocationAndStatus = '', required String? portName}) {
+  //   // final serialPort = SerialPort.availablePorts;
+  //   final portConfig = SerialPortConfig();
+  //   final port = SerialPort(portName!);
+  //   portConfig.baudRate = 9600;
+  //   portConfig.parity = SerialPortParity.none;
 
-    if (port.isOpen) {
-      port.close();
-    } else {
-      if (kDebugMode) print('Connected to: ${port.name}');
-    }
+  //   if (port.isOpen) {
+  //     port.close();
+  //   } else {
+  //     if (kDebugMode) print('Connected to: ${port.name}');
+  //   }
 
-    port.openWrite();
-    // Encode the string using a specific encoding (e.g., ASCII)
-    List<int> encodedBytes = ascii.encode(ledLocationAndStatus);
-    // Create a Uint8List from the encoded bytes
-    Uint8List uint8List = Uint8List.fromList(encodedBytes);
+  //   port.openWrite();
+  //   // Encode the string using a specific encoding (e.g., ASCII)
+  //   List<int> encodedBytes = ascii.encode(ledLocationAndStatus);
+  //   // Create a Uint8List from the encoded bytes
+  //   Uint8List uint8List = Uint8List.fromList(encodedBytes);
 
-    if (port.isOpen) port.write(uint8List);
+  //   if (port.isOpen) port.write(uint8List);
 
-    if (port.isOpen) {
-      port.close();
-      // exit(-1);
-    }
-  }
+  //   if (port.isOpen) {
+  //     port.close();
+  //     // exit(-1);
+  //   }
+  // }
 
   // -----------------------------------------------------------------------------------------
 

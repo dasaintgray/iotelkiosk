@@ -12,6 +12,7 @@ import 'package:iotelkiosk/app/modules/home/views/home_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/underdev_view.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
+import 'package:iotelkiosk/globals/constant/led_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
 import 'package:iotelkiosk/globals/widgets/kioskbi_widget.dart';
@@ -140,51 +141,77 @@ class TransactionView extends GetView<HomeController> {
                 Positioned(
                   left: 8.w,
                   right: 8.w,
-                  child: GestureDetector(
-                    onTap: () async {
-                      switch (index) {
-                        case 0: //CHECK IN
-                          {
-                            hc.isLoading.value = true;
-                            var response = await hc.getAccommodation(
-                                credentialHeaders: hc.accessTOKEN, languageCode: hc.selectedLanguageCode.value);
-                            if (response) {
-                              if (kDebugMode) print('SELECTED ROOM TYPE ID: ${hc.selectedRoomTypeID.value}');
-                              // sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
-                              hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
-                              if (kDebugMode) print(hc.selecttedLanguageID.value);
-                              hc.update();
-                              Get.to(() => AccommodationView());
+                  child: Obx(
+                    () => GestureDetector(
+                      onTap: () async {
+                        switch (index) {
+                          case 0: //CHECK IN
+                            {
+                              hc.isLoading.value = true;
+                              var response = await hc.getAccommodation(
+                                  credentialHeaders: hc.accessTOKEN, languageCode: hc.selectedLanguageCode.value);
+                              if (response) {
+                                if (kDebugMode) print('SELECTED ROOM TYPE ID: ${hc.selectedRoomTypeID.value}');
+                                // sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
+                                hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
+                                if (kDebugMode) print(hc.selecttedLanguageID.value);
+                                hc.update();
+                                Get.to(() => AccommodationView());
+                              }
                             }
-                          }
-                          break;
-                        case 1: //CHECK OUT
-                          {
-                            Get.to(() => CheckoutView());
-                          }
-                          break;
-                        case 2: //book a room
-                          {
-                            Get.to(() => BookaroomView());
-                          }
-                          break;
-                        default:
-                          {
-                            Get.to(() => UnderdevView());
-                          }
-                      }
-                    },
-                    child: SizedBox(
-                      height: 7.h,
-                      child: hc.pageTrans.isEmpty
-                          ? null
-                          : Image.asset(
-                              hc.pageTrans[index].images!,
-                              fit: BoxFit.contain,
-                            )
-                              .animate()
-                              .fade(duration: HenryGlobal.animationSpeed)
-                              .scale(duration: HenryGlobal.animationSpeed),
+                            break;
+                          case 1: //CHECK OUT
+                            {
+                              hc.isLoading.value = true;
+                              // hc.cardDispenser(portNumber: 'COM1');
+                              hc.openLEDLibserial(portName: 'COM1', ledLocationAndStatus: LedOperation.topRIGHTLEDON);
+                              hc.statusMessage.value = 'Please Insert Key Card \nto the dispenser';
+                              hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'COP', type: 'TITLE');
+                              hc.startReadCardTimer();
+                              Get.to(
+                                () => CheckoutView(),
+                              );
+
+                              // final response = await hc.readCard(
+                              //     url: hc.kioskURL.value,
+                              //     sCommand: APIConstant.readCard,
+                              //     terminalID: hc.defaultTerminalID.value);
+                              // if (response) {
+                              //   hc.isLoading.value = false;
+                              //   hc.openLEDLibserial(
+                              //       portName: 'COM1', ledLocationAndStatus: LedOperation.topRIGHTLEDOFF);
+                              //   Get.to(
+                              //     () => CheckoutView(),
+                              //   );
+                              // } else {
+                              //   hc.statusMessage.value =
+                              //       'Unable to read Key Card \nPlease insert Key Card on Card Dispenser';
+                              // }
+                            }
+                            break;
+                          case 2: //book a room
+                            {
+                              Get.to(() => BookaroomView());
+                            }
+                            break;
+                          default:
+                            {
+                              Get.to(() => UnderdevView());
+                            }
+                        }
+                      },
+                      child: SizedBox(
+                        height: 7.h,
+                        child: hc.pageTrans.isEmpty
+                            ? null
+                            : Image.asset(
+                                hc.pageTrans[index].images!,
+                                fit: BoxFit.contain,
+                              )
+                                .animate()
+                                .fade(duration: HenryGlobal.animationSpeed)
+                                .scale(duration: HenryGlobal.animationSpeed),
+                      ),
                     ),
                   ),
                 ),

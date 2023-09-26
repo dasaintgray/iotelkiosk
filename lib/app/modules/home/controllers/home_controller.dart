@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:get/get.dart';
 import 'package:hasura_connect/hasura_connect.dart';
+import 'package:hex/hex.dart';
 import 'package:intl/intl.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
@@ -27,6 +28,7 @@ import 'package:iotelkiosk/app/data/models_graphql/terminals_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/transaction_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/apiresponse_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/cardissueresponse_model.dart';
+import 'package:iotelkiosk/app/data/models_rest/cardresponse_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/userlogin_model.dart';
 import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/app/modules/screen/views/screen_view.dart';
@@ -65,6 +67,7 @@ class HomeController extends GetxController with BaseController {
   final isBottom = false.obs;
   final isDisclaimerClick = false.obs;
   final isButtonActive = true.obs;
+  final kioskURL = ''.obs;
 
   // INT
   final menuIndex = 0.obs;
@@ -114,6 +117,7 @@ class HomeController extends GetxController with BaseController {
   final chargesListV2 = <ChargesModel>[];
   final cutOffList = <CutOffModel>[];
   final cashpositionList = <CashPositionModel>[];
+  final readCardInfoList = <CardResponseModel>[];
 
   final transactionList = <TransactionModel>[].obs;
   final pageTrans = <Conversion>[].obs;
@@ -173,8 +177,11 @@ class HomeController extends GetxController with BaseController {
   final translator = GoogleTranslator();
 
   // SCROLL CONTROLLERS
-  final scrollController = ScrollController();
+  var scrollController = ScrollController();
   var accessTOKEN = <String, String>{};
+
+  // TIMER TO USE TO FETCH OR READ CARD
+  Timer? readCardTimer;
 
   @override
   void onInit() async {
@@ -212,6 +219,14 @@ class HomeController extends GetxController with BaseController {
     //   //     headers: globalHeaders, terminalID: defaultTerminalID.value.isEqual(0) ? 1 : defaultTerminalID.value);
     // }
     // await getTerms(credentialHeaders: headers, languageID: 6);
+
+    // scrollController.addListener(
+    //   () {
+    //     if (scrollController.position.atEdge) {
+    //       isBottom.value = scrollController.position.pixels == 0 ? false : true;
+    //     }
+    //   },
+    // );
   }
 
   @override
@@ -229,23 +244,16 @@ class HomeController extends GetxController with BaseController {
 
     clockLiveUpdate.value = true;
     nabasangPera.value = 0;
-
-    scrollController.addListener(
-      () {
-        if (scrollController.position.atEdge) {
-          isBottom.value = scrollController.position.pixels == 0 ? false : true;
-        }
-      },
-    );
   }
 
-  // @override
-  // void onClose() {
-  //   super.onClose();
-  //   // scrollController.dispose();
-  //   // stopTimer();
-  //   // screenController.dispose();
-  // }
+  @override
+  void onClose() {
+    super.onClose();
+    readCardTimer?.cancel();
+    // scrollController.dispose();
+    // stopTimer();
+    // screenController.dispose();
+  }
 
   // ---------------------------------------------------------------------------------------------------------
   bool getMenu({int? languageID, String? code, String? type}) {
@@ -675,6 +683,15 @@ class HomeController extends GetxController with BaseController {
     }
   }
 
+  Future<bool> readCard({required String? url, required String? sCommand, required int? terminalID}) async {
+    final readResponse = await GlobalProvider().readCardInfo(url: url, cardCommand: sCommand, terminalID: terminalID);
+    if (readResponse != null) {
+      readCardInfoList.add(readResponse);
+      return true;
+    }
+    return false;
+  }
+
   Future<bool> issueCard(
       {required String? command,
       required int? iTerminalID,
@@ -1095,6 +1112,9 @@ class HomeController extends GetxController with BaseController {
             settingsResponse.data.settings.indexWhere((element) => element.code == "EN" || element.value == "English");
         selectedLanguageCode.value = settingsResponse.data.settings[langIndex].code;
 
+        final idx = settingsResponse.data.settings.indexWhere((element) => element.code == 'PHLOCKURL');
+        kioskURL.value = settingsResponse.data.settings[idx].value;
+
         isLoading.value = false;
         return true;
       }
@@ -1327,6 +1347,31 @@ class HomeController extends GetxController with BaseController {
     nabasangPera.value = 0.0;
     totalAmountDue.value = 0.0;
     isConfirmReady.value = false;
+    isDisclaimerClick.value = false;
+  }
+
+  void startReadCardTimer() {
+    // / Create a timer that fires every 3 to 10 seconds
+
+    readCardTimer = Timer.periodic(Duration(seconds: 3 + (Random().nextInt(6))), (timer) {
+      // Fetch data from the API
+      fetchReadCardInfo();
+    });
+  }
+
+  Future<bool> fetchReadCardInfo() async {
+    statusMessage.value = 'Reading card....';
+    final response =
+        await readCard(url: kioskURL.value, sCommand: APIConstant.readCard, terminalID: defaultTerminalID.value);
+    if (response) {
+      readCardTimer?.cancel();
+      isLoading.value = false;
+      openLEDLibserial(portName: 'COM1', ledLocationAndStatus: LedOperation.topRIGHTLEDOFF);
+      return true;
+    } else {
+      statusMessage.value = 'Unable to read Key Card \nPlease insert Key Card on Card Dispenser';
+      return false;
+    }
   }
 
   // ============ SERIAL COMMUNICATION ===========================
@@ -1356,6 +1401,49 @@ class HomeController extends GetxController with BaseController {
     if (port.isOpen) {
       port.close();
       // exit(-1);
+    }
+  }
+
+  // CARD DISPENSER
+  void cardDispenser({required String portNumber}) {
+    // final serialPort = SerialPort.availablePorts;
+    final port = SerialPort(portNumber);
+    final portConfig = SerialPortConfig();
+
+    portConfig.baudRate = 9600;
+    portConfig.parity = SerialPortParity.none;
+    portConfig.bits = 1;
+    portConfig.stopBits = 1;
+
+    if (!port.openReadWrite()) {
+      if (kDebugMode) print(SerialPort.lastError);
+      // exit(-1);
+    }
+
+    // var sendCmd = '02 00 00 00 02 52 46 03 00';
+    var sendCmd = '020000000241500312';
+    Uint8List byteAP = Uint8List.fromList(HEX.decode(sendCmd));
+    if (port.isOpen) {
+      port.write(byteAP, timeout: 2);
+    }
+
+    if (kDebugMode) print('${port.name} is open');
+
+    int readBuffer = 512;
+
+    while (port.isOpen) {
+      Uint8List bytesRead = port.read(readBuffer, timeout: 60);
+
+      if (bytesRead.isNotEmpty) {
+        if (kDebugMode) print('BYTES READ DECIMAL: $bytesRead');
+        if (kDebugMode) print('BYTES READ HEX: ${HEX.encode(bytesRead).toUpperCase()}');
+        var asciiTable = String.fromCharCodes(bytesRead);
+        if (kDebugMode) print('ASCII: $asciiTable');
+      }
+
+      // if (bytesRead.isEmpty) {
+      //   port.close();
+      // }
     }
   }
 }

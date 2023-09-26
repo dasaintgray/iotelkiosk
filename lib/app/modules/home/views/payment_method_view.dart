@@ -184,18 +184,11 @@ class PaymentMethodView extends GetView {
                                           accommodationTYPEID: hc.selectedAccommodationTypeID.value);
 
                                       if (response!) {
-                                        // sc.subscribeCashDispenser();
-                                        // initialize the led on cash acceptor
                                         final String ledPort;
-                                        // if (kDebugMode) {
-                                        //   ledPort = "COM1";
-                                        // } else {
-                                        //   ledPort = "COM8";
-                                        // }
 
                                         ledPort = kDebugMode ? "COM1" : "COM8";
 
-                                        sc.openLEDLibserial(
+                                        hc.openLEDLibserial(
                                             ledLocationAndStatus: LedOperation.bottomRIGHTLEDON, portName: ledPort);
                                         // hc.defaultTerminalID.value = hc.terminalsList.first.data.terminals.first.id;
 
@@ -203,7 +196,7 @@ class PaymentMethodView extends GetView {
                                             sCommand: APIConstant.cashPoolingStart,
                                             iTerminalID: hc.defaultTerminalID.value);
                                         if (cashresponse!) {
-                                          sc.openLEDLibserial(
+                                          hc.openLEDLibserial(
                                               ledLocationAndStatus: LedOperation.bottomRIGHTLEDOFF, portName: ledPort);
                                           hc.isLoading.value = false;
                                           // CHECK ANG TERMINAL DATA DITO

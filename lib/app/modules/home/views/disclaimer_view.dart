@@ -127,6 +127,7 @@ class DisclaimerView extends GetView {
                       )
                     : Visibility(
                         visible: !hc.isDisclaimerClick.value,
+                        // visible: true,
                         child: SingleChildScrollView(
                           controller: hc.scrollController,
                           child: Text(
@@ -148,7 +149,8 @@ class DisclaimerView extends GetView {
           ),
           Obx(
             () => Visibility(
-              visible: hc.isBottom.value,
+              // visible: hc.isBottom.value,
+              visible: hc.isButtonActive.value,
               child: Expanded(
                 flex: 1,
                 child: SizedBox(
