@@ -942,7 +942,7 @@ class HomeController extends GetxController with BaseController {
 
           // PAYMENTS AREA
           final paymentParams = {
-            "cutOffID": 1,
+            "cutOffID": getCutOffs(credentialHeaders: credentialHeaders, isActive: true),
             "balance": 0.0,
             "bookingNo": bookingNumber.value,
             "discount": 0,
@@ -986,7 +986,7 @@ class HomeController extends GetxController with BaseController {
 
           statusMessage.value = 'Issuing Card....';
 
-          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.topRIGHTLEDON);
+          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.cardON);
           // PRINTING CARD
           // 202309081129
           // DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
@@ -1013,12 +1013,15 @@ class HomeController extends GetxController with BaseController {
           // final updateBookingParams = {}
           // STOP THE DISPENSER CASH POLLING
           await cashDispenserCommand(sCommand: APIConstant.cashPoolingStop, iTerminalID: defaultTerminalID.value);
-          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.topRIGHTLEDOFF);
+
+          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.cardOFF);
 
           // DITO ANG PRINTING
-          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.bottomLEFTLEDON);
+          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.printingON);
 
           setBackToDefaultValue();
+
+          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.printingOFF);
 
           return true;
         }
@@ -1028,6 +1031,11 @@ class HomeController extends GetxController with BaseController {
     } else {
       return false;
     }
+  }
+
+  // CHECKOUT MODULE
+  Future checkOUT({required Map<String, String> credentialHeaders}) async {
+    if (selecttedLanguageID.value != 0) {}
   }
 
   Future<String?> getSeriesDetails({required Map<String, String> credentialHeaders, required int moduleID}) async {
@@ -1351,9 +1359,9 @@ class HomeController extends GetxController with BaseController {
   }
 
   void startReadCardTimer() {
-    // / Create a timer that fires every 3 to 10 seconds
+    // / Create a timer that fires every 3 to 5 seconds
 
-    readCardTimer = Timer.periodic(Duration(seconds: 3 + (Random().nextInt(6))), (timer) {
+    readCardTimer = Timer.periodic(Duration(seconds: 3 + (Random().nextInt(3))), (timer) {
       // Fetch data from the API
       fetchReadCardInfo();
     });
@@ -1366,7 +1374,7 @@ class HomeController extends GetxController with BaseController {
     if (response) {
       readCardTimer?.cancel();
       isLoading.value = false;
-      openLEDLibserial(portName: 'COM1', ledLocationAndStatus: LedOperation.topRIGHTLEDOFF);
+      openLEDLibserial(portName: 'COM1', ledLocationAndStatus: LedOperation.cardOFF);
       return true;
     } else {
       statusMessage.value = 'Unable to read Key Card \nPlease insert Key Card on Card Dispenser';

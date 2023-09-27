@@ -67,6 +67,10 @@ dependencies:
   # windows_graphics: ^0.0.4+1
   # windows_devices: ^0.0.2+2
 
+  # ANIMATIONS AND PLAYER
+  dotlottie_loader: ^0.0.3
+  lottie: ^2.6.0
+
 dev_dependencies: 
   flutter_lints: ^2.0.0
   flutter_test: 
@@ -88,5 +92,6 @@ flutter:
     - assets/svg/
     - assets/png/
     - assets/menus/
+    - assets/lottie/
   uses-material-design: true
 

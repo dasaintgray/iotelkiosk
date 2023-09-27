@@ -13,6 +13,9 @@ import 'package:iotelkiosk/globals/widgets/kioskheader_widget.dart';
 import 'package:iotelkiosk/globals/widgets/menutitle_widget.dart';
 import 'package:sizer/sizer.dart';
 
+import 'package:dotlottie_loader/dotlottie_loader.dart';
+import 'package:lottie/lottie.dart';
+
 // ignore_for_file: depend_on_referenced_packages
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 
@@ -106,12 +109,26 @@ class DisclaimerView extends GetView {
                     ? Column(
                         children: [
                           SizedBox(
-                            height: 10.h,
-                            width: 18.w,
-                            child: const CircularProgressIndicator.adaptive(
-                              backgroundColor: HenryColors.puti,
-                            ),
-                          ),
+                              height: 20.h,
+                              width: 28.w,
+                              child:
+                                  DotLottieLoader.fromAsset('assets/lottie/anim4.lottie', frameBuilder: (ctx, lottie) {
+                                if (lottie != null) {
+                                  return Lottie.memory(
+                                    lottie.animations.values.single,
+                                    height: 30.h,
+                                    fit: BoxFit.cover,
+                                  );
+                                } else {
+                                  return SizedBox(
+                                    height: 10.h,
+                                    width: 18.w,
+                                    child: const CircularProgressIndicator.adaptive(
+                                      backgroundColor: HenryColors.puti,
+                                    ),
+                                  );
+                                }
+                              })),
                           SizedBox(
                             height: 5.h,
                             width: double.infinity,

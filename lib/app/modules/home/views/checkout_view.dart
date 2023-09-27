@@ -1,12 +1,15 @@
+import 'package:dotlottie_loader/dotlottie_loader.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
+import 'package:iotelkiosk/app/modules/home/views/home_view.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/kioskbi_widget.dart';
 import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
 import 'package:iotelkiosk/globals/widgets/kioskheader_widget.dart';
 import 'package:iotelkiosk/globals/widgets/menutitle_widget.dart';
+import 'package:lottie/lottie.dart';
 import 'package:sizer/sizer.dart';
 
 class CheckoutView extends GetView<HomeController> {
@@ -48,7 +51,21 @@ class CheckoutView extends GetView<HomeController> {
                     child: hc.isLoading.value
                         ? Column(
                             children: [
-                              const LinearProgressIndicator(),
+                              DotLottieLoader.fromAsset(
+                                'assets/lottie/card.lottie',
+                                frameBuilder: (ctx, dotlottie) {
+                                  if (dotlottie != null) {
+                                    return Lottie.memory(
+                                      dotlottie.animations.values.single,
+                                      height: 30.h,
+                                      // width: 20.w,
+                                      fit: BoxFit.cover,
+                                    );
+                                  } else {
+                                    return const CircularProgressIndicator.adaptive();
+                                  }
+                                },
+                              ),
                               Center(
                                 child: Text(
                                   hc.statusMessage.value,
@@ -86,21 +103,24 @@ class CheckoutView extends GetView<HomeController> {
                                 width: double.infinity,
                               ),
                               ElevatedButton(
-                                  onPressed: () {
-                                    // 
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: HenryColors.darkGreen,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(60),
-                                    ),
-                                    padding: const EdgeInsets.all(30),
-                                    shadowColor: Colors.black26.withOpacity(0.5),
+                                onPressed: () {
+                                  hc.isLoading.value = true;
+                                  hc.checkOUT(credentialHeaders: hc.accessTOKEN);
+                                  Get.to(() => HomeView());
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: HenryColors.darkGreen,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(60),
                                   ),
-                                  child: Text(
-                                    'CHECK-OUT',
-                                    style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
-                                  ))
+                                  padding: const EdgeInsets.all(30),
+                                  shadowColor: Colors.black26.withOpacity(0.5),
+                                ),
+                                child: Text(
+                                  ' CHECK-OUT ',
+                                  style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                                ),
+                              ),
                             ],
                           ),
                   ),

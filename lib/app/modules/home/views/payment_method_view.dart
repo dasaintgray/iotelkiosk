@@ -189,7 +189,7 @@ class PaymentMethodView extends GetView {
                                         ledPort = kDebugMode ? "COM1" : "COM8";
 
                                         hc.openLEDLibserial(
-                                            ledLocationAndStatus: LedOperation.bottomRIGHTLEDON, portName: ledPort);
+                                            ledLocationAndStatus: LedOperation.cashDispenserON, portName: ledPort);
                                         // hc.defaultTerminalID.value = hc.terminalsList.first.data.terminals.first.id;
 
                                         var cashresponse = await hc.cashDispenserCommand(
@@ -197,7 +197,7 @@ class PaymentMethodView extends GetView {
                                             iTerminalID: hc.defaultTerminalID.value);
                                         if (cashresponse!) {
                                           hc.openLEDLibserial(
-                                              ledLocationAndStatus: LedOperation.bottomRIGHTLEDOFF, portName: ledPort);
+                                              ledLocationAndStatus: LedOperation.cashDispenserOFF, portName: ledPort);
                                           hc.isLoading.value = false;
                                           // CHECK ANG TERMINAL DATA DITO
 
