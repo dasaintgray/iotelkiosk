@@ -6,7 +6,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/views/transaction_view.dart';
-import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
@@ -22,10 +21,6 @@ class HomeView extends GetView<HomeController> {
 
   // final hc = Get.find<HomeController>();
   final hc = Get.put(HomeController());
-  final sc = Get.find<ScreenController>();
-
-  // final DateTime dtLocalTime = DateTime.now();
-  // final imgKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +43,14 @@ class HomeView extends GetView<HomeController> {
                       )),
                   // SPACE
                   SizedBox(
-                    height: 12.h,
+                    height: orientation == Orientation.portrait ? 10.h : 2.h,
                   ),
                   // TITLE
-                  KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
+                  KioskMenuTitle(
+                    titleLength: hc.titleTrans.length,
+                    titleTrans: hc.titleTrans,
+                    orientation: orientation,
+                  ),
                   // SPACE
                   SizedBox(
                     height: 2.h,
@@ -71,17 +70,17 @@ class HomeView extends GetView<HomeController> {
   Widget menuLanguage(Orientation orientation) {
     return SizedBox(
       height: orientation == Orientation.portrait ? 45.h : 20.h,
-      width: 75.w,
+      width: orientation == Orientation.portrait ? 70.w : 55.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),
         itemCount: hc.languageList.first.data.languages.length,
         itemBuilder: (BuildContext context, int index) {
           return SizedBox(
-            height: 10.h,
+            height: orientation == Orientation.portrait ? 10.h : 6.h,
             child: Stack(
               children: [
                 Positioned(
-                  left: 28.w,
+                  left: orientation == Orientation.portrait ? 28.w : 20.w,
                   top: 25,
                   // right: 10.w,
                   child: SizedBox(
@@ -91,7 +90,7 @@ class HomeView extends GetView<HomeController> {
                           hc.languageList.first.data.languages[index].description,
                           style: TextStyle(
                             color: HenryColors.darkGreen,
-                            fontSize: 15.sp,
+                            fontSize: orientation == Orientation.portrait ? 15.sp : 8.sp,
                           ),
                         )
                             .animate()
@@ -124,7 +123,7 @@ class HomeView extends GetView<HomeController> {
                       }
                     },
                     child: SizedBox(
-                      height: 7.h,
+                      height: orientation == Orientation.portrait ? 7.h : 5.h,
                       child: hc.languageList.isEmpty
                           ? null
                           : Image.asset(

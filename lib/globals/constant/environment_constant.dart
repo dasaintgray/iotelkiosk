@@ -549,48 +549,21 @@ subscription terminalData($terminalID: Int!, $status: String!, $delay: Int!, $it
 ''';
 
 String addBooking = r'''
-mutation addBookings(
-  $isActive: Boolean!, 
-  $docNo: String!, 
-  $accommodationTypeID: Int!,
-  $agentID: Int!,
-  $bookingStatusID: Int!,
-  $cutOffID: Int!,
-  $roomTypeID: Int!,
-  $actualStartDate: DateTime!,
-  $bed: Int!,
-  $endDate: DateTime!,
-  $numPax: Int!,
-  $startDate: DateTime!,
-  $roomRate: Float!,
-  $roomID: Int!,
-  $discountAMT: Float!,
-  $isWithBreakfast: Boolean!,
-  $isDoNotDesturb: Boolean!,
-  $serviceCharge: Float!,
-  $contactID: Int!
+mutation addBookings($isWithBreakFast: Boolean!, $isActive: Boolean!, $isDoNotDesturb: Boolean!,
+  $accommodationTypeID: Int!, $bookingStatusID: Int!, $agentID: Int!, $contactID: Int!, $cuttOffID: Int!,
+  $roomTypeID: Int!, $roomID: Int!, $bed: Int!, $deposit: Float!, $discountAmount: Float!, 
+  $docNo: String!, $numPax: Int!, $roomRate: Float!, $serviceCharge: Float!, 
+  $actualStartDate: DateTime!, $endDate: DateTime!, $startDate: DateTime!
 ) {
   Bookings(
     mutate: {
-      isActive: $isActive, 
-      docNo: $docNo, 
-      AccommodationTypeId: $accommodationTypeID, 
-      AgentId: $agentID, 
-      BookingStatusId: $bookingStatusID, 
-      CutOffId: $cutOffID, 
-      RoomTypeId: $roomTypeID, 
-      actualStartDate: $actualStartDate, 
-      bed: $bed, 
-      endDate: $endDate, 
-      numPax: $numPax, 
-      startDate: $startDate, 
-      roomRate: $roomRate, 
-      RoomId: $roomID,
-      discountAmount: $discountAMT,
-      isWithBreakfast: $isWithBreakfast,
-      isDoNotDesturb: $isDoNotDesturb,
-      serviceCharge: $serviceCharge,
-      ContactId: $contactID
+      isWithBreakfast: $isWithBreakFast, isActive: $isActive, isDoNotDesturb: $isDoNotDesturb, 
+      AccommodationTypeId: $accommodationTypeID, BookingStatusId: $bookingStatusID, AgentId: $agentID, 
+      ContactId: $contactID, CutOffId: $cuttOffID, RoomTypeId: $roomTypeID, RoomId: $roomID, 
+      bed: $bed, deposit: $deposit, discountAmount: $discountAmount, docNo: $docNo, numPAX: $numPax, 
+      roomRate: $roomRate, serviceCharge: $serviceCharge, 
+			actualStartDate: $actualStartDate, 
+      endDate: $endDate, startDate: $startDate
     }
   ) {
     Ids
@@ -661,6 +634,70 @@ mutation addPaymentDetails($amount: Float!, $paymentID: Int!, $paymentTypeID: In
   ) {
     Ids
     response
+  }
+}
+''';
+
+String updateBookingTable = r'''
+mutation updateBooking($bookingNumber: Int!, $invoiceNo: String!, $cardNo:String!) {
+  Bookings(mutate: {invoiceNo: $invoiceNo, cardNo: $cardNo}, 
+    where: {Id: $bookingNumber}) {
+    Ids
+    response
+  }
+}
+''';
+
+String searchBooking = r'''
+query searchBooking($cardno: String!) {
+  Bookings(where: {cardNo: $cardno}) {
+    Id
+    isWithBreakfast
+    isDoNotDesturb
+    wakeUpTime
+    BookingGroupId
+    isActive
+    docNo
+    RoomId
+    startDate
+    endDate
+    actualStartDate
+    actualEndDate
+    ContactId
+    AgentId
+    AccommodationTypeId
+    RoomTypeId
+    BookingStatusId
+    remarks
+    roomRate
+    serviceCharge
+    discountAmount
+    cancelDate
+    numPAX
+    bed
+    invoiceNo
+    extensionDay
+    extensionHr
+    transferDate
+    transferRoomId
+    agentDocNo
+    deposit
+    cardNo
+    extensionDayRate
+    extensionHrRate
+    CutOffId
+  }
+}
+''';
+
+String searchSettings = r'''
+query searchSettings($code: String!) {
+  Settings(where: {code: $code}) {
+    Id
+    isActive
+    value
+    description
+    code
   }
 }
 ''';

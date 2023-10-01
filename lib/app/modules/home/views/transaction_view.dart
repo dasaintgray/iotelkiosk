@@ -6,11 +6,10 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/views/accommodation_view.dart';
-import 'package:iotelkiosk/app/modules/home/views/bookaroom_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/checkout_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/home_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/underdev_view.dart';
-import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
+// import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/led_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
@@ -27,7 +26,7 @@ class TransactionView extends GetView<HomeController> {
 
   final hc = Get.find<HomeController>();
   // final hc = Get.put(HomeController());
-  final sc = Get.find<ScreenController>();
+  // final sc = Get.find<ScreenController>();
 
   // final DateTime dtLocalTime = DateTime.now();
   final imgKey = GlobalKey();
@@ -53,10 +52,14 @@ class TransactionView extends GetView<HomeController> {
                       )),
                   // SPACE
                   SizedBox(
-                    height: 12.h,
+                    height: orientation == Orientation.portrait ? 10.h : 2.h,
                   ),
                   // TITLE
-                  KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
+                  KioskMenuTitle(
+                    titleLength: hc.titleTrans.length,
+                    titleTrans: hc.titleTrans,
+                    orientation: orientation,
+                  ),
                   // SPACE
                   SizedBox(
                     height: 2.h,
@@ -99,29 +102,31 @@ class TransactionView extends GetView<HomeController> {
   Widget menuTransactionTitle(Orientation orientation, {int? languageID, String? code, String? type}) {
     return SizedBox(
       height: orientation == Orientation.portrait ? 45.h : 20.h,
-      width: 75.w,
+      width: orientation == Orientation.portrait ? 70.w : 55.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),
         itemCount: hc.pageTrans.length,
         itemBuilder: (BuildContext context, int index) {
           return SizedBox(
-            height: 10.h,
+            height: orientation == Orientation.portrait ? 10.h : 6.h,
             child: Stack(
               children: [
                 Positioned(
-                  left: 25.w,
-                  top: 35,
+                  left: orientation == Orientation.portrait ? 25.w : 20.w,
+                  top: 32,
                   right: 10.w,
                   child: SizedBox(
                     width: 10.w,
-                    child: sc.isLoading.value
+                    child: hc.isLoading.value
                         ? Center(
                             child: Column(
                               children: [
                                 const CircularProgressIndicator.adaptive(),
                                 Text(
                                   'Loading, please wait..',
-                                  style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                                  style: TextStyle(
+                                      color: HenryColors.puti,
+                                      fontSize: orientation == Orientation.portrait ? 10.sp : 8.sp),
                                 )
                               ],
                             ),
@@ -130,7 +135,7 @@ class TransactionView extends GetView<HomeController> {
                             hc.pageTrans[index].translationText,
                             style: TextStyle(
                               color: HenryColors.darkGreen,
-                              fontSize: 12.sp,
+                              fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp,
                             ),
                           )
                             .animate()
@@ -162,35 +167,30 @@ class TransactionView extends GetView<HomeController> {
                         case 1: //CHECK OUT
                           {
                             hc.isLoading.value = true;
-                            // hc.cardDispenser(portNumber: 'COM1');
-                            hc.openLEDLibserial(portName: 'COM1', ledLocationAndStatus: LedOperation.cardON);
+                            hc.openLEDLibserial(portName: hc.ledPort.value, ledLocationAndStatus: LedOperation.cardON);
                             hc.statusMessage.value = 'Please Insert Key Card \nto the dispenser';
                             hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'COP', type: 'TITLE');
                             hc.startReadCardTimer();
                             Get.to(
                               () => CheckoutView(),
                             );
-
-                            // final response = await hc.readCard(
-                            //     url: hc.kioskURL.value,
-                            //     sCommand: APIConstant.readCard,
-                            //     terminalID: hc.defaultTerminalID.value);
-                            // if (response) {
-                            //   hc.isLoading.value = false;
-                            //   hc.openLEDLibserial(
-                            //       portName: 'COM1', ledLocationAndStatus: LedOperation.topRIGHTLEDOFF);
-                            //   Get.to(
-                            //     () => CheckoutView(),
-                            //   );
-                            // } else {
-                            //   hc.statusMessage.value =
-                            //       'Unable to read Key Card \nPlease insert Key Card on Card Dispenser';
-                            // }
                           }
                           break;
                         case 2: //book a room
                           {
-                            Get.to(() => BookaroomView());
+                            Get.defaultDialog(
+                              title: 'Too Follow',
+                              middleText: "Not Yet Implemented",
+                            );
+                            // Get.to(() => BookaroomView());
+                          }
+                          break;
+                        case 3: //Extend
+                          {
+                            Get.defaultDialog(
+                              title: 'Too Follow',
+                              middleText: "Not Yet Implemented",
+                            );
                           }
                           break;
                         default:
@@ -201,7 +201,7 @@ class TransactionView extends GetView<HomeController> {
                       }
                     },
                     child: SizedBox(
-                      height: 7.h,
+                      height: orientation == Orientation.portrait ? 7.h : 5.h,
                       child: Image.asset(
                         hc.pageTrans[index].images!,
                         fit: BoxFit.contain,

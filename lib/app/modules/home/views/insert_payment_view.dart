@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/disclaimer_view.dart';
-import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
+// import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
+import 'package:iotelkiosk/globals/constant/api_constant.dart';
 import 'package:iotelkiosk/globals/constant/settings_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
@@ -17,7 +18,7 @@ class InsertPaymentView extends GetView {
   InsertPaymentView({Key? key}) : super(key: key);
 
   final hc = Get.find<HomeController>();
-  final sc = Get.find<ScreenController>();
+  // final sc = Get.find<ScreenController>();
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +41,17 @@ class InsertPaymentView extends GetView {
                       )),
                   // SPACE
                   SizedBox(
-                    height: 12.h,
+                    height: orientation == Orientation.portrait ? 10.h : 2.h,
                   ),
                   // TITLE
-                  KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
+                  KioskMenuTitle(
+                    titleLength: hc.titleTrans.length,
+                    titleTrans: hc.titleTrans,
+                    orientation: orientation,
+                  ),
                   // SPACE
                   SizedBox(
-                    height: 2.h,
+                    height: 1.h,
                   ),
                   // MENU
                   menuInsertPayment(orientation, languageID: hc.selecttedLanguageID.value),
@@ -67,6 +72,10 @@ class InsertPaymentView extends GetView {
                                 terminalID: hc.terminalDataList.first.terminalId);
 
                             var response = hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST');
+                            if (hc.isCashDispenserRunning.value) {
+                              await hc.cashDispenserCommand(
+                                  sCommand: APIConstant.cashPoolingStop, iTerminalID: hc.defaultTerminalID.value);
+                            }
                             if (response) Get.back();
                           },
                           child: Image.asset(
@@ -108,14 +117,14 @@ class InsertPaymentView extends GetView {
     String roomNumber = 'Room Number';
 
     if (langCode.first.code.toLowerCase() != hc.selectedLanguageCode.value.toLowerCase()) {
-      cardDeposit = sc.translateText(
+      cardDeposit = hc.translateText(
           sourceText: cardDeposit,
           fromLang: hc.selectedLanguageCode.value.toLowerCase(),
           toLang: langCode.first.code.toLowerCase());
     }
 
     return SizedBox(
-      height: orientation == Orientation.portrait ? 45.h : 20.h,
+      height: orientation == Orientation.portrait ? 45.h : 25.h,
       width: 75.w,
       child: Container(
         margin: const EdgeInsets.all(30.0),
@@ -148,7 +157,8 @@ class InsertPaymentView extends GetView {
                     langCode.first.code.toLowerCase() == hc.selectedLanguageCode.value.toLowerCase()
                         ? selectedPaymentType.first.description.toUpperCase()
                         : selectedPaymentType.first.translatedText!,
-                    style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                    style: TextStyle(
+                        color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp),
                   ),
                 ),
               ),
@@ -164,19 +174,23 @@ class InsertPaymentView extends GetView {
                   children: [
                     Text(
                       '$roomNumber : ${hc.availRoomList[hc.preSelectedRoomID.value].description}',
-                      style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                      style: TextStyle(
+                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp),
                     ),
                     Text(
                       '$roomRate : $denomination ${hc.availRoomList[hc.preSelectedRoomID.value].rate.toStringAsFixed(2)}',
-                      style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                      style: TextStyle(
+                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp),
                     ),
                     Text(
                       '$cardDeposit : $denomination ${hc.availRoomList[hc.preSelectedRoomID.value].serviceCharge.toStringAsFixed(2)}',
-                      style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                      style: TextStyle(
+                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp),
                     ),
                     Text(
                       '$amountDue : $denomination ${hc.totalAmountDue.toStringAsFixed(2)}',
-                      style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                      style: TextStyle(
+                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp),
                     ),
                     SizedBox(
                       height: 2.h,

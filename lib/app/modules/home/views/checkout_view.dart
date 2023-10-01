@@ -39,11 +39,11 @@ class CheckoutView extends GetView<HomeController> {
                 ),
                 // SPACE
                 SizedBox(
-                  height: 10.h,
+                  height: orientation == Orientation.portrait ? 10.h : 2.h,
                   width: double.infinity,
                 ),
                 // TITLE
-                KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
+                KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans, orientation: orientation,),
                 Obx(
                   () => SizedBox(
                     height: 50.h,

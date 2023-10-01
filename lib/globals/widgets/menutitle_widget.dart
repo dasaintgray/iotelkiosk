@@ -5,42 +5,22 @@ import 'package:sizer/sizer.dart';
 import 'package:get/get.dart';
 
 class KioskMenuTitle extends StatelessWidget {
-  const KioskMenuTitle({super.key, required this.titleLength, required this.titleTrans});
+  const KioskMenuTitle({super.key, required this.titleLength, required this.titleTrans, required this.orientation});
 
   final RxList<Conversion> titleTrans;
   final int titleLength;
+  final Orientation orientation;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 4.h,
+      height: 3.h,
       width: double.infinity,
       child: Center(
-        child: Text(titleTrans.first.translationText, style: TextStyle(color: HenryColors.darkGreen, fontSize: 13.sp)),
+        child: Text(titleTrans.first.translationText,
+            style:
+                TextStyle(color: HenryColors.darkGreen, fontSize: orientation == Orientation.portrait ? 13.sp : 8.sp)),
       ),
-      // child: titleLength == 1
-      //     ? Center(
-      //         child: Text(titleTrans.first.translationText,
-      //             style: TextStyle(color: HenryColors.darkGreen, fontSize: 13.sp)),
-      //       )
-      //     : FlutterCarousel.builder(
-      //         itemCount: titleLength,
-      //         itemBuilder: (BuildContext context, int ctr, int realIndex) {
-      //           return SizedBox(
-      //             height: 5.h,
-      //             width: double.infinity,
-      //             child: Center(
-      //               child: Text(titleTrans[realIndex].translationText,
-      //                   style: TextStyle(color: HenryColors.darkGreen, fontSize: 13.sp)),
-      //             ),
-      //           );
-      //         },
-      //         options: CarouselOptions(
-      //             autoPlay: titleLength == 1 ? false : true,
-      //             showIndicator: false,
-      //             reverse: true,
-      //             scrollDirection: Axis.vertical),
-      //       ),
     );
   }
 }

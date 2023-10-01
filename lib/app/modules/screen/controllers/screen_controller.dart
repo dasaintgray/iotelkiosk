@@ -33,7 +33,11 @@ class ScreenController extends GetxController with BaseController {
   final hostname = ''.obs;
   final imgUrl = ''.obs;
   final sCity = ''.obs;
-
+  final tempC = '0'.obs;
+  final tempF = '0'.obs;
+  final weatherCondition = ''.obs;
+  final weatherLocation = ''.obs;
+  final weatherCountry = ''.obs;
   // INTEGER
 
   // LIST or OBJECT DATA
@@ -44,7 +48,6 @@ class ScreenController extends GetxController with BaseController {
   final resultList = [].obs;
 
   // TRANSACTION VARIABLE
-  final selectedTransactionType = ''.obs;
   final selectedNationalities = 77.obs;
 
   // MODEL LIST
@@ -71,15 +74,19 @@ class ScreenController extends GetxController with BaseController {
   // APP LIFE CYCLE ***********************************************************************************
   @override
   void onInit() async {
-    hostname.value = Platform.localHostname;
-    mediaOpen(useLocal: true);
-    player.play();
+    super.onInit();
+
     await getWeather();
+    // isLoading.value = true;
+    mediaOpen(useLocal: true);
+    // isLoading.value = false;
+
+    hostname.value = Platform.localHostname;
 
     // print(ngayon.toIso8601String());
 
     // monitorInfo();
-    if (kDebugMode) setDisplayMonitor('DISPLAY3');
+    if (kDebugMode) setDisplayMonitor('DISPLAY2');
 
     // getBDOOpen(
     //     transactionCode: BDOTransaction.sSale,
@@ -112,11 +119,10 @@ class ScreenController extends GetxController with BaseController {
     // await getTerminalData(authorizationHeader: headers);
 
     // await getTerms(credentialHeaders: headers, languageID: selecttedLanguageID.value);
-    super.onInit();
   }
 
   // @override
-  // void onReady() {
+  // void onReady() async {
   //   super.onReady();
   // }
 
@@ -141,20 +147,19 @@ class ScreenController extends GetxController with BaseController {
   // }
 
   Future<bool> getWeather() async {
-    isLoading.value = true;
     final weatherResponse =
         await GlobalProvider().fetchWeather(queryParam: sCity.value.isEmpty ? 'Angeles City' : sCity.value);
-    try {
-      if (weatherResponse != null) {
-        weatherList.add(weatherResponse);
-        imgUrl.value = 'http:${weatherResponse.current.condition.icon}';
-        isLoading.value = false;
-        return true;
-      } else {
-        isLoading.value = false;
-      }
-    } finally {
-      isLoading.value = false;
+
+    if (weatherResponse != null) {
+      weatherList.add(weatherResponse);
+      imgUrl.value = 'http:${weatherResponse.current.condition.icon}';
+      tempC.value = weatherList.first.current.tempC.toStringAsFixed(0);
+      tempF.value = weatherList.first.current.tempF.toStringAsFixed(0);
+      weatherCondition.value = weatherList.first.current.condition.text;
+      weatherLocation.value = weatherList.first.location.name;
+      weatherCountry.value = weatherList.first.location.country;
+
+      return true;
     }
     return false;
   }
@@ -828,16 +833,6 @@ class ScreenController extends GetxController with BaseController {
     return false;
   }
 
-  String translateText({required String sourceText, required String fromLang, required String toLang}) {
-    translator.translate(sourceText, from: fromLang, to: toLang).then((value) {
-      if (value.text.isNotEmpty) {
-        return value.text;
-      } else {
-        return '';
-      }
-    });
-    return '';
-  }
 }
 
 typedef Resolution = ({int width, int height});

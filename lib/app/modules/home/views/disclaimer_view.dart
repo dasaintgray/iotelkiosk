@@ -1,11 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/printing_view.dart';
-import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
 import 'package:iotelkiosk/globals/widgets/kioskbi_widget.dart';
@@ -23,7 +21,7 @@ class DisclaimerView extends GetView {
   DisclaimerView({Key? key}) : super(key: key);
 
   final hc = Get.find<HomeController>();
-  final sc = Get.find<ScreenController>();
+  // final sc = Get.find<ScreenController>();
 
   @override
   Widget build(BuildContext context) {
@@ -47,10 +45,14 @@ class DisclaimerView extends GetView {
                 ),
                 // SPACE
                 SizedBox(
-                  height: 10.h,
+                  height: orientation == Orientation.portrait ? 10.h : 2.h,
                 ),
                 // TITLE
-                KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
+                KioskMenuTitle(
+                  titleLength: hc.titleTrans.length,
+                  titleTrans: hc.titleTrans,
+                  orientation: orientation,
+                ),
                 // SPACE
                 SizedBox(
                   height: 2.h,
@@ -79,21 +81,20 @@ class DisclaimerView extends GetView {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Obx(
-            () => Visibility(
-              visible: false,
-              child: SizedBox(
-                height: 15.h,
-                width: 60.w,
-                child: Transform(
-                  key: imgKey,
-                  alignment: Alignment.center,
-                  transform: Matrix4.rotationY(math.pi),
-                  child: CameraPlatform.instance.buildPreview(hc.cameraID.value),
-                ),
+          Visibility(
+            visible: false,
+            child: SizedBox(
+              height: 15.h,
+              width: 60.w,
+              child: Transform(
+                key: imgKey,
+                alignment: Alignment.center,
+                transform: Matrix4.rotationY(math.pi),
+                child: CameraPlatform.instance.buildPreview(hc.cameraID.value),
               ),
             ),
           ),
+
           SizedBox(
             height: 2.h,
             width: double.infinity,
@@ -109,10 +110,11 @@ class DisclaimerView extends GetView {
                     ? Column(
                         children: [
                           SizedBox(
-                              height: 20.h,
-                              width: 28.w,
-                              child:
-                                  DotLottieLoader.fromAsset('assets/lottie/anim4.lottie', frameBuilder: (ctx, lottie) {
+                            height: 20.h,
+                            width: 28.w,
+                            child: DotLottieLoader.fromAsset(
+                              'assets/lottie/anim4.lottie',
+                              frameBuilder: (ctx, lottie) {
                                 if (lottie != null) {
                                   return Lottie.memory(
                                     lottie.animations.values.single,
@@ -128,7 +130,9 @@ class DisclaimerView extends GetView {
                                     ),
                                   );
                                 }
-                              })),
+                              },
+                            ),
+                          ),
                           SizedBox(
                             height: 5.h,
                             width: double.infinity,
@@ -142,9 +146,8 @@ class DisclaimerView extends GetView {
                           )
                         ],
                       )
-                    : Visibility(
-                        visible: !hc.isDisclaimerClick.value,
-                        // visible: true,
+                    : SizedBox(
+                        height: 24.h,
                         child: SingleChildScrollView(
                           controller: hc.scrollController,
                           child: Text(
@@ -181,8 +184,8 @@ class DisclaimerView extends GetView {
                             hc.isDisclaimerClick.value = true;
                             hc.isLoading.value = true;
                             // var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
-                            final handle = imgKey.currentContext?.findAncestorWidgetOfExactType<SizedBox>().hashCode;
-                            if (kDebugMode) print('Picture Handle: $handle');
+                            // final handle = imgKey.currentContext?.findAncestorWidgetOfExactType<SizedBox>().hashCode;
+                            // if (kDebugMode) print('Picture Handle: $handle');
                             hc.getMenu(code: 'SLMT', type: 'TITLE');
 
                             // await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: hc.defaultTerminalID.value);
@@ -194,6 +197,11 @@ class DisclaimerView extends GetView {
                             if (response) {
                               hc.disposeCamera();
                               hc.isLoading.value = false;
+                              // STOP THE DISPENSER CASH POLLING
+                              // await hc.cashDispenserCommand(
+                              //     sCommand: APIConstant.cashPoolingStop, iTerminalID: hc.defaultTerminalID.value);
+                              // hc.isLoading.value = false;
+
                               Get.to(() => PrintingView());
                               // PRINTING OF CARDS AND DISPLAY INFO OF ROOMS
                             }

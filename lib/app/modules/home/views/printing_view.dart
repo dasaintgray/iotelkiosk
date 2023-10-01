@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/home_view.dart';
-import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
+// import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
 import 'package:iotelkiosk/globals/widgets/kioskbi_widget.dart';
@@ -14,7 +14,7 @@ class PrintingView extends GetView {
   PrintingView({Key? key}) : super(key: key);
 
   final hc = Get.find<HomeController>();
-  final sc = Get.find<ScreenController>();
+  // final sc = Get.find<ScreenController>();
 
   @override
   Widget build(BuildContext context) {

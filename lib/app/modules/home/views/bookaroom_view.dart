@@ -147,7 +147,7 @@ class BookaroomView extends GetView {
                   right: 10.w,
                   child: SizedBox(
                     width: 10.w,
-                    child: sc.isLoading.value
+                    child: hc.isLoading.value
                         ? Center(
                             child: Column(
                               children: [

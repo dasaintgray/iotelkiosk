@@ -1,11 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/insert_payment_view.dart';
-import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
+// import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/api_constant.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/led_constant.dart';
@@ -20,7 +19,7 @@ class PaymentMethodView extends GetView {
   PaymentMethodView({Key? key}) : super(key: key);
 
   final hc = Get.find<HomeController>();
-  final sc = Get.find<ScreenController>();
+  // final sc = Get.find<ScreenController>();
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +42,14 @@ class PaymentMethodView extends GetView {
                       )),
                   // SPACE
                   SizedBox(
-                    height: 12.h,
+                    height: orientation == Orientation.portrait ? 12.h : 2.h,
                   ),
                   // TITLE
-                  KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
+                  KioskMenuTitle(
+                    titleLength: hc.titleTrans.length,
+                    titleTrans: hc.titleTrans,
+                    orientation: orientation,
+                  ),
                   // SPACE
                   SizedBox(
                     height: 2.h,
@@ -54,7 +57,7 @@ class PaymentMethodView extends GetView {
                   // MENU
                   menuPaymentType(orientation, languageID: hc.selecttedLanguageID.value),
                   Obx(() => Visibility(
-                        visible: !sc.isLoading.value,
+                        visible: !hc.isLoading.value,
                         child: SizedBox(
                           height: orientation == Orientation.portrait ? 10.h : 2.h,
                           child: Row(
@@ -133,7 +136,7 @@ class PaymentMethodView extends GetView {
                               width: 10.w,
                               child: Animate(
                                 // effects: const [FadeEffect(), ScaleEffect()],
-                                child: sc.isLoading.value
+                                child: hc.isLoading.value
                                     ? Center(
                                         child: Column(
                                           mainAxisAlignment: MainAxisAlignment.center,
@@ -184,21 +187,18 @@ class PaymentMethodView extends GetView {
                                           accommodationTYPEID: hc.selectedAccommodationTypeID.value);
 
                                       if (response!) {
-                                        final String ledPort;
-
-                                        ledPort = kDebugMode ? "COM1" : "COM8";
-
                                         hc.openLEDLibserial(
-                                            ledLocationAndStatus: LedOperation.cashDispenserON, portName: ledPort);
+                                            ledLocationAndStatus: LedOperation.cashDispenserON,
+                                            portName: hc.ledPort.value);
                                         // hc.defaultTerminalID.value = hc.terminalsList.first.data.terminals.first.id;
 
                                         var cashresponse = await hc.cashDispenserCommand(
                                             sCommand: APIConstant.cashPoolingStart,
                                             iTerminalID: hc.defaultTerminalID.value);
-                                        if (cashresponse!) {
-                                          hc.openLEDLibserial(
-                                              ledLocationAndStatus: LedOperation.cashDispenserOFF, portName: ledPort);
-                                          hc.isLoading.value = false;
+                                        if (cashresponse != null) {
+                                          // hc.openLEDLibserial(
+                                          //     ledLocationAndStatus: LedOperation.cashDispenserOFF, portName: ledPort);
+                                          // hc.isLoading.value = false;
                                           // CHECK ANG TERMINAL DATA DITO
 
                                           var accessToken = await hc.getAccessToken();

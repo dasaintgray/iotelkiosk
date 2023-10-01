@@ -5,7 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/payment_method_view.dart';
-import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
+// import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/globals/constant/api_constant.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
@@ -19,7 +19,7 @@ class RoomTypeView extends GetView {
   RoomTypeView({Key? key}) : super(key: key);
 
   final hc = Get.find<HomeController>();
-  final sc = Get.find<ScreenController>();
+  // final sc = Get.find<ScreenController>();
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +42,14 @@ class RoomTypeView extends GetView {
                       )),
                   // SPACE
                   SizedBox(
-                    height: 12.h,
+                    height: orientation == Orientation.portrait ? 10.h : 2.h,
                   ),
                   // TITLE
-                  KioskMenuTitle(titleLength: hc.titleTrans.length, titleTrans: hc.titleTrans),
+                  KioskMenuTitle(
+                    titleLength: hc.titleTrans.length,
+                    titleTrans: hc.titleTrans,
+                    orientation: orientation,
+                  ),
                   // SPACE
                   SizedBox(
                     height: 2.h,

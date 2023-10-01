@@ -94,6 +94,24 @@ class GlobalProvider extends BaseController {
     }
   }
 
+  Future<bool> printReceipt(
+      {required String? url,
+      required String? cardCommand,
+      required int? iTerminalID,
+      Map<String, dynamic>? bodyPayload}) async {
+    final sCommand = '?command=${cardCommand!.toUpperCase()}&Terminal=$iTerminalID';
+    final endpoint = '/processcommand$sCommand';
+
+    final printRequest = await HenryBaseClient()
+        .postRequest(url!, endpoint, bodyPayload!, httpHeaders: HenryGlobal.serviceHeaders)
+        .catchError(handleError);
+
+    if (printRequest != null) {
+      return true;
+    }
+    return false;
+  }
+
   Future<CardResponseModel?> readCardInfo(
       {required String? url, required String? cardCommand, required int? terminalID}) async {
     final sCommand = '?command=${cardCommand!.toUpperCase()}&Terminal=$terminalID';
@@ -328,7 +346,7 @@ class GlobalProvider extends BaseController {
   }
 
   // CUT OFF
-  Future fetchCutOffData({required Map<String, String> headers, required bool isActive}) async {
+  Future<CutOffModel?> fetchCutOffData({required Map<String, String> headers, required bool isActive}) async {
     final params = {"isActive": isActive};
 
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: headers);
@@ -336,7 +354,7 @@ class GlobalProvider extends BaseController {
     final cutOffResponse = await hasuraConnect.query(qryCutOffs, variables: params).catchError(handleError);
 
     if (cutOffResponse["data"]["CutOffs"].toString() != "[]") {
-      return cutOffModelFromJson(jsonEncode(cutOffResponse["data"]));
+      return cutOffModelFromJson(jsonEncode(cutOffResponse));
     } else {
       return null;
     }

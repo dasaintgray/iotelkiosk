@@ -56,47 +56,6 @@ class HomeController extends GetxController with BaseController {
   // late Timer timer;
   late final idleTime = 0;
 
-  // BOOLEAN
-  final isLoading = false.obs;
-  final isIdleActive = false.obs;
-  final isMenuLanguageVisible = true.obs;
-  final isMenuTransactionVisible = true.obs;
-  final isConfirmReady = false.obs;
-  final isOverPaymentDetected = false.obs;
-  final clockLiveUpdate = false.obs;
-  final isBottom = false.obs;
-  final isDisclaimerClick = false.obs;
-  final isButtonActive = true.obs;
-  final kioskURL = ''.obs;
-
-  // INT
-  final menuIndex = 0.obs;
-
-  // DOUBLE
-  final nabasangPera = 0.0.obs;
-  final overPayment = 0.0.obs;
-
-  // MONEY DUE
-  final iP20 = 0.obs;
-  final iP50 = 0.obs;
-  final iP100 = 0.obs;
-  final iP200 = 0.obs;
-  final iP500 = 0.obs;
-  final iP1000 = 0.obs;
-  final iTotal = 0.obs;
-
-  // CAMERA GLOBAL VARIABLES
-  final cameraInfo = 'Unkown'.obs;
-  final cameraList = [].obs;
-  final isInitialized = false.obs;
-  final cameraID = 0.obs;
-
-  late Size previewSize;
-
-  // final accessToken = ''.obs;
-  final defaultTerminalID = 0.obs;
-  // final Map<String, String> globalHeaders;
-
   // LIST
   // final denominationList = <DenominationModel>[];
   final terminalDataList = <TerminalDataModel>[].obs;
@@ -133,21 +92,66 @@ class HomeController extends GetxController with BaseController {
   final preSelectedRoomID = 0.obs;
   final totalAmountDue = 0.0.obs;
   final generatedBookingID = 0.obs;
-  final kioskName = ''.obs;
+  final globalFetchID = 0.obs;
+  final paymentChargesID = 0.obs;
+  final defaultCutOffID = 0.obs;
 
   final bookingNumber = ''.obs;
   final contactNumber = ''.obs;
   final invoiceNumber = ''.obs;
-  final globalFetchID = 0.obs;
-  final paymentChargesID = 0.obs;
+  final kioskName = ''.obs;
+  final keyCardNumber = ''.obs;
+  final kioskURL = ''.obs;
 
   final selectedPaymentTypeCode = ''.obs;
   final selectedPaymentTypeID = 0.obs;
   final serviceResponseStatusMessages = ''.obs;
+  final selectedTransactionType = ''.obs;
+
+  // BOOLEAN
+  final isLoading = false.obs;
+  final isIdleActive = false.obs;
+  final isMenuLanguageVisible = true.obs;
+  final isMenuTransactionVisible = true.obs;
+  final isConfirmReady = false.obs;
+  final isOverPaymentDetected = false.obs;
+  final clockLiveUpdate = false.obs;
+  final isBottom = false.obs;
+  final isDisclaimerClick = false.obs;
+  final isButtonActive = true.obs;
+  final isCashDispenserRunning = false.obs;
+  // INT
+  final menuIndex = 0.obs;
+
+  // DOUBLE
+  final nabasangPera = 0.0.obs;
+  final overPayment = 0.0.obs;
+
+  // MONEY DUE
+  final iP20 = 0.obs;
+  final iP50 = 0.obs;
+  final iP100 = 0.obs;
+  final iP200 = 0.obs;
+  final iP500 = 0.obs;
+  final iP1000 = 0.obs;
+  final iTotal = 0.obs;
+
+  // CAMERA GLOBAL VARIABLES
+  final cameraInfo = 'Unkown'.obs;
+  final cameraList = [].obs;
+  final isInitialized = false.obs;
+  final cameraID = 0.obs;
+
+  late Size previewSize;
+
+  // final accessToken = ''.obs;
+  final defaultTerminalID = 0.obs;
+  // final Map<String, String> globalHeaders;
 
   final statusMessage = 'Initializing \nCash Acceptor Device \nplease wait ....'.obs;
 
   final sCity = ''.obs;
+  final ledPort = 'COM1'.obs;
 
   // MAP
   final snapshotData = [];
@@ -209,6 +213,10 @@ class HomeController extends GetxController with BaseController {
     await getDenominationData(terminalID: defaultTerminalID.value);
     await getAvailableRoomsGraphQL(credentialHeaders: accessTOKEN, roomTYPEID: 1, accommodationTYPEID: 1);
     await getCharges(credentialHeaders: accessTOKEN, isActive: true, isDefault: true);
+    await getCutOffs(credentialHeaders: accessTOKEN, isActive: true);
+
+    ledPort.value = kDebugMode ? 'COM1' : 'COM8';
+
     // paymentChargesID.value = (await getChargesV2(credentialHeaders: accessTOKEN, codeValue: 'PYMT', ))!;
 
     // startTimer();
@@ -244,6 +252,7 @@ class HomeController extends GetxController with BaseController {
 
     clockLiveUpdate.value = true;
     nabasangPera.value = 0;
+    // defaultCutOffID.value = getCutOffs(credentialHeaders: accessTOKEN, isActive: true);
   }
 
   @override
@@ -432,6 +441,8 @@ class HomeController extends GetxController with BaseController {
                     isOverPaymentDetected.value = true;
                   }
                   isConfirmReady.value = true;
+                  openLEDLibserial(ledLocationAndStatus: LedOperation.cashDispenserOFF, portName: ledPort.value);
+                  cashDispenserCommand(sCommand: APIConstant.cashPoolingStop, iTerminalID: defaultTerminalID.value);
                 } else {
                   isConfirmReady.value = false;
                 }
@@ -674,6 +685,9 @@ class HomeController extends GetxController with BaseController {
       if (cashResponse?.statuscode == 200) {
         apiResponseList.add(cashResponse!);
         serviceResponseStatusMessages.value = apiResponseList.first.message!;
+
+        sCommand == "CASA" ? isCashDispenserRunning.value = true : isCashDispenserRunning.value = false;
+
         return true;
       } else {
         return false;
@@ -701,8 +715,6 @@ class HomeController extends GetxController with BaseController {
       required String? guestName,
       String? commonDoor,
       String? liftReader}) async {
-    isLoading.value = true;
-
     final bodyPayload = {
       "RoomNo": roomNo,
       "CheckInDateTime": checkInTime,
@@ -719,16 +731,35 @@ class HomeController extends GetxController with BaseController {
     final issueResponse =
         await GlobalProvider().issueRoomCard(cardCommand: command, iTerminalID: iTerminalID, bodyPayload: bodyPayload);
 
-    try {
-      if (issueResponse != null) {
-        issueResponseList.add(issueResponse);
-        return true;
-      } else {
-        return false;
-      }
-    } finally {
-      isLoading.value = false;
+    if (issueResponse != null) {
+      issueResponseList.add(issueResponse);
+      keyCardNumber.value = issueResponseList.first.data.first.cardNumber;
+      return true;
     }
+    return false;
+  }
+
+  Future<bool> receiptPrint(
+      {required String? roomNo, required String? timeConsume, required String checkOuttime}) async {
+    final printingParams = {
+      "RoomDesc": roomNo,
+      "Hrs": timeConsume,
+      "CheckOutInfo": checkOuttime,
+      "bookingdtls": [
+        ["Description 1", 100, 2, 200],
+        ["Description 1", 100, 3, 300]
+      ]
+    };
+
+    final printResponse = await GlobalProvider().printReceipt(
+        url: kioskURL.value,
+        cardCommand: APIConstant.printReceipt,
+        iTerminalID: defaultTerminalID.value,
+        bodyPayload: printingParams);
+    if (printResponse) {
+      return true;
+    }
+    return false;
   }
 
   Future<bool?> getTerminals({required String? ipAddress, required Map<String, String>? accessHeader}) async {
@@ -803,6 +834,10 @@ class HomeController extends GetxController with BaseController {
       String? name = '${screenController.hostname}-${seriesDetailsList.first.data.seriesDetails.first.docNo}';
       DateTime? dtNow = DateTime.now();
 
+      if (cutOffList.isNotEmpty) {
+        defaultCutOffID.value = cutOffList.first.data.cutOffs.first.id;
+      }
+
       statusMessage.value = 'Transaction started...';
 
       int? contactID = await GlobalProvider().addContacts(
@@ -863,30 +898,31 @@ class HomeController extends GetxController with BaseController {
 
         final bookingParams = {
           "isActive": true,
-          // "docNo": seriesDetailsList.first.data.seriesDetails.first.docNo,
+          "isWithBreakFast": false,
+          "isDoNotDesturb": false,
           "docNo": bookingNumber.value,
           "accommodationTypeID": selectedAccommodationTypeID.value,
           "agentID": 1,
           "bookingStatusID": 2,
-          "cutOffID": 1,
+          "cuttOffID": defaultCutOffID.value,
           "roomTypeID": selectedRoomTypeID.value,
-          "actualStartDate": startDateTime,
           "bed": 1,
-          "endDate": endDateTime,
           "numPax": 2,
+          "actualStartDate": startDateTime,
           "startDate": startDateTime,
+          "endDate": endDateTime,
           "roomRate": availRoomList[preSelectedRoomID.value].rate,
           "roomID": int.parse(availRoomList[preSelectedRoomID.value].id),
-          "discountAMT": 0.0,
-          "isWithBreakfast": false,
-          "isDoNotDesturb": false,
+          "discountAmount": 0.0,
           "serviceCharge": availRoomList[preSelectedRoomID.value].serviceCharge,
-          "contactID": contactID
+          "contactID": contactID,
+          "deposit": 0.0
         };
 
         // var jsondata = jsonEncode(bookingParams);
         // print(jsondata);
         // INSERT BOOKING
+        statusMessage.value = 'Posting';
         var bookingResponse = await GlobalProvider()
             .mutateGraphQLData(documents: addBooking, variables: bookingParams, accessHeaders: credentialHeaders);
         final saveResponse = bookingResponse['data']['Bookings']['response'];
@@ -911,6 +947,7 @@ class HomeController extends GetxController with BaseController {
           // PROCESSING PAYMENT;
           // insert all Charges into Booking Charges
           // BOOKING CHARGES
+          statusMessage.value = 'Booking Charges';
           for (var x = 0; x < chargesList.first.data.charges.length; x++) {
             bool isRoomBa = chargesList.first.data.charges[x].code == "Room" ? true : false;
             final bookingChargesParams = {
@@ -940,9 +977,11 @@ class HomeController extends GetxController with BaseController {
               await getCashPositions(credentialHeaders: credentialHeaders, codeValue: kioskName.value);
           final iChargesID = await getChargesV2(credentialHeaders: credentialHeaders, codeValue: 'PYMT');
 
+          statusMessage.value = 'Payments';
+
           // PAYMENTS AREA
           final paymentParams = {
-            "cutOffID": getCutOffs(credentialHeaders: credentialHeaders, isActive: true),
+            "cutOffID": defaultCutOffID.value,
             "balance": 0.0,
             "bookingNo": bookingNumber.value,
             "discount": 0,
@@ -981,12 +1020,9 @@ class HomeController extends GetxController with BaseController {
               documents: addPaymentDetails, variables: paymentDetailsParams, accessHeaders: credentialHeaders);
           // final pdResponse =  paymentDetailResponse['data']['PaymentDetails']['response'];
 
-          final String ledPort;
-          ledPort = kDebugMode ? "COM1" : "COM8";
-
           statusMessage.value = 'Issuing Card....';
 
-          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.cardON);
+          openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.cardON);
           // PRINTING CARD
           // 202309081129
           // DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
@@ -1001,6 +1037,8 @@ class HomeController extends GetxController with BaseController {
             liftReader: "010101",
           );
 
+          statusMessage.value = 'Updating series....';
+
           // update seriesDetails
           await GlobalProvider().updateSeriesDetails(
             accessHeader: credentialHeaders,
@@ -1009,19 +1047,39 @@ class HomeController extends GetxController with BaseController {
             isActive: false,
             tranDate: DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow),
           );
-          // UPDATE BOOKING WITH FINAL INVOICE#
-          // final updateBookingParams = {}
-          // STOP THE DISPENSER CASH POLLING
-          await cashDispenserCommand(sCommand: APIConstant.cashPoolingStop, iTerminalID: defaultTerminalID.value);
 
-          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.cardOFF);
+          // UPDATE BOOKING WITH FINAL INVOICE#
+          final updateBookingParams = {
+            "bookingNumber": generatedBookingID.value,
+            "invoiceNo": invoiceNumber.value,
+            "cardNo": keyCardNumber.value
+          };
+
+          statusMessage.value = 'Finalizing transaction';
+
+          // final payload = jsonEncode(updateBookingParams);
+
+          final updateResponse = await GlobalProvider().mutateGraphQLData(
+              documents: updateBookingTable, variables: updateBookingParams, accessHeaders: credentialHeaders);
+          if (updateResponse["data"]["Bookings"]["response"] == "Success") {
+            openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.cardOFF);
+          }
 
           // DITO ANG PRINTING
-          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.printingON);
+          statusMessage.value = 'Printing receipt';
+          openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.printingON);
 
+          final consumeTime = computeTimeDifference(
+            startDate: dtNow,
+            endDate: endtime,
+          );
+
+          await receiptPrint(
+              roomNo: availRoomList[preSelectedRoomID.value].code, timeConsume: consumeTime, checkOuttime: endDateTime);
+
+          openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.printingOFF);
+          statusMessage.value = 'Closing Transaction';
           setBackToDefaultValue();
-
-          openLEDLibserial(portName: ledPort, ledLocationAndStatus: LedOperation.printingOFF);
 
           return true;
         }
@@ -1307,13 +1365,12 @@ class HomeController extends GetxController with BaseController {
   }
 
   Future<int>? getCutOffs({required Map<String, String> credentialHeaders, required bool isActive}) async {
-    final cutParams = {'isActive': isActive};
+    // final cutParams = {'isActive': isActive};
 
-    final cutResponse =
-        await GlobalProvider().executeGraphQLData(documents: qryCutOffs, headers: accessTOKEN, params: cutParams);
+    final cutResponse = await GlobalProvider().fetchCutOffData(headers: credentialHeaders, isActive: isActive);
     if (cutResponse != null) {
       cutOffList.add(cutResponse);
-      return cutOffList.first.id;
+      return cutOffList.first.data.cutOffs.first.id;
     }
     return 0;
   }
@@ -1374,12 +1431,51 @@ class HomeController extends GetxController with BaseController {
     if (response) {
       readCardTimer?.cancel();
       isLoading.value = false;
-      openLEDLibserial(portName: 'COM1', ledLocationAndStatus: LedOperation.cardOFF);
+      openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.cardOFF);
       return true;
     } else {
       statusMessage.value = 'Unable to read Key Card \nPlease insert Key Card on Card Dispenser';
       return false;
     }
+  }
+
+  // COMPUTE DATE AND TIME DIFFERENCE
+  String? computeTimeDifference({required DateTime? startDate, required DateTime? endDate}) {
+    // Calculate the difference between the two dates
+    Duration? difference = endDate!.difference(startDate!);
+
+    // Calculate the difference in days and hours
+    int daysDifference = difference.inDays;
+    int hoursDifference = (difference.inHours % 24);
+
+    // Build the result string
+    String result = '';
+    if (daysDifference > 0) {
+      result += '$daysDifference day${daysDifference > 1 ? 's' : ''}';
+      if (hoursDifference > 0) {
+        result += ' and ';
+      }
+    }
+    if (hoursDifference > 0) {
+      result += '$hoursDifference hour${hoursDifference > 1 ? 's' : ''}';
+    }
+
+    if (result != '') {
+      return result;
+    } else {
+      return 'Unable to compute time difference';
+    }
+  }
+
+  String translateText({required String sourceText, required String fromLang, required String toLang}) {
+    translator.translate(sourceText, from: fromLang, to: toLang).then((value) {
+      if (value.text.isNotEmpty) {
+        return value.text;
+      } else {
+        return '';
+      }
+    });
+    return '';
   }
 
   // ============ SERIAL COMMUNICATION ===========================

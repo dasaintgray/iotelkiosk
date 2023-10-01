@@ -4,19 +4,50 @@
 
 import 'dart:convert';
 
-List<CutOffModel> cutOffModelFromJson(String str) =>
-    List<CutOffModel>.from(json.decode(str).map((x) => CutOffModel.fromJson(x)));
+CutOffModel cutOffModelFromJson(String str) => CutOffModel.fromJson(json.decode(str));
 
-String cutOffModelToJson(List<CutOffModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String cutOffModelToJson(CutOffModel data) => json.encode(data.toJson());
 
 class CutOffModel {
+  Data data;
+
+  CutOffModel({
+    required this.data,
+  });
+
+  factory CutOffModel.fromJson(Map<String, dynamic> json) => CutOffModel(
+        data: Data.fromJson(json["data"]),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "data": data.toJson(),
+      };
+}
+
+class Data {
+  List<CutOff> cutOffs;
+
+  Data({
+    required this.cutOffs,
+  });
+
+  factory Data.fromJson(Map<String, dynamic> json) => Data(
+        cutOffs: List<CutOff>.from(json["CutOffs"].map((x) => CutOff.fromJson(x))),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "CutOffs": List<dynamic>.from(cutOffs.map((x) => x.toJson())),
+      };
+}
+
+class CutOff {
   int id;
   int locationId;
   bool isActive;
   DateTime startDate;
   DateTime endDate;
 
-  CutOffModel({
+  CutOff({
     required this.id,
     required this.locationId,
     required this.isActive,
@@ -24,7 +55,7 @@ class CutOffModel {
     required this.endDate,
   });
 
-  factory CutOffModel.fromJson(Map<String, dynamic> json) => CutOffModel(
+  factory CutOff.fromJson(Map<String, dynamic> json) => CutOff(
         id: json["Id"],
         locationId: json["LocationId"],
         isActive: json["isActive"],
