@@ -102,6 +102,7 @@ class HomeController extends GetxController with BaseController {
   final kioskName = ''.obs;
   final keyCardNumber = ''.obs;
   final kioskURL = ''.obs;
+  late String languageCODE = '';
 
   final selectedPaymentTypeCode = ''.obs;
   final selectedPaymentTypeID = 0.obs;
@@ -172,6 +173,7 @@ class HomeController extends GetxController with BaseController {
 
   // UI
   late TextEditingController textEditingController = TextEditingController();
+  late TextEditingController bkReferenceNo = TextEditingController();
   // ScreenController screenController = Get.put(ScreenController());
   // final ScreenController screenController = Get.find<ScreenController>();
 
@@ -1177,6 +1179,7 @@ class HomeController extends GetxController with BaseController {
         final langIndex =
             settingsResponse.data.settings.indexWhere((element) => element.code == "EN" || element.value == "English");
         selectedLanguageCode.value = settingsResponse.data.settings[langIndex].code;
+        languageCODE = settingsResponse.data.settings[langIndex].code.toLowerCase().toString();
 
         final idx = settingsResponse.data.settings.indexWhere((element) => element.code == 'PHLOCKURL');
         kioskURL.value = settingsResponse.data.settings[idx].value;

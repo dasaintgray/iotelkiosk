@@ -51,42 +51,35 @@ class InsertPaymentView extends GetView {
                   ),
                   // SPACE
                   SizedBox(
-                    height: 1.h,
+                    height: 2.h,
                   ),
                   // MENU
                   menuInsertPayment(orientation, languageID: hc.selecttedLanguageID.value),
+                  SizedBox(
+                    height: 5.h,
+                  ),
 
                   SizedBox(
-                    height: orientation == Orientation.portrait ? 10.h : 2.h,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () async {
-                            // STOP THE CASH DISPENSER IF RUNNING
-                            // var cashDResponse = await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: 1);
-                            // if (cashDResponse!) {}
-                            await hc.updateTerminalData(
-                                recordID: hc.terminalDataList.first.id,
-                                terminalID: hc.terminalDataList.first.terminalId);
+                    height: orientation == Orientation.portrait ? 5.h : 2.h,
+                    child: GestureDetector(
+                      onTap: () async {
+                        // STOP THE CASH DISPENSER IF RUNNING
+                        // var cashDResponse = await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: 1);
+                        // if (cashDResponse!) {}
+                        await hc.updateTerminalData(
+                            recordID: hc.terminalDataList.first.id, terminalID: hc.terminalDataList.first.terminalId);
 
-                            var response = hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST');
-                            if (hc.isCashDispenserRunning.value) {
-                              await hc.cashDispenserCommand(
-                                  sCommand: APIConstant.cashPoolingStop, iTerminalID: hc.defaultTerminalID.value);
-                            }
-                            if (response) Get.back();
-                          },
-                          child: Image.asset(
-                            'assets/menus/back-arrow.png',
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 50,
-                        ),
-                      ],
+                        var response = hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST');
+                        if (hc.isCashDispenserRunning.value) {
+                          await hc.cashDispenserCommand(
+                              sCommand: APIConstant.cashPoolingStop, iTerminalID: hc.defaultTerminalID.value);
+                        }
+                        if (response) Get.back();
+                      },
+                      child: Image.asset(
+                        'assets/menus/back-arrow.png',
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ],

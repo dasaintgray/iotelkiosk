@@ -59,27 +59,21 @@ class AccommodationView extends GetView {
                   menuAccommodationType(orientation, languageID: hc.selecttedLanguageID.value),
 
                   SizedBox(
-                    height: 3.h,
+                    height: 5.h,
                   ),
                   SizedBox(
                     height: orientation == Orientation.portrait ? 5.h : 2.h,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            hc.getMenu(code: 'SLMT', type: 'TITLE');
-                            // hc.update();
-                            Get.back();
-                          },
-                          child: Image.asset(
-                            'assets/menus/back-arrow.png',
-                            fit: BoxFit.cover,
-                            semanticLabel: 'Back to previous menu',
-                          ),
-                        ),
-                      ],
+                    child: GestureDetector(
+                      onTap: () {
+                        hc.getMenu(code: 'SLMT', type: 'TITLE');
+                        // hc.update();
+                        Get.back();
+                      },
+                      child: Image.asset(
+                        'assets/menus/back-arrow.png',
+                        fit: BoxFit.cover,
+                        semanticLabel: 'Back to previous menu',
+                      ),
                     ),
                   ),
                 ],
@@ -95,7 +89,7 @@ class AccommodationView extends GetView {
     final langCode = hc.languageList.first.data.languages.where((element) => element.id == languageID);
 
     return SizedBox(
-      height: orientation == Orientation.portrait ? 43.h : 20.h,
+      height: orientation == Orientation.portrait ? 45.h : 20.h,
       width: 75.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),

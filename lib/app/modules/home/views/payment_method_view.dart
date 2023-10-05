@@ -56,31 +56,27 @@ class PaymentMethodView extends GetView {
                   ),
                   // MENU
                   menuPaymentType(orientation, languageID: hc.selecttedLanguageID.value),
-                  Obx(() => Visibility(
-                        visible: !hc.isLoading.value,
-                        child: SizedBox(
-                          height: orientation == Orientation.portrait ? 10.h : 2.h,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  var response = hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST');
-                                  if (response) Get.back();
-                                },
-                                child: Image.asset(
-                                  'assets/menus/back-arrow.png',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 50,
-                              ),
-                            ],
+                  SizedBox(
+                    height: 5.h,
+                  ),
+                  Obx(
+                    () => Visibility(
+                      visible: !hc.isLoading.value,
+                      child: SizedBox(
+                        height: orientation == Orientation.portrait ? 5.h : 2.h,
+                        child: GestureDetector(
+                          onTap: () {
+                            var response = hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST');
+                            if (response) Get.back();
+                          },
+                          child: Image.asset(
+                            'assets/menus/back-arrow.png',
+                            fit: BoxFit.cover,
                           ),
                         ),
-                      )),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

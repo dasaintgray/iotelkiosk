@@ -371,6 +371,33 @@ mutation updateDenomination($bente: Int!, $tapwe: Int!, $isangdaan: Int!, $dalaw
 }
 ''';
 
+String searchBookedRooms = r'''
+query searchBooking($bookingReference: String!) {
+  ViewBookings(where: {agentDocNo: $bookingReference}) {
+    Id
+    isWithBreakfast
+    isDoNotDesturb
+    wakeUpTime
+    isActive
+    docNo
+    room
+    startDate
+    endDate
+    RoomType
+    BookingStatusId
+    BookingStatus
+    roomRate
+    AgentDocNo
+    ContactId
+    Contact
+    AgentId
+    description
+    AccommodationType
+    bed
+  }
+}
+''';
+
 // MUTATION AREA (INSERT, UPDATE, DELETE)
 // ----------------------------------------------------------------------------------------------------
 

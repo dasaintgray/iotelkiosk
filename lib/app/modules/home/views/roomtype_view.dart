@@ -57,27 +57,21 @@ class RoomTypeView extends GetView {
                   // MENU
                   menuRoomType(orientation, languageID: hc.selecttedLanguageID.value),
                   SizedBox(
+                    height: 5.h,
+                  ),
+                  SizedBox(
                     height: orientation == Orientation.portrait ? 5.h : 2.h,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            hc.getMenu(code: 'SLMT', type: 'TITLE');
-                            hc.update();
-                            Get.back();
-                          },
-                          child: Image.asset(
-                            'assets/menus/back-arrow.png',
-                            fit: BoxFit.cover,
-                            semanticLabel: 'Back to previous menu',
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 50,
-                        ),
-                      ],
+                    child: GestureDetector(
+                      onTap: () {
+                        hc.getMenu(code: 'SLMT', type: 'TITLE');
+                        hc.update();
+                        Get.back();
+                      },
+                      child: Image.asset(
+                        'assets/menus/back-arrow.png',
+                        fit: BoxFit.cover,
+                        semanticLabel: 'Back to previous menu',
+                      ),
                     ),
                   ),
                 ],

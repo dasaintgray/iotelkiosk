@@ -1,15 +1,14 @@
-// ignore_for_file: depend_on_referenced_packages
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:get/get.dart';
-import 'package:iotelkiosk/app/modules/home/views/checkout_view.dart';
+import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
+import 'package:iotelkiosk/app/modules/home/views/accommodation_view.dart';
+import 'package:iotelkiosk/app/modules/home/views/bookedroom_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/home_view.dart';
-import 'package:iotelkiosk/app/modules/home/views/transaction2_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/underdev_view.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
-import 'package:iotelkiosk/globals/constant/led_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
 import 'package:iotelkiosk/globals/widgets/kioskbi_widget.dart';
@@ -17,17 +16,10 @@ import 'package:iotelkiosk/globals/widgets/kioskheader_widget.dart';
 import 'package:iotelkiosk/globals/widgets/menutitle_widget.dart';
 import 'package:sizer/sizer.dart';
 
-import '../controllers/home_controller.dart';
-
-class TransactionView extends GetView<HomeController> {
-  TransactionView({Key? key}) : super(key: key);
+class Transaction2View extends GetView {
+  Transaction2View({Key? key}) : super(key: key);
 
   final hc = Get.find<HomeController>();
-  // final hc = Get.put(HomeController());
-  // final sc = Get.find<ScreenController>();
-
-  // final DateTime dtLocalTime = DateTime.now();
-  final imgKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +55,7 @@ class TransactionView extends GetView<HomeController> {
                     height: 2.h,
                   ),
                   // MENU
-                  menuTransactionTitle(orientation),
+                  menuTransactionTitle2(orientation),
                   SizedBox(
                     height: 5.h,
                   ),
@@ -91,7 +83,7 @@ class TransactionView extends GetView<HomeController> {
     );
   }
 
-  Widget menuTransactionTitle(Orientation orientation, {int? languageID, String? code, String? type}) {
+  Widget menuTransactionTitle2(Orientation orientation, {int? languageID, String? code, String? type}) {
     return SizedBox(
       height: orientation == Orientation.portrait ? 45.h : 20.h,
       width: orientation == Orientation.portrait ? 70.w : 55.w,
@@ -141,55 +133,30 @@ class TransactionView extends GetView<HomeController> {
                   child: GestureDetector(
                     onTap: () async {
                       switch (index) {
-                        case 0: //CHECK IN
+                        case 0: //BOOKED ROOM
                           {
                             hc.isLoading.value = true;
                             final response =
-                                hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SCIP', type: 'ITEM');
+                                hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'PIBN', type: 'TITLE');
                             if (response) {
-                              hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SCIP', type: 'TITLE');
                               hc.isLoading.value = false;
-                              Get.to(() => Transaction2View());
+                              Get.to(() => BookedroomView());
                             }
-                            // var response = await hc.getAccommodation(
-                            //     credentialHeaders: hc.accessTOKEN, languageCode: hc.selectedLanguageCode.value);
-                            // if (response) {
-                            //   // if (kDebugMode) print('SELECTED ROOM TYPE ID: ${hc.selectedRoomTypeID.value}');
-                            //   // sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
-                            //   hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SCIP', type: 'TITLE');
-                            //   if (kDebugMode) print(hc.selecttedLanguageID.value);
-                            //   hc.update();
-                            //   Get.to(() => Transaction2View());
-                            // }
                           }
                           break;
-                        case 1: //CHECK OUT
+                        case 1: //WALK-IN
                           {
                             hc.isLoading.value = true;
-                            hc.openLEDLibserial(portName: hc.ledPort.value, ledLocationAndStatus: LedOperation.cardON);
-                            hc.statusMessage.value = 'Please Insert Key Card \nto the dispenser';
-                            hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'COP', type: 'TITLE');
-                            hc.startReadCardTimer();
-                            Get.to(
-                              () => CheckoutView(),
-                            );
-                          }
-                          break;
-                        case 2: //book a room
-                          {
-                            Get.defaultDialog(
-                              title: 'Too Follow',
-                              middleText: "Not Yet Implemented",
-                            );
-                            // Get.to(() => BookaroomView());
-                          }
-                          break;
-                        case 3: //Extend
-                          {
-                            Get.defaultDialog(
-                              title: 'Too Follow',
-                              middleText: "Not Yet Implemented",
-                            );
+                            var response = await hc.getAccommodation(
+                                credentialHeaders: hc.accessTOKEN, languageCode: hc.selectedLanguageCode.value);
+                            if (response) {
+                              if (kDebugMode) print('SELECTED ROOM TYPE ID: ${hc.selectedRoomTypeID.value}');
+                              // sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
+                              hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
+                              if (kDebugMode) print(hc.selecttedLanguageID.value);
+                              hc.update();
+                              Get.to(() => AccommodationView());
+                            }
                           }
                           break;
                         default:
