@@ -51,7 +51,8 @@ class DisclaimerView extends GetView {
                 KioskMenuTitle(
                   titleLength: hc.titleTrans.length,
                   titleTrans: hc.titleTrans,
-                  orientation: orientation,
+                  fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp,
+                  heights: orientation == Orientation.portrait ? 7.h : 2.h,
                 ),
                 // SPACE
                 SizedBox(
@@ -75,7 +76,7 @@ class DisclaimerView extends GetView {
   Widget menuDisclaimer(Orientation orientation, BuildContext context) {
     final imgKey = GlobalKey();
     return SizedBox(
-      height: orientation == Orientation.portrait ? 45.h : 20.h,
+      height: orientation == Orientation.portrait ? 40.h : 20.h,
       width: 75.w,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -150,11 +151,14 @@ class DisclaimerView extends GetView {
                         height: 24.h,
                         child: SingleChildScrollView(
                           controller: hc.scrollController,
-                          child: Text(
-                            hc.languageList.first.data.languages.first.disclaimer,
-                            style: TextStyle(
-                              color: HenryColors.puti,
-                              fontSize: 5.sp,
+                          child: Visibility(
+                            visible: !hc.isDisclaimerClick.value,
+                            child: Text(
+                              hc.languageList.first.data.languages.first.disclaimer,
+                              style: TextStyle(
+                                color: HenryColors.puti,
+                                fontSize: 5.sp,
+                              ),
                             ),
                           ),
                         ),
@@ -179,14 +183,14 @@ class DisclaimerView extends GetView {
                   child: ElevatedButton(
                     onPressed: hc.isButtonActive.value
                         ? () async {
+                            hc.isLoading.value = true;
                             hc.isButtonActive.value = false;
                             hc.isBottom.value = false;
                             hc.isDisclaimerClick.value = true;
-                            hc.isLoading.value = true;
                             // var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
                             // final handle = imgKey.currentContext?.findAncestorWidgetOfExactType<SizedBox>().hashCode;
                             // if (kDebugMode) print('Picture Handle: $handle');
-                            hc.getMenu(code: 'SLMT', type: 'TITLE');
+                            // hc.getMenu(code: 'SLMT', type: 'TITLE');
 
                             // await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: hc.defaultTerminalID.value);
                             // hc.statusMessage.value = 'Issuing Command to Cash Dispenser';

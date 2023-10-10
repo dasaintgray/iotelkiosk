@@ -48,7 +48,8 @@ class RoomTypeView extends GetView {
                   KioskMenuTitle(
                     titleLength: hc.titleTrans.length,
                     titleTrans: hc.titleTrans,
-                    orientation: orientation,
+                    fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp,
+                    heights: orientation == Orientation.portrait ? 7.h : 2.h,
                   ),
                   // SPACE
                   SizedBox(
@@ -63,8 +64,7 @@ class RoomTypeView extends GetView {
                     height: orientation == Orientation.portrait ? 5.h : 2.h,
                     child: GestureDetector(
                       onTap: () {
-                        hc.getMenu(code: 'SLMT', type: 'TITLE');
-                        hc.update();
+                        hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SRT', type: 'TITLE');
                         Get.back();
                       },
                       child: Image.asset(
@@ -87,7 +87,7 @@ class RoomTypeView extends GetView {
     final langCode = hc.languageList.first.data.languages.where((element) => element.id == languageID);
     // bool isTranslate = langCode.first.code.toLowerCase() != sc.defaultLanguageCode.value.toLowerCase();
     return SizedBox(
-      height: orientation == Orientation.portrait ? 45.h : 20.h,
+      height: orientation == Orientation.portrait ? 40.h : 20.h,
       width: 75.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),
@@ -146,7 +146,6 @@ class RoomTypeView extends GetView {
                         if (kDebugMode) print('PAYMENT => LANGUAGE ID: ${hc.selecttedLanguageID.value}');
                         await hc.cashDispenserCommand(
                             sCommand: APIConstant.cashPoolingStop, iTerminalID: hc.defaultTerminalID.value);
-
                         hc.isLoading.value = false;
                         Get.to(() => PaymentMethodView());
                       }

@@ -1,4 +1,4 @@
-import 'package:accessibility_tools/accessibility_tools.dart';
+// import 'package:accessibility_tools/accessibility_tools.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_acrylic/flutter_acrylic.dart';
@@ -40,11 +40,13 @@ void main() async {
 
   runApp(
     GetMaterialApp(
-      builder: (context, child) => AccessibilityTools(
-        checkFontOverflows: true,
-        checkSemanticLabels: false,
-        child: child,
-      ),
+      // builder: (context, child) => AccessibilityTools(
+      //   checkFontOverflows: true,
+      //   checkSemanticLabels: false,
+      //   checkMissingInputLabels: false,
+      //   minimumTapAreas: MinimumTapAreas.material,
+      //   child: child,
+      // ),
       title: "iOtel Kiosk Application",
       debugShowCheckedModeBanner: false,
       initialRoute: AppPages.INITIAL,

@@ -53,7 +53,7 @@ class ViewBooking {
   String roomType;
   int bookingStatusId;
   String bookingStatus;
-  int roomRate;
+  double roomRate;
   String agentDocNo;
   int contactId;
   String contact;

@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/accommodation_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/bookedroom_view.dart';
-import 'package:iotelkiosk/app/modules/home/views/home_view.dart';
+import 'package:iotelkiosk/app/modules/home/views/transaction_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/underdev_view.dart';
 import 'package:iotelkiosk/globals/constant/environment_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
@@ -48,7 +48,8 @@ class Transaction2View extends GetView {
                   KioskMenuTitle(
                     titleLength: hc.titleTrans.length,
                     titleTrans: hc.titleTrans,
-                    orientation: orientation,
+                    fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp,
+                    heights: orientation == Orientation.portrait ? 7.h : 2.h,
                   ),
                   // SPACE
                   SizedBox(
@@ -57,15 +58,15 @@ class Transaction2View extends GetView {
                   // MENU
                   menuTransactionTitle2(orientation),
                   SizedBox(
-                    height: 5.h,
+                    height: orientation == Orientation.portrait ? 5.h : 1.h,
                   ),
                   SizedBox(
                     height: orientation == Orientation.portrait ? 5.h : 2.h,
                     child: GestureDetector(
                       onTap: () {
-                        hc.getMenu(code: 'SLMT', type: 'TITLE');
+                        hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST', type: 'TITLE');
                         // Get.back();
-                        Get.off(() => HomeView());
+                        Get.off(() => TransactionView());
                       },
                       child: Image.asset(
                         'assets/menus/back-arrow.png',
@@ -85,7 +86,7 @@ class Transaction2View extends GetView {
 
   Widget menuTransactionTitle2(Orientation orientation, {int? languageID, String? code, String? type}) {
     return SizedBox(
-      height: orientation == Orientation.portrait ? 45.h : 20.h,
+      height: orientation == Orientation.portrait ? 40.h : 20.h,
       width: orientation == Orientation.portrait ? 70.w : 55.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),

@@ -31,7 +31,7 @@ class HomeView extends GetView<HomeController> {
             const KioskBackgroundImage(),
             orientation == Orientation.portrait
                 ? CompanyLogo(top: 15.h, bottom: 65.h, left: 35.w, right: 35.w)
-                : CompanyLogo(top: 5.h, bottom: 45.h, left: 45.w, right: 45.w),
+                : CompanyLogo(top: 5.h, bottom: 46.h, left: 45.w, right: 45.w),
             // KioskHeader(),
             Scaffold(
               body: Column(
@@ -43,13 +43,14 @@ class HomeView extends GetView<HomeController> {
                       )),
                   // SPACE
                   SizedBox(
-                    height: orientation == Orientation.portrait ? 10.h : 2.h,
+                    height: orientation == Orientation.portrait ? 10.h : 1.h,
                   ),
                   // TITLE
                   KioskMenuTitle(
                     titleLength: hc.titleTrans.length,
                     titleTrans: hc.titleTrans,
-                    orientation: orientation,
+                    fontSize: orientation == Orientation.portrait ? 12.sp : 10.sp,
+                    heights: orientation == Orientation.portrait ? 7.h : 2.h,
                   ),
                   // SPACE
                   SizedBox(
@@ -69,75 +70,64 @@ class HomeView extends GetView<HomeController> {
 
   Widget menuLanguage(Orientation orientation) {
     return SizedBox(
-      height: orientation == Orientation.portrait ? 45.h : 20.h,
+      height: orientation == Orientation.portrait ? 40.h : 20.h,
       width: orientation == Orientation.portrait ? 70.w : 55.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),
         itemCount: hc.languageList.first.data.languages.length,
         itemBuilder: (BuildContext context, int index) {
           return SizedBox(
-            height: orientation == Orientation.portrait ? 10.h : 6.h,
-            child: Stack(
-              children: [
-                Positioned(
-                  left: orientation == Orientation.portrait ? 28.w : 20.w,
-                  top: 25,
-                  // right: 10.w,
-                  child: SizedBox(
-                    child: Animate(
-                      child: Center(
-                        child: Text(
-                          hc.languageList.first.data.languages[index].description,
-                          style: TextStyle(
+            height: orientation == Orientation.portrait ? 10.h : 8.h,
+            child: Animate(
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: orientation == Orientation.portrait ? 27.w : 22.w,
+                    top: orientation == Orientation.portrait ? 20 : 30,
+                    child: Center(
+                      child: Text(
+                        hc.languageList.first.data.languages[index].description,
+                        style: TextStyle(
                             color: HenryColors.darkGreen,
-                            fontSize: orientation == Orientation.portrait ? 15.sp : 8.sp,
-                          ),
+                            fontSize: orientation == Orientation.portrait ? 18.sp : 14.sp),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: orientation == Orientation.portrait ? 8.w : 1.w,
+                    right: orientation == Orientation.portrait ? 8.w : 1.w,
+                    child: GestureDetector(
+                      onTap: () {
+                        int lID = hc.languageList.first.data.languages[index].id;
+                        String sCode = 'ST';
+                        hc.selecttedLanguageID.value = hc.languageList.first.data.languages[index].id;
+                        hc.selectedLanguageCode.value = hc.languageList.first.data.languages[index].code;
+
+                        var response = hc.getMenu(languageID: lID, code: sCode, type: 'TITLE');
+                        if (response) {
+                          if (kDebugMode) print('SELECTED LANGUAGE CODE: ${hc.selectedLanguageCode.value}');
+                          hc.update();
+                          Get.to(
+                            () => TransactionView(),
+                          );
+                        }
+                      },
+                      child: SizedBox(
+                        height: orientation == Orientation.portrait ? 7.h : 7.h,
+                        width: orientation == Orientation.portrait ? 10.w : 10.w,
+                        child: Image.asset(
+                          'assets/png/${hc.languageList.first.data.languages[index].flag!}',
+                          fit: BoxFit.fill,
+                          semanticLabel: 'Select Language',
                         )
                             .animate()
-                            .slide(duration: HenryGlobal.animationSpeed)
+                            .fade(duration: HenryGlobal.animationSpeed)
                             .scale(duration: HenryGlobal.animationSpeed),
                       ),
                     ),
                   ),
-                ),
-                Positioned(
-                  left: 8.w,
-                  right: 8.w,
-                  child: GestureDetector(
-                    onTap: () {
-                      int lID = hc.languageList.first.data.languages[index].id;
-                      String sCode = 'ST';
-                      hc.selecttedLanguageID.value = hc.languageList.first.data.languages[index].id;
-                      hc.selectedLanguageCode.value = hc.languageList.first.data.languages[index].code;
-
-                      var response = hc.getMenu(languageID: lID, code: sCode, type: 'TITLE');
-                      if (response) {
-                        if (kDebugMode) {
-                          print('SELECTED LANGUAGE CODE: ${hc.selectedLanguageCode.value}');
-                        }
-                        hc.update();
-                        Get.to(
-                          () => TransactionView(),
-                        );
-                        // debugPrint('CURRENT INDEX ${hc.menuIndex.value}');
-                      }
-                    },
-                    child: SizedBox(
-                      height: orientation == Orientation.portrait ? 7.h : 5.h,
-                      child: hc.languageList.isEmpty
-                          ? null
-                          : Image.asset(
-                              'assets/png/${hc.languageList.first.data.languages[index].flag!}',
-                              fit: BoxFit.fill,
-                              semanticLabel: 'Select Language',
-                            )
-                              .animate()
-                              .fade(duration: HenryGlobal.animationSpeed)
-                              .scale(duration: HenryGlobal.animationSpeed),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -147,7 +137,7 @@ class HomeView extends GetView<HomeController> {
 
   Widget menuLanguage2(Orientation orientation) {
     return SizedBox(
-      height: orientation == Orientation.portrait ? 45.h : 20.h,
+      height: orientation == Orientation.portrait ? 45.h : 10.h,
       width: 75.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25),

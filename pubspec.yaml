@@ -59,7 +59,7 @@ dependencies:
   hex: ^0.2.0
 
   #ACCESSIBILITY
-  accessibility_tools: ^1.0.0
+  # accessibility_tools: ^1.0.0
 
   flutter_libserialport: ^0.3.0
 
@@ -93,5 +93,6 @@ flutter:
     - assets/png/
     - assets/menus/
     - assets/lottie/
+    - assets/logo/
   uses-material-design: true
 

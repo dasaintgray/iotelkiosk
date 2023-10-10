@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hasura_connect/hasura_connect.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/bookinginfo_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/cashpositions_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/charges_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/cutoff_model.dart';
@@ -382,6 +383,19 @@ class GlobalProvider extends BaseController {
 
     if (response["data"]["Charges"].toString() != "[]") {
       return chargesModelFromJson(jsonEncode(response));
+    }
+    return null;
+  }
+
+  Future<BookingInfoModel?> fetchBookingInfo(
+      {required String? bookingNumber, required Map<String, String>? accessHeader}) async {
+    final searchParams = {'bookingReference': bookingNumber};
+
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: accessHeader);
+    final response = await hasuraConnect.query(searchBookedRooms, variables: searchParams).catchError(handleError);
+
+    if (response["data"]["ViewBookings"].toString() != "[]") {
+      return bookingInfoModelFromJson(jsonEncode(response));
     }
     return null;
   }

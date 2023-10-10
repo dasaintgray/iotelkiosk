@@ -50,13 +50,14 @@ class TransactionView extends GetView<HomeController> {
                       )),
                   // SPACE
                   SizedBox(
-                    height: orientation == Orientation.portrait ? 10.h : 2.h,
+                    height: orientation == Orientation.portrait ? 10.h : 1.h,
                   ),
                   // TITLE
                   KioskMenuTitle(
                     titleLength: hc.titleTrans.length,
                     titleTrans: hc.titleTrans,
-                    orientation: orientation,
+                    fontSize: orientation == Orientation.portrait ? 12.sp : 10.sp,
+                    heights: orientation == Orientation.portrait ? 7.h : 2.h,
                   ),
                   // SPACE
                   SizedBox(
@@ -65,13 +66,13 @@ class TransactionView extends GetView<HomeController> {
                   // MENU
                   menuTransactionTitle(orientation),
                   SizedBox(
-                    height: 5.h,
+                    height: orientation == Orientation.portrait ? 5.h : 1.h,
                   ),
                   SizedBox(
                     height: orientation == Orientation.portrait ? 5.h : 2.h,
                     child: GestureDetector(
                       onTap: () {
-                        hc.getMenu(code: 'SLMT', type: 'TITLE');
+                        hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SLMT', type: 'TITLE');
                         // Get.back();
                         Get.off(() => HomeView());
                       },
@@ -93,22 +94,22 @@ class TransactionView extends GetView<HomeController> {
 
   Widget menuTransactionTitle(Orientation orientation, {int? languageID, String? code, String? type}) {
     return SizedBox(
-      height: orientation == Orientation.portrait ? 45.h : 20.h,
+      height: orientation == Orientation.portrait ? 40.h : 20.h,
       width: orientation == Orientation.portrait ? 70.w : 55.w,
       child: ListView.builder(
         padding: const EdgeInsets.all(25.0),
         itemCount: hc.pageTrans.length,
         itemBuilder: (BuildContext context, int index) {
           return SizedBox(
-            height: orientation == Orientation.portrait ? 10.h : 6.h,
+            height: orientation == Orientation.portrait ? 10.h : 8.h,
             child: Stack(
               children: [
                 Positioned(
                   left: orientation == Orientation.portrait ? 25.w : 20.w,
-                  top: 32,
-                  right: 10.w,
+                  top: orientation == Orientation.portrait ? 32 : 40,
+                  // right: 10.w,
                   child: SizedBox(
-                    width: 10.w,
+                    // width: 10.w,
                     child: hc.isLoading.value
                         ? Center(
                             child: Column(
@@ -127,7 +128,7 @@ class TransactionView extends GetView<HomeController> {
                             hc.pageTrans[index].translationText,
                             style: TextStyle(
                               color: HenryColors.darkGreen,
-                              fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp,
+                              fontSize: orientation == Orientation.portrait ? 12.sp : 10.sp,
                             ),
                           )
                             .animate()
@@ -136,8 +137,8 @@ class TransactionView extends GetView<HomeController> {
                   ),
                 ),
                 Positioned(
-                  left: 8.w,
-                  right: 8.w,
+                  left: orientation == Orientation.portrait ? 8.w : 1.w,
+                  right: orientation == Orientation.portrait ? 8.w : 1.w,
                   child: GestureDetector(
                     onTap: () async {
                       switch (index) {
@@ -151,16 +152,6 @@ class TransactionView extends GetView<HomeController> {
                               hc.isLoading.value = false;
                               Get.to(() => Transaction2View());
                             }
-                            // var response = await hc.getAccommodation(
-                            //     credentialHeaders: hc.accessTOKEN, languageCode: hc.selectedLanguageCode.value);
-                            // if (response) {
-                            //   // if (kDebugMode) print('SELECTED ROOM TYPE ID: ${hc.selectedRoomTypeID.value}');
-                            //   // sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;
-                            //   hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SCIP', type: 'TITLE');
-                            //   if (kDebugMode) print(hc.selecttedLanguageID.value);
-                            //   hc.update();
-                            //   Get.to(() => Transaction2View());
-                            // }
                           }
                           break;
                         case 1: //CHECK OUT
@@ -200,7 +191,8 @@ class TransactionView extends GetView<HomeController> {
                       }
                     },
                     child: SizedBox(
-                      height: orientation == Orientation.portrait ? 7.h : 5.h,
+                      height: orientation == Orientation.portrait ? 7.h : 7.h,
+                      width: orientation == Orientation.portrait ? 10.w : 10.w,
                       child: Image.asset(
                         hc.pageTrans[index].images!,
                         fit: BoxFit.contain,

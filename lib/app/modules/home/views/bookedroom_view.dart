@@ -11,6 +11,7 @@ import 'package:iotelkiosk/globals/widgets/kioskheader_widget.dart';
 import 'package:iotelkiosk/globals/widgets/menutitle_widget.dart';
 import 'package:sizer/sizer.dart';
 import 'package:translator/translator.dart';
+import 'package:virtual_keyboard_multi_language/virtual_keyboard_multi_language.dart';
 
 class BookedroomView extends GetView {
   BookedroomView({Key? key}) : super(key: key);
@@ -42,22 +43,23 @@ class BookedroomView extends GetView {
                       )),
                   // SPACE
                   SizedBox(
-                    height: orientation == Orientation.portrait ? 10.h : 2.h,
+                    height: orientation == Orientation.portrait ? 10.h : 0.h,
                   ),
                   // TITLE
                   KioskMenuTitle(
                     titleLength: hc.titleTrans.length,
                     titleTrans: hc.titleTrans,
-                    orientation: orientation,
+                    fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp,
+                    heights: orientation == Orientation.portrait ? 7.h : 2.h,
                   ),
                   // SPACE
                   SizedBox(
-                    height: 2.h,
+                    height: orientation == Orientation.portrait ? 2.h : 1.h,
                   ),
                   // MENU
                   menuBookingInfo(orientation),
                   SizedBox(
-                    height: 5.h,
+                    height: orientation == Orientation.portrait ? 5.h : 1.h,
                   ),
                   SizedBox(
                       height: orientation == Orientation.portrait ? 5.h : 2.h,
@@ -94,89 +96,115 @@ class BookedroomView extends GetView {
           (value) => hintText.value = value.text,
         );
 
-    return SafeArea(
-      child: SizedBox(
-        height: orientation == Orientation.portrait ? 45.h : 20.h,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              flex: 8,
-              child: SizedBox(
-                height: 20.h,
+    return SizedBox(
+      height: orientation == Orientation.portrait ? 40.h : 25.h,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Obx(
+              () => SizedBox(
+                height: orientation == Orientation.portrait ? 20.h : 10.h,
                 child: Padding(
-                  padding: EdgeInsets.only(left: 40.sp, right: 40.sp, top: 40.sp),
-                  child: Obx(
-                    () => TextFormField(
-                      controller: hc.bkReferenceNo,
-                      textAlignVertical: TextAlignVertical.bottom,
-                      maxLength: 20,
-                      style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
-                      autofocus: true,
-                      textAlign: TextAlign.center,
-                      inputFormatters: [FilteringTextInputFormatter(RegExp(r'[a-zA-Z0-9]'), allow: true)],
-                      decoration: InputDecoration(
-                        enabledBorder: const OutlineInputBorder(
-                          // width: 0.0 produces a thin "hairline" border
-                          borderSide: BorderSide(color: HenryColors.puti, width: 1.0),
-                        ),
-                        border: const OutlineInputBorder(),
-                        disabledBorder: InputBorder.none,
-                        focusedBorder: const OutlineInputBorder(
-                          // width: 0.0 produces a thin "hairline" border
-                          borderSide: BorderSide(color: HenryColors.puti, width: 1.0),
-                        ),
-                        hintText: hintText.value,
-                        // labelText: '[ BOOKING REFERENCE NUMBER ]',
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
-                        // helperText: 'Only accept letters from a to z & 0-9',
-                        helperStyle: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
-                        prefixIcon: Icon(
-                          Icons.numbers,
-                          color: HenryColors.puti,
-                          size: 15.sp,
-                        ),
-                        labelStyle: TextStyle(
-                          color: HenryColors.puti,
-                          fontSize: 12.sp,
-                        ),
-                        hintStyle: TextStyle(
-                          color: HenryColors.puti,
-                          fontSize: 12.sp,
-                        ),
+                  padding: EdgeInsets.only(left: 60.w, right: 60.w),
+                  child: TextFormField(
+                    controller: hc.bkReferenceNo,
+                    textAlignVertical: TextAlignVertical.bottom,
+                    maxLength: 20,
+                    style: TextStyle(
+                        color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 12.sp : 10.sp),
+                    autofocus: true,
+                    textAlign: TextAlign.center,
+                    inputFormatters: [FilteringTextInputFormatter(RegExp(r'[fff0-9]'), allow: true)],
+                    decoration: InputDecoration(
+                      enabledBorder: const OutlineInputBorder(
+                        // width: 0.0 produces a thin "hairline" border
+                        borderSide: BorderSide(color: HenryColors.puti, width: 1.0),
+                      ),
+                      border: const OutlineInputBorder(),
+                      disabledBorder: InputBorder.none,
+                      focusedBorder: const OutlineInputBorder(
+                        // width: 0.0 produces a thin "hairline" border
+                        borderSide: BorderSide(color: HenryColors.puti, width: 1.0),
+                      ),
+                      hintText: hintText.value,
+                      // labelText: '[ BOOKING REFERENCE NUMBER ]',
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      // helperText: 'Only accept letters from a to z & 0-9',
+                      helperStyle: TextStyle(
+                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 10.sp : 8.sp),
+                      prefixIcon: Icon(
+                        Icons.numbers,
+                        color: HenryColors.puti,
+                        size: orientation == Orientation.portrait ? 15.sp : 10.sp,
+                      ),
+                      labelStyle: TextStyle(
+                        color: HenryColors.puti,
+                        fontSize: orientation == Orientation.portrait ? 12.sp : 10.sp,
+                      ),
+                      hintStyle: TextStyle(
+                        color: HenryColors.puti,
+                        fontSize: orientation == Orientation.portrait ? 12.sp : 10.sp,
                       ),
                     ),
+                    keyboardType: const TextInputType.numberWithOptions(),
                   ),
                 ),
               ),
             ),
-            Expanded(
-              flex: 1,
-              child: SizedBox(
-                height: 5.h,
-                child: ElevatedButton(
-                  onPressed: () async {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: HenryColors.darkGreen,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    shadowColor: Colors.black26.withOpacity(0.5),
+          ),
+          Expanded(
+            flex: 5,
+            child: SizedBox(
+              width: orientation == Orientation.portrait ? 20.w : 40.w,
+              child: VirtualKeyboard(
+                textController: hc.bkReferenceNo,
+                textColor: HenryColors.puti,
+                fontSize: 15.sp,
+                type: VirtualKeyboardType.Numeric,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: SizedBox(
+              height: orientation == Orientation.portrait ? 5.h : 10.h,
+              child: ElevatedButton(
+                onPressed: () async {
+                  hc.isLoading.value = true;
+                  final response =
+                      await hc.searchBK(bookingNumber: hc.bkReferenceNo.text, credentialHeaders: hc.accessTOKEN);
+                  if (response) {
+                    hc.isGuestFound.value = true;
+                    // display the info
+                    hc.isLoading.value = false;
+                  } else {
+                    hc.isGuestFound.value = false;
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: HenryColors.darkGreen,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
-                  // AGREE BUTTON
-                  child: Obx(
-                    () => Text(
-                      buttonText.value,
-                      style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
-                    ),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: orientation == Orientation.portrait ? 40 : 20,
+                      vertical: orientation == Orientation.portrait ? 15 : 10),
+                  shadowColor: Colors.black26.withOpacity(0.5),
+                ),
+                // SEARCH
+                child: Obx(
+                  () => Text(
+                    buttonText.value,
+                    style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

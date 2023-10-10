@@ -3,7 +3,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ffi' as ffi;
 
+import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +17,7 @@ import 'package:hex/hex.dart';
 import 'package:intl/intl.dart';
 import 'package:iotelkiosk/app/data/models_graphql/accomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/availablerooms_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/bookinginfo_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/cashpositions_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/charges_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/cutoff_model.dart';
@@ -77,6 +80,7 @@ class HomeController extends GetxController with BaseController {
   final cutOffList = <CutOffModel>[];
   final cashpositionList = <CashPositionModel>[];
   final readCardInfoList = <CardResponseModel>[];
+  final guestInfoList = <BookingInfoModel>[];
 
   final transactionList = <TransactionModel>[].obs;
   final pageTrans = <Conversion>[].obs;
@@ -99,6 +103,7 @@ class HomeController extends GetxController with BaseController {
   final bookingNumber = ''.obs;
   final contactNumber = ''.obs;
   final invoiceNumber = ''.obs;
+  final roomNumber = ''.obs;
   final kioskName = ''.obs;
   final keyCardNumber = ''.obs;
   final kioskURL = ''.obs;
@@ -121,12 +126,15 @@ class HomeController extends GetxController with BaseController {
   final isDisclaimerClick = false.obs;
   final isButtonActive = true.obs;
   final isCashDispenserRunning = false.obs;
+  final isGuestFound = false.obs;
   // INT
   final menuIndex = 0.obs;
 
   // DOUBLE
   final nabasangPera = 0.0.obs;
   final overPayment = 0.0.obs;
+  final cardDeposit = 0.0.obs;
+  final roomRate = 0.0.obs;
 
   // MONEY DUE
   final iP20 = 0.obs;
@@ -146,7 +154,7 @@ class HomeController extends GetxController with BaseController {
   late Size previewSize;
 
   // final accessToken = ''.obs;
-  final defaultTerminalID = 0.obs;
+  final defaultTerminalID = 1.obs;
   // final Map<String, String> globalHeaders;
 
   final statusMessage = 'Initializing \nCash Acceptor Device \nplease wait ....'.obs;
@@ -213,9 +221,9 @@ class HomeController extends GetxController with BaseController {
     await getTransaction(credentialHeaders: accessTOKEN);
     await getLanguages(credentialHeaders: accessTOKEN);
     await getDenominationData(terminalID: defaultTerminalID.value);
-    await getAvailableRoomsGraphQL(credentialHeaders: accessTOKEN, roomTYPEID: 1, accommodationTYPEID: 1);
     await getCharges(credentialHeaders: accessTOKEN, isActive: true, isDefault: true);
     await getCutOffs(credentialHeaders: accessTOKEN, isActive: true);
+    await getAvailableRoomsGraphQL(credentialHeaders: accessTOKEN, roomTYPEID: 1, accommodationTYPEID: 1);
 
     ledPort.value = kDebugMode ? 'COM1' : 'COM8';
 
@@ -898,6 +906,8 @@ class HomeController extends GetxController with BaseController {
         bookingNumber.value =
             (await getSeriesDetails(credentialHeaders: accessTOKEN, moduleID: int.parse(moduleResponse.first.value)))!;
 
+        roomRate.value = availRoomList[preSelectedRoomID.value].rate;
+
         final bookingParams = {
           "isActive": true,
           "isWithBreakFast": false,
@@ -922,7 +932,7 @@ class HomeController extends GetxController with BaseController {
         };
 
         // var jsondata = jsonEncode(bookingParams);
-        // print(jsondata);
+        // if (kDebugMode) print(jsondata);
         // INSERT BOOKING
         statusMessage.value = 'Posting';
         var bookingResponse = await GlobalProvider()
@@ -950,6 +960,7 @@ class HomeController extends GetxController with BaseController {
           // insert all Charges into Booking Charges
           // BOOKING CHARGES
           statusMessage.value = 'Booking Charges';
+
           for (var x = 0; x < chargesList.first.data.charges.length; x++) {
             bool isRoomBa = chargesList.first.data.charges[x].code == "Room" ? true : false;
             final bookingChargesParams = {
@@ -964,6 +975,7 @@ class HomeController extends GetxController with BaseController {
             await GlobalProvider().mutateGraphQLData(
                 documents: addBookingCharges, variables: bookingChargesParams, accessHeaders: credentialHeaders);
           }
+
           statusMessage.value = 'Posting client transaction';
 
           var moduleResponse =
@@ -1028,10 +1040,11 @@ class HomeController extends GetxController with BaseController {
           // PRINTING CARD
           // 202309081129
           // DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
-          await issueCard(
+          roomNumber.value = availRoomList[preSelectedRoomID.value].code;
+          final issueCardResponse = await issueCard(
             command: APIConstant.issueCard,
             iTerminalID: defaultTerminalID.value,
-            roomNo: availRoomList[preSelectedRoomID.value].code,
+            roomNo: roomNumber.value,
             checkInTime: DateFormat('yyyyMMddHHmm').format(dtNow),
             checkOuttime: DateFormat('yyyyMMddHHmm').format(endtime),
             guestName: name,
@@ -1039,51 +1052,87 @@ class HomeController extends GetxController with BaseController {
             liftReader: "010101",
           );
 
-          statusMessage.value = 'Updating series....';
+          if (issueCardResponse) {
+            statusMessage.value = 'Updating series....';
 
-          // update seriesDetails
-          await GlobalProvider().updateSeriesDetails(
-            accessHeader: credentialHeaders,
-            idNo: globalFetchID.value,
-            docNo: invoiceNumber.value,
-            isActive: false,
-            tranDate: DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow),
-          );
+            // update seriesDetails
+            await GlobalProvider().updateSeriesDetails(
+              accessHeader: credentialHeaders,
+              idNo: globalFetchID.value,
+              docNo: invoiceNumber.value,
+              isActive: false,
+              tranDate: DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow),
+            );
 
-          // UPDATE BOOKING WITH FINAL INVOICE#
-          final updateBookingParams = {
-            "bookingNumber": generatedBookingID.value,
-            "invoiceNo": invoiceNumber.value,
-            "cardNo": keyCardNumber.value
-          };
+            // UPDATE BOOKING WITH FINAL INVOICE#
+            final updateBookingParams = {
+              "bookingNumber": generatedBookingID.value,
+              "invoiceNo": invoiceNumber.value,
+              "cardNo": keyCardNumber.value
+            };
 
-          statusMessage.value = 'Finalizing transaction';
+            statusMessage.value = 'Finalizing transaction';
 
-          // final payload = jsonEncode(updateBookingParams);
+            // final payload = jsonEncode(updateBookingParams);
 
-          final updateResponse = await GlobalProvider().mutateGraphQLData(
-              documents: updateBookingTable, variables: updateBookingParams, accessHeaders: credentialHeaders);
-          if (updateResponse["data"]["Bookings"]["response"] == "Success") {
-            openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.cardOFF);
+            final updateResponse = await GlobalProvider().mutateGraphQLData(
+                documents: updateBookingTable, variables: updateBookingParams, accessHeaders: credentialHeaders);
+            if (updateResponse["data"]["Bookings"]["response"] == "Success") {
+              openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.cardOFF);
+            }
+
+            // DITO ANG PRINTING
+            statusMessage.value = 'Printing receipt';
+            openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.printingON);
+
+            final consumeTime = computeTimeDifference(
+              startDate: dtNow,
+              endDate: endtime,
+            );
+
+            statusMessage.value = 'Printing receipt';
+
+            final addressResponse = settingsList.first.data.settings.where((element) => element.code == 'R2');
+            final owner = settingsList.first.data.settings.where((element) => element.code == 'R1');
+            final telephone = settingsList.first.data.settings.where((element) => element.code == 'R3');
+            final email = settingsList.first.data.settings.where((element) => element.code == 'R4');
+            final vatPercentage = settingsList.first.data.settings.where((element) => element.code == 'VAT');
+            final currency = settingsList.first.data.settings.where((element) => element.code == 'CURRENCY');
+
+            // COMPUTE THE VAT
+
+            final vatText = vatPercentage.first.value;
+            final vat = '1.$vatText';
+            final vatTable = (roomRate.value / double.parse(vat));
+            final vatTax = (roomRate.value - vatTable);
+
+            printReceipt(
+                address: addressResponse.first.value,
+                owner: owner.first.value,
+                telephone: telephone.first.value,
+                email: email.first.value,
+                vatTin: '000000000',
+                bookingID: generatedBookingID.value,
+                terminalID: defaultTerminalID.value,
+                qty: 1,
+                roomRate: roomRate.value,
+                deposit: 100,
+                totalAmount: totalAmountDue.value,
+                totalAmountPaid: totalAmountDue.value,
+                paymentMethod: selectedPaymentTypeCode.value,
+                currencyString: currency.first.value,
+                vatTable: vatTable,
+                vatTax: vatTax,
+                roomNumber: roomNumber.value,
+                timeConsume: consumeTime,
+                endTime: endtime,
+                isOR: false);
+
+            openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.printingOFF);
+            statusMessage.value = 'Closing Transaction';
+            setBackToDefaultValue();
+            return true;
           }
-
-          // DITO ANG PRINTING
-          statusMessage.value = 'Printing receipt';
-          openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.printingON);
-
-          final consumeTime = computeTimeDifference(
-            startDate: dtNow,
-            endDate: endtime,
-          );
-
-          await receiptPrint(
-              roomNo: availRoomList[preSelectedRoomID.value].code, timeConsume: consumeTime, checkOuttime: endDateTime);
-
-          openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.printingOFF);
-          statusMessage.value = 'Closing Transaction';
-          setBackToDefaultValue();
-
-          return true;
         }
       } else {
         return false;
@@ -1099,7 +1148,7 @@ class HomeController extends GetxController with BaseController {
   }
 
   Future<String?> getSeriesDetails({required Map<String, String> credentialHeaders, required int moduleID}) async {
-    isLoading.value = true;
+    // isLoading.value = true;
     seriesDetailsList.clear();
 
     final Map<String, dynamic> params = {"moduleID": moduleID};
@@ -1110,12 +1159,12 @@ class HomeController extends GetxController with BaseController {
       if (response != null) {
         seriesDetailsList.add(response);
         if (kDebugMode) print(response.data.seriesDetails.first.docNo);
-        isLoading.value = false;
+        // isLoading.value = false;
         globalFetchID.value = response.data.seriesDetails.first.id;
         return response.data.seriesDetails.first.docNo;
       }
     } finally {
-      isLoading.value = false;
+      // isLoading.value = false;
     }
     return null;
   }
@@ -1315,8 +1364,14 @@ class HomeController extends GetxController with BaseController {
         preSelectedRoomID.value = pickRoom();
 
         if (preSelectedRoomID.value != 0) {
-          totalAmountDue.value =
-              availRoomList[preSelectedRoomID.value].rate + availRoomList[preSelectedRoomID.value].serviceCharge;
+          // GET THE DEPOSIT AMOUNT FROM CHARGES TABLE
+          if (chargesList.first.data.charges.isNotEmpty) {
+            final cardDepositResponse = chargesList.first.data.charges.where((element) => element.code == "Deposit");
+            cardDeposit.value = cardDepositResponse.first.rate;
+            totalAmountDue.value = availRoomList[preSelectedRoomID.value].rate + cardDeposit.value;
+          }
+          // totalAmountDue.value =
+          //     availRoomList[preSelectedRoomID.value].rate + availRoomList[preSelectedRoomID.value].serviceCharge;
         }
 
         if (kDebugMode) {
@@ -1404,6 +1459,17 @@ class HomeController extends GetxController with BaseController {
     return 0;
   }
 
+  // BOOKED ROOMS
+  Future<bool> searchBK({required String? bookingNumber, required Map<String, String> credentialHeaders}) async {
+    final searchResponse =
+        await GlobalProvider().fetchBookingInfo(bookingNumber: bookingNumber, accessHeader: credentialHeaders);
+    if (searchResponse != null) {
+      guestInfoList.add(searchResponse);
+      return true;
+    }
+    return false;
+  }
+
   void setBackToDefaultValue() {
     statusMessage.value = 'Initializing \nCash Acceptor Device \nplease wait ....';
     isButtonActive.value = true;
@@ -1414,8 +1480,10 @@ class HomeController extends GetxController with BaseController {
     paymentChargesID.value = 0;
     nabasangPera.value = 0.0;
     totalAmountDue.value = 0.0;
+    roomRate.value = 0.0;
     isConfirmReady.value = false;
     isDisclaimerClick.value = false;
+    isGuestFound.value = false;
   }
 
   void startReadCardTimer() {
@@ -1552,5 +1620,219 @@ class HomeController extends GetxController with BaseController {
       //   port.close();
       // }
     }
+  }
+
+  bool printReceipt({
+    required String? address,
+    required String? owner,
+    required String? telephone,
+    required String? email,
+    required String? vatTin,
+    required int? bookingID,
+    required int? terminalID,
+    required int? qty,
+    required double? roomRate,
+    required double? deposit,
+    required double? totalAmount,
+    required double? totalAmountPaid,
+    required String? paymentMethod,
+    required String? currencyString,
+    required double? vatTable,
+    required double? vatTax,
+    required String? roomNumber,
+    required String? timeConsume,
+    required DateTime? endTime,
+    required bool? isOR,
+  }) {
+    final libPath = Platform.script.resolve("/library/dll/Msprintsdkx64.dll").path;
+    final logoPath = Platform.script.resolve("assets/logo/iotel.bmp").path;
+    final dylib = ffi.DynamicLibrary.open(libPath.substring(1, libPath.length));
+
+    DateTime dtNow = DateTime.now();
+    final ngayongAraw = DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
+    final checkout = DateFormat("dd, MMM yyyy HH:mm aaa").format(endTime!);
+
+    if (!dylib.handle.address.isNaN) {
+      final openPrinter = dylib.lookupFunction<ffi.Int32 Function(), int Function()>('SetUsbportauto');
+      final openResult = openPrinter();
+      if (openResult == 0) {
+        // final telephonePath = Platform.script.resolve("telephone.bmp").path;
+        // final emailPath = Platform.script.resolve("email.bmp").path;
+        // OPEN ALL THE FUNCTIONS IF THE USB IS OPEN
+        final setInit = dylib.lookupFunction<ffi.Int32 Function(), int Function()>('SetInit');
+        final setCommandmode = dylib.lookupFunction<ffi.Int32 Function(ffi.Int32), int Function(int)>('SetCommandmode');
+        final setAlignment = dylib.lookupFunction<ffi.Int32 Function(ffi.Int32), int Function(int)>('SetAlignment');
+        final printFeedline = dylib.lookupFunction<ffi.Int32 Function(ffi.Int32), int Function(int)>('PrintFeedline');
+        final printDiskbmpfile = dylib
+            .lookupFunction<ffi.Int32 Function(ffi.Pointer<Utf8>), int Function(ffi.Pointer<Utf8>)>('PrintDiskbmpfile');
+        final setClean = dylib.lookupFunction<ffi.Int32 Function(), int Function()>('SetClean');
+        final setSizetext =
+            dylib.lookupFunction<ffi.Int32 Function(ffi.Int32, ffi.Int32), int Function(int, int)>('SetSizetext');
+        final printString = dylib.lookupFunction<ffi.Int32 Function(ffi.Pointer<Utf8>, ffi.Int32),
+            int Function(ffi.Pointer<Utf8>, int)>('PrintString');
+        final setAlignmentLeftRight =
+            dylib.lookupFunction<ffi.Int32 Function(ffi.Int32), int Function(int)>('SetAlignmentLeftRight');
+        final printFeedDot = dylib.lookupFunction<ffi.Int32 Function(ffi.Int32), int Function(int)>('PrintFeedDot');
+        final printCutpaper = dylib.lookupFunction<ffi.Int32 Function(ffi.Int32), int Function(int)>('PrintCutpaper');
+        final setClose = dylib.lookupFunction<ffi.Int32 Function(), int Function()>("SetClose");
+        final setBold = dylib.lookupFunction<ffi.Int32 Function(ffi.Int32), int Function(int)>("SetBold");
+        // final setSizechar = dylib.lookupFunction<ffi.Int32 Function(ffi.Int32, ffi.Int32, ffi.Int32, ffi.Int32),
+        //     int Function(int, int, int, int)>("SetSizechar");
+        // final printQrcode = dylib.lookupFunction<ffi.Int32 Function(ffi.Pointer<Utf8>, ffi.Int32, ffi.Int32, ffi.Int32),
+        //     int Function(ffi.Pointer<Utf8>, int, int, int)>("PrintQrcode");
+
+        // begin to use the function
+        final initResponse = setInit();
+        if (initResponse == 0) {
+          setCommandmode(3);
+          setAlignment(1);
+          // printFeedline(1);
+          printDiskbmpfile(logoPath.substring(1, logoPath.length).toNativeUtf8());
+          //
+          // printDiskbmpfile(emailPath.substring(1, emailPath.length).toNativeUtf8());
+          setClean();
+          printFeedline(1);
+          setAlignment(1);
+          setSizetext(1, 1);
+          // setSizechar(1, 1, 1, 1);
+          printString(address.toString().toNativeUtf8(), 0);
+          printString('Owned & Operated by:'.toNativeUtf8(), 0);
+          setBold(1);
+          printString(owner.toString().toNativeUtf8(), 0);
+          setBold(0);
+          printFeedline(1);
+          printString('VAT REG TIN: $vatTin'.toNativeUtf8(), 0);
+          // printDiskbmpfile(telephonePath.substring(1, telephonePath.length).toNativeUtf8());
+          printString(telephone.toString().toNativeUtf8(), 0);
+          // printDiskbmpfile(emailPath.substring(1, emailPath.length).toNativeUtf8());
+          printString('$email'.toNativeUtf8(), 0);
+          printString(ngayongAraw.toNativeUtf8(), 0);
+          printFeedline(1);
+          setAlignment(0);
+          setClean();
+          setAlignmentLeftRight(0);
+          printString('RCPT#: $bookingID'.toNativeUtf8(), 1);
+          setAlignmentLeftRight(2);
+          printString('TERMINAL# $terminalID'.toNativeUtf8(), 0);
+          setClean();
+          setAlignmentLeftRight(0);
+          printString('BRANCH#: 1'.toNativeUtf8(), 1);
+          setAlignmentLeftRight(2);
+          printString('SERIAL# '.toNativeUtf8(), 0);
+          setClean();
+          setAlignment(0);
+          printString('MIN #: '.toNativeUtf8(), 0);
+          printFeedline(1);
+
+          // DITO YUNG MGA CHARGES
+          // setClean();
+          setAlignment(1);
+          setBold(1);
+          printString('[ Acknowledgement Receipt ]'.toNativeUtf8(), 0);
+          setBold(0);
+          printFeedline(1);
+          setClean();
+          setAlignment(0);
+          // setClean();
+          printString('ROOM'.toNativeUtf8(), 0);
+          // setClean();
+          setAlignmentLeftRight(0);
+          printString('  x$qty'.toNativeUtf8(), 1);
+          setAlignmentLeftRight(2);
+          printString('$currencyString $roomRate'.toNativeUtf8(), 0);
+          setClean();
+          setAlignmentLeftRight(0);
+          printString('KEY CARD DEPOSIT'.toNativeUtf8(), 1);
+          setAlignmentLeftRight(2);
+          printString('$currencyString $deposit'.toNativeUtf8(), 0);
+          setClean();
+
+          printString('------------------------------------------------'.toNativeUtf8(), 0);
+          setClean();
+          setAlignmentLeftRight(0);
+          printString('TOTAL'.toNativeUtf8(), 1);
+          setAlignmentLeftRight(2);
+          printString('$currencyString $totalAmount'.toNativeUtf8(), 0);
+          setClean();
+          setAlignmentLeftRight(0);
+          printString('$paymentMethod'.toNativeUtf8(), 1);
+          setAlignmentLeftRight(2);
+          printString('$currencyString $totalAmountPaid'.toNativeUtf8(), 0);
+          setClean();
+          setAlignmentLeftRight(0);
+          printString('CHANGE'.toNativeUtf8(), 1);
+          setAlignmentLeftRight(2);
+          printString('$currencyString 0.00'.toNativeUtf8(), 0);
+          printFeedline(1);
+          setAlignmentLeftRight(0);
+          printString('VATable '.toNativeUtf8(), 1);
+          setAlignmentLeftRight(2);
+          printString('$currencyString ${vatTable!.toStringAsFixed(2)}'.toNativeUtf8(), 0);
+          setClean();
+          setAlignmentLeftRight(0);
+          printString('VAT_Tax'.toNativeUtf8(), 1);
+          setAlignmentLeftRight(2);
+          printString('$currencyString ${vatTax!.toStringAsFixed(2)}'.toNativeUtf8(), 0);
+          setClean();
+          setAlignmentLeftRight(0);
+          printString('ZERO_Rated'.toNativeUtf8(), 1);
+          setAlignmentLeftRight(2);
+          printString('$currencyString 0.00'.toNativeUtf8(), 0);
+          setClean();
+          setAlignmentLeftRight(0);
+          printString('VAT Exempted'.toNativeUtf8(), 1);
+          setAlignmentLeftRight(2);
+          printString('$currencyString 0.00'.toNativeUtf8(), 0);
+          setClean();
+
+          // ignore: dead_code
+          if (isOR!) {
+            printString('SOLD TO-----------------------------------------'.toNativeUtf8(), 0);
+            printString('NAME--------------------------------------------'.toNativeUtf8(), 0);
+            printString('ADDRESS-----------------------------------------'.toNativeUtf8(), 0);
+            printString('TIN#--------------------------------------------'.toNativeUtf8(), 0);
+            printString('BUSINESS STYLE ---------------------------------'.toNativeUtf8(), 0);
+          }
+
+          // setUnderline(1);
+          printFeedline(1);
+          setAlignment(1);
+          setSizetext(2, 2);
+          printString('WELCOME GUEST'.toNativeUtf8(), 0);
+          printFeedline(1);
+          setSizetext(1, 1);
+          printString('YOUR ASSIGNED ROOM NUMBER'.toNativeUtf8(), 0);
+          setSizetext(3, 4);
+          printString('$roomNumber'.toNativeUtf8(), 0);
+          printFeedline(1);
+          setSizetext(1, 1);
+          printString("YOU'RE STAYING WITH US FOR".toNativeUtf8(), 0);
+          setSizetext(2, 2);
+          printString("$timeConsume".toNativeUtf8(), 0);
+          printFeedline(2);
+          setSizetext(1, 1);
+          printString("YOU'RE CHECK-OUT TIME IS:".toNativeUtf8(), 0);
+          setSizetext(2, 2);
+          printString(checkout.toNativeUtf8(), 0);
+          printFeedline(2);
+          setSizetext(1, 1);
+          printString('Please dial 0 if you need assistance'.toNativeUtf8(), 0);
+          printString('Enjoy you stay'.toNativeUtf8(), 0);
+          printFeedline(2);
+          printString('THIS OFFICIAL RECEIPT SHALL BE VALID'.toNativeUtf8(), 0);
+          printString('FOR FIVE(5) YEARS FROM THE DATE OF ATP'.toNativeUtf8(), 0);
+          printFeedline(1);
+          // printQrcode('WWW.CIRCUITMINDZ.COM'.toNativeUtf8(), 2, 8, 0);
+          printString('www.circuitmindz.com'.toNativeUtf8(), 0);
+
+          printFeedDot(100);
+          printCutpaper(0);
+          setClean();
+          setClose();
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

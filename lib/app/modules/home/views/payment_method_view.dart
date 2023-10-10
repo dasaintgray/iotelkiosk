@@ -42,13 +42,14 @@ class PaymentMethodView extends GetView {
                       )),
                   // SPACE
                   SizedBox(
-                    height: orientation == Orientation.portrait ? 12.h : 2.h,
+                    height: orientation == Orientation.portrait ? 10.h : 2.h,
                   ),
                   // TITLE
                   KioskMenuTitle(
                     titleLength: hc.titleTrans.length,
                     titleTrans: hc.titleTrans,
-                    orientation: orientation,
+                    fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp,
+                    heights: orientation == Orientation.portrait ? 7.h : 2.h,
                   ),
                   // SPACE
                   SizedBox(
@@ -66,7 +67,8 @@ class PaymentMethodView extends GetView {
                         height: orientation == Orientation.portrait ? 5.h : 2.h,
                         child: GestureDetector(
                           onTap: () {
-                            var response = hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST');
+                            var response =
+                                hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SPM', type: 'TITLE');
                             if (response) Get.back();
                           },
                           child: Image.asset(
@@ -89,7 +91,7 @@ class PaymentMethodView extends GetView {
   Widget menuPaymentType(Orientation orientation, {int? languageID, String? code, String? type}) {
     final langCode = hc.languageList.first.data.languages.where((element) => element.id == languageID);
     return Obx(() => SizedBox(
-          height: orientation == Orientation.portrait ? 45.h : 20.h,
+          height: orientation == Orientation.portrait ? 40.h : 20.h,
           width: 75.w,
           child: hc.isLoading.value
               ? Center(

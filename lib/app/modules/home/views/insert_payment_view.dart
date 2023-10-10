@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/disclaimer_view.dart';
 // import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
-import 'package:iotelkiosk/globals/constant/api_constant.dart';
 import 'package:iotelkiosk/globals/constant/settings_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
@@ -47,7 +46,8 @@ class InsertPaymentView extends GetView {
                   KioskMenuTitle(
                     titleLength: hc.titleTrans.length,
                     titleTrans: hc.titleTrans,
-                    orientation: orientation,
+                    fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp,
+                    heights: orientation == Orientation.portrait ? 7.h : 2.h,
                   ),
                   // SPACE
                   SizedBox(
@@ -59,29 +59,29 @@ class InsertPaymentView extends GetView {
                     height: 5.h,
                   ),
 
-                  SizedBox(
-                    height: orientation == Orientation.portrait ? 5.h : 2.h,
-                    child: GestureDetector(
-                      onTap: () async {
-                        // STOP THE CASH DISPENSER IF RUNNING
-                        // var cashDResponse = await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: 1);
-                        // if (cashDResponse!) {}
-                        await hc.updateTerminalData(
-                            recordID: hc.terminalDataList.first.id, terminalID: hc.terminalDataList.first.terminalId);
+                  // SizedBox(
+                  //   height: orientation == Orientation.portrait ? 5.h : 2.h,
+                  //   child: GestureDetector(
+                  //     onTap: () async {
+                  //       // STOP THE CASH DISPENSER IF RUNNING
+                  //       // var cashDResponse = await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: 1);
+                  //       // if (cashDResponse!) {}
+                  //       await hc.updateTerminalData(
+                  //           recordID: hc.terminalDataList.first.id, terminalID: hc.terminalDataList.first.terminalId);
 
-                        var response = hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'ST');
-                        if (hc.isCashDispenserRunning.value) {
-                          await hc.cashDispenserCommand(
-                              sCommand: APIConstant.cashPoolingStop, iTerminalID: hc.defaultTerminalID.value);
-                        }
-                        if (response) Get.back();
-                      },
-                      child: Image.asset(
-                        'assets/menus/back-arrow.png',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
+                  //       if (hc.isCashDispenserRunning.value) {
+                  //         await hc.cashDispenserCommand(
+                  //             sCommand: APIConstant.cashPoolingStop, iTerminalID: hc.defaultTerminalID.value);
+                  //       }
+                  //       var response = hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'IP', type: 'TITLE');
+                  //       if (response) Get.back();
+                  //     },
+                  //     child: Image.asset(
+                  //       'assets/menus/back-arrow.png',
+                  //       fit: BoxFit.cover,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -117,7 +117,7 @@ class InsertPaymentView extends GetView {
     }
 
     return SizedBox(
-      height: orientation == Orientation.portrait ? 45.h : 25.h,
+      height: orientation == Orientation.portrait ? 40.h : 25.h,
       width: 75.w,
       child: Container(
         margin: const EdgeInsets.all(30.0),
@@ -151,7 +151,7 @@ class InsertPaymentView extends GetView {
                         ? selectedPaymentType.first.description.toUpperCase()
                         : selectedPaymentType.first.translatedText!,
                     style: TextStyle(
-                        color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp),
+                        color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 10.sp : 8.sp),
                   ),
                 ),
               ),
@@ -168,22 +168,22 @@ class InsertPaymentView extends GetView {
                     Text(
                       '$roomNumber : ${hc.availRoomList[hc.preSelectedRoomID.value].description}',
                       style: TextStyle(
-                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp),
+                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 10.sp : 8.sp),
                     ),
                     Text(
                       '$roomRate : $denomination ${hc.availRoomList[hc.preSelectedRoomID.value].rate.toStringAsFixed(2)}',
                       style: TextStyle(
-                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp),
+                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 10.sp : 8.sp),
                     ),
                     Text(
-                      '$cardDeposit : $denomination ${hc.availRoomList[hc.preSelectedRoomID.value].serviceCharge.toStringAsFixed(2)}',
+                      '$cardDeposit : $denomination ${hc.cardDeposit.value.toStringAsFixed(2)}',
                       style: TextStyle(
-                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp),
+                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 10.sp : 8.sp),
                     ),
                     Text(
                       '$amountDue : $denomination ${hc.totalAmountDue.toStringAsFixed(2)}',
                       style: TextStyle(
-                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp),
+                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 10.sp : 8.sp),
                     ),
                     SizedBox(
                       height: 2.h,
@@ -193,15 +193,6 @@ class InsertPaymentView extends GetView {
                       () => SizedBox(
                         height: 10.h,
                         width: double.infinity,
-                        // decoration: const BoxDecoration(
-                        //   color: HenryColors.darkGreen,
-                        //   gradient: LinearGradient(
-                        //       colors: [HenryColors.darkGreen, Colors.white],
-                        //       begin: Alignment.topLeft,
-                        //       end: Alignment.bottomRight,
-                        //       tileMode: TileMode.clamp),
-                        //   borderRadius: BorderRadius.only(topLeft: Radius.circular(60), topRight: Radius.circular(60)),
-                        // ),
                         child: hc.nabasangPera.value != 0.0
                             ? Column(
                                 children: [
@@ -225,7 +216,7 @@ class InsertPaymentView extends GetView {
                                   Visibility(
                                     visible: hc.isOverPaymentDetected.value,
                                     child: Expanded(
-                                      flex: 2,
+                                      flex: 1,
                                       child: hc.isOverPaymentDetected.value
                                           ? Text(
                                               'Change: PHP ${hc.overPayment.value.toStringAsFixed(2)}',
@@ -239,7 +230,7 @@ class InsertPaymentView extends GetView {
                             : Center(
                                 child: Text(
                                   'Please insert CASH in Cash Acceptor...',
-                                  style: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                                  style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -279,7 +270,7 @@ class InsertPaymentView extends GetView {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(60),
                           ),
-                          padding: const EdgeInsets.all(40),
+                          padding: const EdgeInsets.all(30),
                           shadowColor: Colors.black26.withOpacity(0.5),
                         ),
                         // CONFIRM BUTTON
