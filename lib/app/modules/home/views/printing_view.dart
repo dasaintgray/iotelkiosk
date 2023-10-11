@@ -82,7 +82,7 @@ class PrintingView extends GetView {
                   width: 35.w,
                   child: MaterialButton(
                     onPressed: () {
-                      hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SL', type: 'TITLE');
+                      hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SLMT', type: 'TITLE');
                       hc.setBackToDefaultValue();
                       Get.off(() => HomeView());
                     },

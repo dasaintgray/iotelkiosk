@@ -21,6 +21,8 @@ class Transaction2View extends GetView {
 
   final hc = Get.find<HomeController>();
 
+  // SCIP = SELECT CHECK IN PROCESS
+
   @override
   Widget build(BuildContext context) {
     return Sizer(
@@ -136,11 +138,11 @@ class Transaction2View extends GetView {
                       switch (index) {
                         case 0: //BOOKED ROOM
                           {
-                            hc.isLoading.value = true;
+                            // hc.isLoading.value = true;
                             final response =
                                 hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'PIBN', type: 'TITLE');
                             if (response) {
-                              hc.isLoading.value = false;
+                              // hc.isLoading.value = false;
                               Get.to(() => BookedroomView());
                             }
                           }

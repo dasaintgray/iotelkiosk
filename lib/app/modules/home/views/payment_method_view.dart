@@ -176,6 +176,8 @@ class PaymentMethodView extends GetView {
                                       hc.isLoading.value = true;
                                       hc.selectedPaymentTypeCode.value =
                                           hc.paymentTypeList.first.data.paymentTypes[index].code;
+                                      hc.selectedPaymentType.value =
+                                          hc.paymentTypeList.first.data.paymentTypes[index].description;
                                       hc.selectedPaymentTypeID.value =
                                           hc.paymentTypeList.first.data.paymentTypes[index].id;
 

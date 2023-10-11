@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
+import 'package:iotelkiosk/app/modules/home/views/guestfound_view.dart';
 import 'package:iotelkiosk/app/modules/home/views/transaction2_view.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
@@ -62,18 +63,19 @@ class BookedroomView extends GetView {
                     height: orientation == Orientation.portrait ? 5.h : 1.h,
                   ),
                   SizedBox(
-                      height: orientation == Orientation.portrait ? 5.h : 2.h,
-                      child: GestureDetector(
-                        onTap: () {
-                          hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SCIP', type: 'TITLE');
-                          Get.off(() => Transaction2View());
-                        },
-                        child: Image.asset(
-                          'assets/menus/back-arrow.png',
-                          fit: BoxFit.cover,
-                          semanticLabel: 'Back to previous menu',
-                        ),
-                      )),
+                    height: orientation == Orientation.portrait ? 5.h : 2.h,
+                    child: GestureDetector(
+                      onTap: () {
+                        hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SCIP', type: 'TITLE');
+                        Get.off(() => Transaction2View());
+                      },
+                      child: Image.asset(
+                        'assets/menus/back-arrow.png',
+                        fit: BoxFit.cover,
+                        semanticLabel: 'Back to previous menu',
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -107,8 +109,11 @@ class BookedroomView extends GetView {
             child: Obx(
               () => SizedBox(
                 height: orientation == Orientation.portrait ? 20.h : 10.h,
+                width: double.infinity,
                 child: Padding(
-                  padding: EdgeInsets.only(left: 60.w, right: 60.w),
+                  padding: EdgeInsets.only(
+                      left: orientation == Orientation.portrait ? 10.w : 60.w,
+                      right: orientation == Orientation.portrait ? 10.w : 60.w),
                   child: TextFormField(
                     controller: hc.bkReferenceNo,
                     textAlignVertical: TextAlignVertical.bottom,
@@ -158,7 +163,8 @@ class BookedroomView extends GetView {
           Expanded(
             flex: 5,
             child: SizedBox(
-              width: orientation == Orientation.portrait ? 20.w : 40.w,
+              width: orientation == Orientation.portrait ? 50.w : 40.w,
+              height: orientation == Orientation.portrait ? 10.h : 20.h,
               child: VirtualKeyboard(
                 textController: hc.bkReferenceNo,
                 textColor: HenryColors.puti,
@@ -167,18 +173,23 @@ class BookedroomView extends GetView {
               ),
             ),
           ),
+          SizedBox(
+            height: 3.h,
+          ),
           Expanded(
-            flex: 1,
+            flex: 2,
             child: SizedBox(
-              height: orientation == Orientation.portrait ? 5.h : 10.h,
+              height: orientation == Orientation.portrait ? 10.h : 10.h,
+              width: 25.w,
               child: ElevatedButton(
                 onPressed: () async {
                   hc.isLoading.value = true;
                   final response =
                       await hc.searchBK(bookingNumber: hc.bkReferenceNo.text, credentialHeaders: hc.accessTOKEN);
                   if (response) {
+                    hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'GI', type: 'TITLE');
                     hc.isGuestFound.value = true;
-                    // display the info
+                    Get.to(() => GuestfoundView());
                     hc.isLoading.value = false;
                   } else {
                     hc.isGuestFound.value = false;
@@ -187,18 +198,18 @@ class BookedroomView extends GetView {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: HenryColors.darkGreen,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(60),
                   ),
                   padding: EdgeInsets.symmetric(
-                      horizontal: orientation == Orientation.portrait ? 40 : 20,
-                      vertical: orientation == Orientation.portrait ? 15 : 10),
+                      horizontal: orientation == Orientation.portrait ? 30 : 20,
+                      vertical: orientation == Orientation.portrait ? 25 : 10),
                   shadowColor: Colors.black26.withOpacity(0.5),
                 ),
                 // SEARCH
                 child: Obx(
                   () => Text(
                     buttonText.value,
-                    style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                    style: TextStyle(color: HenryColors.puti, fontSize: 15.sp),
                   ),
                 ),
               ),

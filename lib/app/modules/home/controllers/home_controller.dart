@@ -110,6 +110,7 @@ class HomeController extends GetxController with BaseController {
   late String languageCODE = '';
 
   final selectedPaymentTypeCode = ''.obs;
+  final selectedPaymentType = ''.obs;
   final selectedPaymentTypeID = 0.obs;
   final serviceResponseStatusMessages = ''.obs;
   final selectedTransactionType = ''.obs;
@@ -1071,18 +1072,15 @@ class HomeController extends GetxController with BaseController {
               "cardNo": keyCardNumber.value
             };
 
-            statusMessage.value = 'Finalizing transaction';
-
+            statusMessage.value = 'Printing receipt';
             // final payload = jsonEncode(updateBookingParams);
 
             final updateResponse = await GlobalProvider().mutateGraphQLData(
                 documents: updateBookingTable, variables: updateBookingParams, accessHeaders: credentialHeaders);
             if (updateResponse["data"]["Bookings"]["response"] == "Success") {
               openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.cardOFF);
+              statusMessage.value = 'Finalizing transaction';
             }
-
-            // DITO ANG PRINTING
-            statusMessage.value = 'Printing receipt';
 
             openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.printingON);
 
@@ -1090,8 +1088,6 @@ class HomeController extends GetxController with BaseController {
               startDate: dtNow,
               endDate: endtime,
             );
-
-            statusMessage.value = 'Printing receipt';
 
             final addressResponse = settingsList.first.data.settings.where((element) => element.code == 'R2');
             final owner = settingsList.first.data.settings.where((element) => element.code == 'R1');
@@ -1101,13 +1097,13 @@ class HomeController extends GetxController with BaseController {
             final currency = settingsList.first.data.settings.where((element) => element.code == 'CURRENCY');
 
             // COMPUTE THE VAT
-
             final vatText = vatPercentage.first.value;
             final vat = '1.$vatText';
             final vatTable = (roomRate.value / double.parse(vat));
             final vatTax = (roomRate.value - vatTable);
 
-            printReceipt(
+            // DITO ANG PRINTING
+            printResibo(
               address: addressResponse.first.value,
               owner: owner.first.value,
               telephone: telephone.first.value,
@@ -1116,14 +1112,14 @@ class HomeController extends GetxController with BaseController {
               bookingID: generatedBookingID.value,
               terminalID: defaultTerminalID.value,
               qty: 1,
-              roomRate: roomRate.value,
-              deposit: cardDeposit.value,
-              totalAmount: totalAmountDue.value,
-              totalAmountPaid: totalAmountDue.value,
-              paymentMethod: selectedPaymentTypeCode.value,
+              roomRate: NumberFormat("#,##0.00", "en_PH").format(roomRate.value),
+              deposit: NumberFormat("#,##0.00", "en_PH").format(cardDeposit.value),
+              totalAmount: NumberFormat("#,##0.00", "en_PH").format(totalAmountDue.value),
+              totalAmountPaid: NumberFormat("#,##0.00", "en_PH").format(totalAmountDue.value),
+              paymentMethod: selectedPaymentType.value,
               currencyString: currency.first.value,
-              vatTable: vatTable,
-              vatTax: vatTax,
+              vatTable: NumberFormat("#,##0.00", "en_PH").format(vatTable),
+              vatTax: NumberFormat("#,##0.00", "en_PH").format(vatTax),
               roomNumber: roomNumber.value,
               timeConsume: consumeTime,
               endTime: endtime,
@@ -1474,7 +1470,6 @@ class HomeController extends GetxController with BaseController {
 
   void setBackToDefaultValue() {
     statusMessage.value = 'Initializing \nCash Acceptor Device \nplease wait ....';
-    isButtonActive.value = true;
     bookingNumber.value = '';
     contactNumber.value = '';
     invoiceNumber.value = '';
@@ -1483,7 +1478,8 @@ class HomeController extends GetxController with BaseController {
     nabasangPera.value = 0.0;
     totalAmountDue.value = 0.0;
     roomRate.value = 0.0;
-    isConfirmReady.value = false;
+    isButtonActive.value = true;
+    isConfirmReady.value = true;
     isDisclaimer.value = false;
     isGuestFound.value = false;
   }
@@ -1624,7 +1620,7 @@ class HomeController extends GetxController with BaseController {
     }
   }
 
-  bool printReceipt({
+  bool printResibo({
     required String? address,
     required String? owner,
     required String? telephone,
@@ -1633,14 +1629,14 @@ class HomeController extends GetxController with BaseController {
     required int? bookingID,
     required int? terminalID,
     required int? qty,
-    required double? roomRate,
-    required double? deposit,
-    required double? totalAmount,
-    required double? totalAmountPaid,
+    required String? roomRate,
+    required String? deposit,
+    required String? totalAmount,
+    required String? totalAmountPaid,
     required String? paymentMethod,
     required String? currencyString,
-    required double? vatTable,
-    required double? vatTax,
+    required String? vatTable,
+    required String? vatTax,
     required String? roomNumber,
     required String? timeConsume,
     required DateTime? endTime,
@@ -1741,12 +1737,12 @@ class HomeController extends GetxController with BaseController {
           setAlignmentLeftRight(0);
           printString('  x$qty'.toNativeUtf8(), 1);
           setAlignmentLeftRight(2);
-          printString('$currencyString $roomRate'.toNativeUtf8(), 0);
+          printString('$currencyString ${roomRate!}'.toNativeUtf8(), 0);
           setClean();
           setAlignmentLeftRight(0);
           printString('KEY CARD DEPOSIT'.toNativeUtf8(), 1);
           setAlignmentLeftRight(2);
-          printString('$currencyString $deposit'.toNativeUtf8(), 0);
+          printString('$currencyString ${deposit!}'.toNativeUtf8(), 0);
           setClean();
 
           printString('------------------------------------------------'.toNativeUtf8(), 0);
@@ -1754,7 +1750,7 @@ class HomeController extends GetxController with BaseController {
           setAlignmentLeftRight(0);
           printString('TOTAL'.toNativeUtf8(), 1);
           setAlignmentLeftRight(2);
-          printString('$currencyString $totalAmount'.toNativeUtf8(), 0);
+          printString('$currencyString ${totalAmount!}'.toNativeUtf8(), 0);
           setClean();
           setAlignmentLeftRight(0);
           printString('$paymentMethod'.toNativeUtf8(), 1);
@@ -1764,17 +1760,17 @@ class HomeController extends GetxController with BaseController {
           setAlignmentLeftRight(0);
           printString('CHANGE'.toNativeUtf8(), 1);
           setAlignmentLeftRight(2);
-          printString('$currencyString 0.00'.toNativeUtf8(), 0);
+          printString('$currencyString ${overPayment.value}'.toNativeUtf8(), 0);
           printFeedline(1);
           setAlignmentLeftRight(0);
           printString('VATable '.toNativeUtf8(), 1);
           setAlignmentLeftRight(2);
-          printString('$currencyString ${vatTable!.toStringAsFixed(2)}'.toNativeUtf8(), 0);
+          printString('$currencyString ${vatTable!}'.toNativeUtf8(), 0);
           setClean();
           setAlignmentLeftRight(0);
           printString('VAT_Tax'.toNativeUtf8(), 1);
           setAlignmentLeftRight(2);
-          printString('$currencyString ${vatTax!.toStringAsFixed(2)}'.toNativeUtf8(), 0);
+          printString('$currencyString ${vatTax!}'.toNativeUtf8(), 0);
           setClean();
           setAlignmentLeftRight(0);
           printString('ZERO_Rated'.toNativeUtf8(), 1);

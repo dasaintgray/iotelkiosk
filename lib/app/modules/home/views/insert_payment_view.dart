@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/disclaimer_view.dart';
 // import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
@@ -92,6 +93,8 @@ class InsertPaymentView extends GetView {
   }
 
   Widget menuInsertPayment(Orientation orientation, {required int? languageID}) {
+    final moneyFormatting = NumberFormat("#,##0.00", "en_PH");
+
     final langCode = hc.languageList.first.data.languages.where((element) => element.id == languageID);
 
     final selectedPaymentType =
@@ -171,17 +174,17 @@ class InsertPaymentView extends GetView {
                           color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 10.sp : 8.sp),
                     ),
                     Text(
-                      '$roomRate : $denomination ${hc.availRoomList[hc.preSelectedRoomID.value].rate.toStringAsFixed(2)}',
+                      '$roomRate : $denomination ${moneyFormatting.format(hc.availRoomList[hc.preSelectedRoomID.value].rate)}',
                       style: TextStyle(
                           color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 10.sp : 8.sp),
                     ),
                     Text(
-                      '$cardDeposit : $denomination ${hc.cardDeposit.value.toStringAsFixed(2)}',
+                      '$cardDeposit : $denomination ${moneyFormatting.format(hc.cardDeposit.value)}',
                       style: TextStyle(
                           color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 10.sp : 8.sp),
                     ),
                     Text(
-                      '$amountDue : $denomination ${hc.totalAmountDue.toStringAsFixed(2)}',
+                      '$amountDue : $denomination ${moneyFormatting.format(hc.totalAmountDue.value)}',
                       style: TextStyle(
                           color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 10.sp : 8.sp),
                     ),
@@ -208,7 +211,7 @@ class InsertPaymentView extends GetView {
                                     child: Visibility(
                                       visible: hc.nabasangPera.value != 0.0,
                                       child: Text(
-                                        'PHP ${hc.nabasangPera.value.toStringAsFixed(2)}',
+                                        'PHP ${moneyFormatting.format(hc.nabasangPera.value)}',
                                         style: TextStyle(color: HenryColors.puti, fontSize: 18.sp),
                                       ),
                                     ),
@@ -219,7 +222,7 @@ class InsertPaymentView extends GetView {
                                       flex: 1,
                                       child: hc.isOverPaymentDetected.value
                                           ? Text(
-                                              'Change: PHP ${hc.overPayment.value.toStringAsFixed(2)}',
+                                              'Change: PHP ${moneyFormatting.format(hc.overPayment.value)}',
                                               style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
                                             )
                                           : const Text(''),
