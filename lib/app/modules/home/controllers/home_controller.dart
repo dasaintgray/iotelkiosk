@@ -123,7 +123,7 @@ class HomeController extends GetxController with BaseController {
   final isOverPaymentDetected = false.obs;
   final clockLiveUpdate = false.obs;
   final isBottom = false.obs;
-  final isDisclaimerClick = false.obs;
+  final isDisclaimer = false.obs;
   final isButtonActive = true.obs;
   final isCashDispenserRunning = false.obs;
   final isGuestFound = false.obs;
@@ -1083,6 +1083,7 @@ class HomeController extends GetxController with BaseController {
 
             // DITO ANG PRINTING
             statusMessage.value = 'Printing receipt';
+
             openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.printingON);
 
             final consumeTime = computeTimeDifference(
@@ -1107,26 +1108,27 @@ class HomeController extends GetxController with BaseController {
             final vatTax = (roomRate.value - vatTable);
 
             printReceipt(
-                address: addressResponse.first.value,
-                owner: owner.first.value,
-                telephone: telephone.first.value,
-                email: email.first.value,
-                vatTin: '000000000',
-                bookingID: generatedBookingID.value,
-                terminalID: defaultTerminalID.value,
-                qty: 1,
-                roomRate: roomRate.value,
-                deposit: 100,
-                totalAmount: totalAmountDue.value,
-                totalAmountPaid: totalAmountDue.value,
-                paymentMethod: selectedPaymentTypeCode.value,
-                currencyString: currency.first.value,
-                vatTable: vatTable,
-                vatTax: vatTax,
-                roomNumber: roomNumber.value,
-                timeConsume: consumeTime,
-                endTime: endtime,
-                isOR: false);
+              address: addressResponse.first.value,
+              owner: owner.first.value,
+              telephone: telephone.first.value,
+              email: email.first.value,
+              vatTin: '000000000',
+              bookingID: generatedBookingID.value,
+              terminalID: defaultTerminalID.value,
+              qty: 1,
+              roomRate: roomRate.value,
+              deposit: cardDeposit.value,
+              totalAmount: totalAmountDue.value,
+              totalAmountPaid: totalAmountDue.value,
+              paymentMethod: selectedPaymentTypeCode.value,
+              currencyString: currency.first.value,
+              vatTable: vatTable,
+              vatTax: vatTax,
+              roomNumber: roomNumber.value,
+              timeConsume: consumeTime,
+              endTime: endtime,
+              isOR: false,
+            );
 
             openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.printingOFF);
             statusMessage.value = 'Closing Transaction';
@@ -1482,7 +1484,7 @@ class HomeController extends GetxController with BaseController {
     totalAmountDue.value = 0.0;
     roomRate.value = 0.0;
     isConfirmReady.value = false;
-    isDisclaimerClick.value = false;
+    isDisclaimer.value = false;
     isGuestFound.value = false;
   }
 
@@ -1650,7 +1652,7 @@ class HomeController extends GetxController with BaseController {
 
     DateTime dtNow = DateTime.now();
     final ngayongAraw = DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
-    final checkout = DateFormat("dd, MMM yyyy HH:mm aaa").format(endTime!);
+    final checkout = DateFormat("dd, MMM yyyy hh:mm aa").format(endTime!);
 
     if (!dylib.handle.address.isNaN) {
       final openPrinter = dylib.lookupFunction<ffi.Int32 Function(), int Function()>('SetUsbportauto');

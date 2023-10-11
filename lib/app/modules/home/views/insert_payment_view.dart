@@ -249,7 +249,8 @@ class InsertPaymentView extends GetView {
                         onPressed: hc.isButtonActive.value
                             ? () async {
                                 hc.isButtonActive.value = false;
-                                hc.isLoading.value = true;
+                                hc.isDisclaimer.value = true;
+                                // hc.isLoading.value = true;
                                 hc.getMenu(code: 'DI', type: 'TITLE', languageID: languageID);
                                 await hc.initializeCamera();
 

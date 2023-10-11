@@ -107,7 +107,7 @@ class DisclaimerView extends GetView {
             child: Obx(
               () => SizedBox(
                 height: 35.h,
-                child: hc.isLoading.value
+                child: !hc.isDisclaimer.value
                     ? Column(
                         children: [
                           SizedBox(
@@ -151,14 +151,11 @@ class DisclaimerView extends GetView {
                         height: 24.h,
                         child: SingleChildScrollView(
                           controller: hc.scrollController,
-                          child: Visibility(
-                            visible: !hc.isDisclaimerClick.value,
-                            child: Text(
-                              hc.languageList.first.data.languages.first.disclaimer,
-                              style: TextStyle(
-                                color: HenryColors.puti,
-                                fontSize: 5.sp,
-                              ),
+                          child: Text(
+                            hc.languageList.first.data.languages.first.disclaimer,
+                            style: TextStyle(
+                              color: HenryColors.puti,
+                              fontSize: 5.sp,
                             ),
                           ),
                         ),
@@ -173,7 +170,6 @@ class DisclaimerView extends GetView {
           ),
           Obx(
             () => Visibility(
-              // visible: hc.isBottom.value,
               visible: hc.isButtonActive.value,
               child: Expanded(
                 flex: 1,
@@ -186,7 +182,7 @@ class DisclaimerView extends GetView {
                             hc.isLoading.value = true;
                             hc.isButtonActive.value = false;
                             hc.isBottom.value = false;
-                            hc.isDisclaimerClick.value = true;
+                            hc.isDisclaimer.value = false;
                             // var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
                             // final handle = imgKey.currentContext?.findAncestorWidgetOfExactType<SizedBox>().hashCode;
                             // if (kDebugMode) print('Picture Handle: $handle');
