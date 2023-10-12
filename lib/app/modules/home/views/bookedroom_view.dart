@@ -164,22 +164,22 @@ class BookedroomView extends GetView {
             flex: 5,
             child: SizedBox(
               width: orientation == Orientation.portrait ? 50.w : 40.w,
-              height: orientation == Orientation.portrait ? 10.h : 20.h,
+              height: orientation == Orientation.portrait ? 10.h : 25.h,
               child: VirtualKeyboard(
                 textController: hc.bkReferenceNo,
                 textColor: HenryColors.puti,
-                fontSize: 15.sp,
+                fontSize: orientation == Orientation.portrait ? 15.sp : 10.sp,
                 type: VirtualKeyboardType.Numeric,
               ),
             ),
           ),
           SizedBox(
-            height: 3.h,
+            height: orientation == Orientation.portrait ? 3.h : 1.h,
           ),
           Expanded(
             flex: 2,
             child: SizedBox(
-              height: orientation == Orientation.portrait ? 10.h : 10.h,
+              height: orientation == Orientation.portrait ? 10.h : 5.h,
               width: 25.w,
               child: ElevatedButton(
                 onPressed: () async {
@@ -209,7 +209,8 @@ class BookedroomView extends GetView {
                 child: Obx(
                   () => Text(
                     buttonText.value,
-                    style: TextStyle(color: HenryColors.puti, fontSize: 15.sp),
+                    style: TextStyle(
+                        color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 15.sp : 10.sp),
                   ),
                 ),
               ),
