@@ -1,10 +1,10 @@
 // import 'package:accessibility_tools/accessibility_tools.dart';
-import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_acrylic/flutter_acrylic.dart';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:media_kit/media_kit.dart';
 
 import 'app/routes/app_pages.dart';
 
@@ -15,7 +15,7 @@ void main() async {
   await GetStorage.init();
 
   // VIDEO PLAYER
-  DartVLC.initialize();
+  MediaKit.ensureInitialized();
 
   await windowManager.ensureInitialized();
 

@@ -12,7 +12,7 @@ dependencies:
     path: ./library/system_idle
 
   cupertino_icons: ^1.0.2
-  get: 4.6.5
+  get: ^4.6.6
   flutter: 
     sdk: flutter
 
@@ -26,16 +26,21 @@ dependencies:
   vector_graphics_compiler: ^1.0.1
   flutter_carousel_widget: ^2.0.2
   virtual_keyboard_multi_language: ^1.0.3
-  flutter_form_builder: ^7.8.0
+  flutter_form_builder: ^9.1.1
   flutter_datetime_picker: ^1.5.1
-  dart_vlc: ^0.4.0
-  # dart_vlc_ffi: ^0.2.0+1
+  # dart_vlc: ^0.4.0
   marquee: ^2.2.3
   flutter_animate: ^4.1.1+1
   camera_windows: ^0.2.1+8
   translator: ^0.1.7
   ffi: ^2.0.2
   win32: ^5.0.3
+
+  # MEDIA AND AUDIO
+  media_kit: ^1.1.8+2
+  media_kit_video: ^1.2.1                        # For video rendering.
+  media_kit_libs_video: ^1.0.3                   # Native video dependencies.
+  media_kit_libs_audio: ^1.0.3                   # Native audio dependencies.
 
   # WEB COMMUNICATION 
   signalr_core: ^1.1.1
@@ -45,7 +50,7 @@ dependencies:
   # expandable_page_view: ^1.0.17
 
   #FORMATTING and DATE
-  intl: ^0.17.0
+  intl: ^0.18.1
 
   #HTTP COMMUNICATION
   http: ^0.13.5
@@ -75,7 +80,7 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   flutter_test: 
     sdk: flutter
-  flutter_launcher_icons: ^0.12.0
+  flutter_launcher_icons: ^0.13.1
 
 
 flutter:

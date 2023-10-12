@@ -1,4 +1,3 @@
-import 'package:dart_vlc/dart_vlc.dart';
 // import 'package:dart_vlc_ffi/dart_vlc_ffi.dart';
 import 'package:flutter/material.dart';
 
@@ -7,6 +6,7 @@ import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/home_view.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:marquee/marquee.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:sizer/sizer.dart';
 
 import '../controllers/screen_controller.dart';
@@ -21,13 +21,20 @@ class ScreenView extends GetView<ScreenController> {
 
   @override
   Widget build(BuildContext context) {
-    sc.player.playbackStream.listen(
-      (PlaybackState state) {
-        if (state.isCompleted) {
-          sc.player.play();
-        }
+    // sc.player.playbackStream.listen(
+    //   (PlaybackState state) {
+    //     if (state.isCompleted) {
+    //       sc.player.play();
+    //     }
+    //   },
+    // );
+
+    sc.player.stream.playing.listen(
+      (bool playing) {
+        sc.player.play();
       },
     );
+
     return Sizer(
       builder: (BuildContext context, Orientation orientation, DeviceType deviceType) {
         return GestureDetector(
@@ -41,32 +48,9 @@ class ScreenView extends GetView<ScreenController> {
           child: Stack(
             children: [
               // VIDEOS
-              // Positioned(
-              //         top: 40.h,
-              //         left: 25.sp,
-              //         right: 25.sp,
-              //         bottom: 40.h,
-              //         child: SizedBox(
-              //           child: Center(
-              //             child: Column(
-              //               children: [
-              //                 const CircularProgressIndicator.adaptive(
-              //                   backgroundColor: HenryColors.puti,
-              //                 ),
-              //                 DefaultTextStyle(
-              //                   style: TextStyle(color: HenryColors.puti, fontSize: 15.sp),
-              //                   child: const Text('Loading video, please wait...'),
-              //                 ),
-              //               ],
-              //             ),
-              //           ),
-              //         ),
-              //       )
               Positioned(
                 child: Video(
-                  fit: BoxFit.fill,
-                  player: sc.player,
-                  showControls: false,
+                  controller: sc.videoController,
                   filterQuality: FilterQuality.high,
                 ),
               ),

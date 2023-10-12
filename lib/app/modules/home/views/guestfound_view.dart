@@ -50,15 +50,16 @@ class GuestfoundView extends GetView {
                   ),
                   // SPACE
                   // MENU
-                  SizedBox(
-                    height: 45.h,
-                    width: double.infinity,
-                    child: hc.isLoading.value
-                        ? const Center(
-                            child: CircularProgressIndicator.adaptive(),
-                          )
-                        : menuGuestInfo(orientation, context),
-                  ),
+                  menuGuestInfo(orientation, context),
+                  // SizedBox(
+                  //   height: 45.h,
+                  //   width: double.infinity,
+                  //   child: hc.isLoading.value
+                  //       ? const Center(
+                  //           child: CircularProgressIndicator.adaptive(),
+                  //         )
+                  //       : menuGuestInfo(orientation, context),
+                  // ),
                   SizedBox(
                     height: orientation == Orientation.portrait ? 5.h : 1.h,
                   ),
@@ -106,8 +107,10 @@ class GuestfoundView extends GetView {
     translator.translate(roomNumberText.value, to: langCode).then((value) => roomNumberText.value = value.text);
     translator.translate(roomRateText.value, to: langCode).then((value) => roomRateText.value = value.text);
 
+
     return SizedBox(
       height: orientation == Orientation.portrait ? 35.h : 20.h,
+      width: orientation == Orientation.portrait ? 80.w : 40.w,
       child: SingleChildScrollView(
         controller: hc.scrollController,
         child: Padding(
@@ -147,7 +150,7 @@ class GuestfoundView extends GetView {
                       ],
                     ),
                   ),
-                ).animate().slide().shake(duration: 300.ms),
+                ).animate().scaleXY(duration: 500.ms),
                 Card(
                   color: HenryColors.darkGreen,
                   elevation: 2.0,
@@ -170,7 +173,7 @@ class GuestfoundView extends GetView {
                           style: TextStyle(color: HenryColors.black87, fontSize: 8.sp),
                         ),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
@@ -186,7 +189,7 @@ class GuestfoundView extends GetView {
                       ],
                     ),
                   ),
-                ).animate().slide().shake(duration: 300.ms),
+                ).animate().slideY(duration: 500.ms),
                 Card(
                   color: HenryColors.darkGreen,
                   elevation: 2.0,
@@ -215,7 +218,7 @@ class GuestfoundView extends GetView {
                       ],
                     ),
                   ),
-                ).animate().slide().shake(duration: 300.ms),
+                ).animate().slideX(duration: 500.ms),
                 Card(
                   color: HenryColors.darkGreen,
                   elevation: 2.0,
@@ -244,7 +247,7 @@ class GuestfoundView extends GetView {
                       ],
                     ),
                   ),
-                ).animate().slide().shake(duration: 300.ms),
+                ).animate().slideY(duration: 500.ms),
                 Card(
                   color: HenryColors.darkGreen,
                   elevation: 2.0,
@@ -273,7 +276,7 @@ class GuestfoundView extends GetView {
                       ],
                     ),
                   ),
-                ).animate().slide().shake(duration: 300.ms),
+                ).animate().slideX(duration: 500.ms),
                 Card(
                   color: HenryColors.darkGreen,
                   elevation: 2.0,
@@ -302,7 +305,7 @@ class GuestfoundView extends GetView {
                       ],
                     ),
                   ),
-                ).animate().slide().shake(duration: 300.ms),
+                ).animate().slideY(duration: 500.ms),
               ],
             ),
           ),

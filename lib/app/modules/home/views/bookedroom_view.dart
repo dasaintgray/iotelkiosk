@@ -66,6 +66,7 @@ class BookedroomView extends GetView {
                     height: orientation == Orientation.portrait ? 5.h : 2.h,
                     child: GestureDetector(
                       onTap: () {
+                        hc.bkReferenceNo.clear();
                         hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SCIP', type: 'TITLE');
                         Get.off(() => Transaction2View());
                       },
@@ -90,13 +91,19 @@ class BookedroomView extends GetView {
     var buttonText = 'Search'.obs;
     var hintText = 'Please Input Booking Number'.obs;
 
-    translator.translate(buttonText.value, from: 'auto', to: langCode).then((value) {
-      buttonText.value = value.text;
-    });
+    translator.translate(buttonText.value, from: 'auto', to: langCode).then(
+      (value) {
+        buttonText.value = value.text;
+      },
+    );
 
-    translator.translate(hintText.value, to: langCode).then(
-          (value) => hintText.value = value.text,
-        );
+    translator.translate(hintText.value, to: langCode).then((value) => hintText.value = value.text);
+
+    hc.bkReferenceNo.addListener(
+      () {
+        hc.isSearchButton.value = hc.bkReferenceNo.text.isNotEmpty;
+      },
+    );
 
     return SizedBox(
       height: orientation == Orientation.portrait ? 40.h : 25.h,
@@ -178,39 +185,52 @@ class BookedroomView extends GetView {
           ),
           Expanded(
             flex: 2,
-            child: SizedBox(
-              height: orientation == Orientation.portrait ? 10.h : 5.h,
-              width: 25.w,
-              child: ElevatedButton(
-                onPressed: () async {
-                  hc.isLoading.value = true;
-                  final response =
-                      await hc.searchBK(bookingNumber: hc.bkReferenceNo.text, credentialHeaders: hc.accessTOKEN);
-                  if (response) {
-                    hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'GI', type: 'TITLE');
-                    hc.isGuestFound.value = true;
-                    Get.to(() => GuestfoundView());
-                    hc.isLoading.value = false;
-                  } else {
-                    hc.isGuestFound.value = false;
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: HenryColors.darkGreen,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(60),
+            child: Obx(
+              () => SizedBox(
+                height: orientation == Orientation.portrait ? 10.h : 5.h,
+                width: 25.w,
+                child: ElevatedButton(
+                  onPressed: hc.isSearchButton.value
+                      ? () async {
+                          hc.isLoading.value = true;
+                          final response = await hc.searchBK(
+                              bookingNumber: hc.bkReferenceNo.text, credentialHeaders: hc.accessTOKEN);
+                          if (response) {
+                            hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'GI', type: 'TITLE');
+                            hc.isGuestFound.value = true;
+                            Get.to(() => GuestfoundView());
+                            hc.isLoading.value = false;
+                          } else {
+                            hc.isGuestFound.value = false;
+                            hc.isLoading.value = false;
+                            Get.defaultDialog(
+                                title: 'Record not found',
+                                titleStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+                                titlePadding: const EdgeInsets.all(10),
+                                middleText: 'Booking reference number \n ${hc.bkReferenceNo.text} \n not found!',
+                                middleTextStyle: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                                contentPadding: const EdgeInsets.all(20),
+                                backgroundColor: HenryColors.darkGreen);
+                          }
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: HenryColors.darkGreen,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(60),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: orientation == Orientation.portrait ? 30 : 20,
+                        vertical: orientation == Orientation.portrait ? 25 : 10),
+                    shadowColor: Colors.black26.withOpacity(0.5),
                   ),
-                  padding: EdgeInsets.symmetric(
-                      horizontal: orientation == Orientation.portrait ? 30 : 20,
-                      vertical: orientation == Orientation.portrait ? 25 : 10),
-                  shadowColor: Colors.black26.withOpacity(0.5),
-                ),
-                // SEARCH
-                child: Obx(
-                  () => Text(
-                    buttonText.value,
-                    style: TextStyle(
-                        color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 15.sp : 10.sp),
+                  // SEARCH
+                  child: Obx(
+                    () => Text(
+                      buttonText.value,
+                      style: TextStyle(
+                          color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 15.sp : 10.sp),
+                    ),
                   ),
                 ),
               ),

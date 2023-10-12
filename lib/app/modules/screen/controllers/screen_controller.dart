@@ -4,7 +4,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dart_vlc/dart_vlc.dart';
 // import 'package:dart_vlc_ffi/dart_vlc_ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
@@ -17,6 +16,8 @@ import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 import 'package:iotelkiosk/globals/services/devices/display_service.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:translator/translator.dart';
 import 'package:get/get.dart';
 import 'package:hex/hex.dart';
@@ -63,9 +64,8 @@ class ScreenController extends GetxController with BaseController {
   final dtNow = DateFormat.yMMMMd().format(DateTime.now());
 
   // LISTENING
-  final player = Player(
-    id: 0,
-  );
+  late final player = Player();
+  late final videoController = VideoController(player);
 
   // GLOBAL
   // var ports = <String>[];
@@ -77,13 +77,7 @@ class ScreenController extends GetxController with BaseController {
     super.onInit();
 
     await getWeather();
-    // isLoading.value = true;
-    mediaOpen(useLocal: true);
-    // isLoading.value = false;
-
     hostname.value = Platform.localHostname;
-
-    // print(ngayon.toIso8601String());
 
     // monitorInfo();
     if (kDebugMode) setDisplayMonitor('DISPLAY2');
@@ -121,10 +115,11 @@ class ScreenController extends GetxController with BaseController {
     // await getTerms(credentialHeaders: headers, languageID: selecttedLanguageID.value);
   }
 
-  // @override
-  // void onReady() async {
-  //   super.onReady();
-  // }
+  @override
+  void onReady() async {
+    super.onReady();
+    await mediaOpen(useLocal: true);
+  }
 
   // @override
   // void onClose() {
@@ -720,23 +715,27 @@ class ScreenController extends GetxController with BaseController {
 
   // -----------------------------------------------------------------------------------------
 
-  void mediaOpen({required bool useLocal}) {
-    if (kDebugMode) {
-      player.setVolume(0);
-    }
-    player.open(
-      useLocal
-          ? Playlist(
-              medias: [
-                Media.asset('assets/background/iOtelWalkin.mp4'),
-                Media.asset('assets/background/iotel.mp4'),
-              ],
-            )
-          : Playlist(medias: [
-              Media.network('https://www.youtube.com/watch?v=Mn254cnduOY&t=1426s', parse: true),
-            ]),
-      autoStart: true,
+  Future<void> mediaOpen({required bool useLocal}) async {
+    if (kDebugMode) player.setVolume(0);
+
+    final playable = Playlist(
+      [
+        Media('assets/background/iOtelWalkin.mp4'),
+        Media('assets/background/iotel.mp4'),
+      ],
     );
+
+    final networkPlay = Playlist(
+      [
+        Media('https://user-images.githubusercontent.com/28951144/229373695-22f88f13-d18f-4288-9bf1-c3e078d83722.mp4'),
+        Media('https://user-images.githubusercontent.com/28951144/229373709-603a7a89-2105-4e1b-a5a5-a6c3567c9a59.mp4'),
+        Media('https://user-images.githubusercontent.com/28951144/229373716-76da0a4e-225a-44e4-9ee7-3e9006dbc3e3.mp4'),
+        Media('https://user-images.githubusercontent.com/28951144/229373718-86ce5e1d-d195-45d5-baa6-ef94041d0b90.mp4'),
+        Media('https://user-images.githubusercontent.com/28951144/229373720-14d69157-1a56-4a78-a2f4-d7a134d7c3e9.mp4'),
+      ],
+    );
+
+    await player.open(useLocal ? playable : networkPlay, play: true);
   }
 
   // SUBSCRIPTION

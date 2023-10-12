@@ -128,6 +128,7 @@ class HomeController extends GetxController with BaseController {
   final isButtonActive = true.obs;
   final isCashDispenserRunning = false.obs;
   final isGuestFound = false.obs;
+  final isSearchButton = false.obs;
   // INT
   final menuIndex = 0.obs;
 
@@ -850,7 +851,7 @@ class HomeController extends GetxController with BaseController {
       }
 
       statusMessage.value = 'Transaction started...';
-
+      // ADD CONTACT INFO
       int? contactID = await GlobalProvider().addContacts(
           code: seriesDetailsList.first.data.seriesDetails.first.docNo,
           firstName: name,
@@ -864,10 +865,8 @@ class HomeController extends GetxController with BaseController {
           headers: credentialHeaders);
 
       // String? basePhoto = await HomeController().takePicture();
+      // add Photo discreetly
       String? basePhoto = await takePicture(camID: cameraID.value);
-
-      // var accessToken = await getAccessToken();
-
       var response = await GlobalProvider()
           .addContactPhotoes(accessHeader: credentialHeaders, contactID: contactID!, isActive: true, photo: basePhoto);
 
@@ -895,7 +894,6 @@ class HomeController extends GetxController with BaseController {
 
         // CHECK IF THE VALUE MAX
         DateTime endtime = intValue == 1 ? dtNow.add(Duration(days: intValue)) : dtNow.add(Duration(hours: intValue));
-
         String startDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
         String endDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(endtime);
 
@@ -934,7 +932,7 @@ class HomeController extends GetxController with BaseController {
 
         // var jsondata = jsonEncode(bookingParams);
         // if (kDebugMode) print(jsondata);
-        // INSERT BOOKING
+        // INSERT BOOKING = Bookings
         statusMessage.value = 'Posting';
         var bookingResponse = await GlobalProvider()
             .mutateGraphQLData(documents: addBooking, variables: bookingParams, accessHeaders: credentialHeaders);
@@ -946,7 +944,7 @@ class HomeController extends GetxController with BaseController {
         if (saveResponse == "Success") {
           generatedBookingID.value = bookingIDResponse[0];
 
-          // update seriesDetails
+          // update seriesDetails base on the bookings
           await GlobalProvider().updateSeriesDetails(
             accessHeader: accessTOKEN,
             // idNo: seriesDetailsList.first.data.seriesDetails.first.id,
@@ -960,8 +958,8 @@ class HomeController extends GetxController with BaseController {
           // PROCESSING PAYMENT;
           // insert all Charges into Booking Charges
           // BOOKING CHARGES
-          statusMessage.value = 'Booking Charges';
 
+          statusMessage.value = 'Processing Booking Charges';
           for (var x = 0; x < chargesList.first.data.charges.length; x++) {
             bool isRoomBa = chargesList.first.data.charges[x].code == "Room" ? true : false;
             final bookingChargesParams = {
@@ -1116,6 +1114,7 @@ class HomeController extends GetxController with BaseController {
               deposit: NumberFormat("#,##0.00", "en_PH").format(cardDeposit.value),
               totalAmount: NumberFormat("#,##0.00", "en_PH").format(totalAmountDue.value),
               totalAmountPaid: NumberFormat("#,##0.00", "en_PH").format(totalAmountDue.value),
+              changeValue: NumberFormat("#,##0.00", "en_PH").format(overPayment.value),
               paymentMethod: selectedPaymentType.value,
               currencyString: currency.first.value,
               vatTable: NumberFormat("#,##0.00", "en_PH").format(vatTable),
@@ -1634,6 +1633,7 @@ class HomeController extends GetxController with BaseController {
     required String? totalAmount,
     required String? totalAmountPaid,
     required String? paymentMethod,
+    required String? changeValue,
     required String? currencyString,
     required String? vatTable,
     required String? vatTax,
@@ -1760,7 +1760,7 @@ class HomeController extends GetxController with BaseController {
           setAlignmentLeftRight(0);
           printString('CHANGE'.toNativeUtf8(), 1);
           setAlignmentLeftRight(2);
-          printString('$currencyString ${overPayment.value}'.toNativeUtf8(), 0);
+          printString('$currencyString $changeValue'.toNativeUtf8(), 0);
           printFeedline(1);
           setAlignmentLeftRight(0);
           printString('VATable '.toNativeUtf8(), 1);

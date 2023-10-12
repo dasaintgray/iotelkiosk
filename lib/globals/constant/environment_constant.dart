@@ -398,6 +398,29 @@ query searchBooking($bookingReference: String!) {
 }
 ''';
 
+String searchPayment = r''' 
+query searchPayments($bookingNo:String!) {
+  Payments(where: {bookingNo: $bookingNo}) {
+    Id
+    invoiceNo
+    bookingNo
+    tranDate
+    totalQuantity
+    totalAmount
+    discount
+    discountAmount
+    vat
+    vatAmount
+    dueDate
+    totalPaid
+    balance
+    cashPositionID
+    chargeID
+    CutOffId
+  }
+}
+''';
+
 // MUTATION AREA (INSERT, UPDATE, DELETE)
 // ----------------------------------------------------------------------------------------------------
 
