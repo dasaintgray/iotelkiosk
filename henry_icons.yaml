@@ -1,5 +1,6 @@
 #command: flutter pub run flutter_launcher_icons:main
-#flutter pub run flutter_launcher_icons:main -f <your config file name here>
+#<DEPRECATED>flutter pub run flutter_launcher_icons:main -f <your config file name here>
+# dart run flutter_launcher_icons:main -f <your config file name here>
 flutter_icons:
   android: launcher_icon
   image_path: assets/png/ologo.png

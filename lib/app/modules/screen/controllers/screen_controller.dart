@@ -80,7 +80,7 @@ class ScreenController extends GetxController with BaseController {
     hostname.value = Platform.localHostname;
 
     // monitorInfo();
-    if (kDebugMode) setDisplayMonitor('DISPLAY2');
+    if (kDebugMode) setDisplayMonitor('DISPLAY3');
 
     // getBDOOpen(
     //     transactionCode: BDOTransaction.sSale,
@@ -153,7 +153,6 @@ class ScreenController extends GetxController with BaseController {
       weatherCondition.value = weatherList.first.current.condition.text;
       weatherLocation.value = weatherList.first.location.name;
       weatherCountry.value = weatherList.first.location.country;
-
       return true;
     }
     return false;
@@ -716,7 +715,7 @@ class ScreenController extends GetxController with BaseController {
   // -----------------------------------------------------------------------------------------
 
   Future<void> mediaOpen({required bool useLocal}) async {
-    if (kDebugMode) player.setVolume(0);
+    // if (kDebugMode) player.setVolume(0);
 
     final playable = Playlist(
       [

@@ -4,7 +4,7 @@ publish_to: none
 description: A Kiosk application written in Flutter and Dart, this will be use in a Hotel for easy transaction, this kiosk is connected via PMS, Property Management System with the integration on hardware like Printer, Card Issuance, etc.
 environment: 
   # sdk: '>=2.19.0 <3.0.0'
-  sdk: '>=3.0.0  <4.0.0'
+  sdk: '>=3.1.3 <4.0.0'
 
 dependencies: 
   #local library
@@ -76,6 +76,9 @@ dependencies:
   dotlottie_loader: ^0.0.3
   lottie: ^2.6.0
 
+  # LOGGING
+  logger: ^2.0.2+1
+
 dev_dependencies: 
   flutter_lints: ^2.0.0
   flutter_test: 
@@ -99,5 +102,6 @@ flutter:
     - assets/menus/
     - assets/lottie/
     - assets/logo/
+    - assets/dll/
   uses-material-design: true
 

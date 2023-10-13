@@ -48,18 +48,27 @@ class DisclaimerView extends GetView {
                   height: orientation == Orientation.portrait ? 10.h : 2.h,
                 ),
                 // TITLE
-                KioskMenuTitle(
-                  titleLength: hc.titleTrans.length,
-                  titleTrans: hc.titleTrans,
-                  fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp,
-                  heights: orientation == Orientation.portrait ? 7.h : 2.h,
+                Obx(
+                  () => Visibility(
+                    visible: hc.isDisclaimer.value,
+                    child: KioskMenuTitle(
+                      titleTrans: hc.titleTrans,
+                      fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp,
+                      heights: orientation == Orientation.portrait ? 7.h : 2.h,
+                    ),
+                  ),
                 ),
                 // SPACE
-                SizedBox(
-                  height: 2.h,
-                  child: Text(
-                    'Please scroll up the disclaimer',
-                    style: TextStyle(color: HenryColors.puti, fontSize: 3.sp),
+                Obx(
+                  () => Visibility(
+                    visible: hc.isDisclaimer.value,
+                    child: SizedBox(
+                      height: 2.h,
+                      child: Text(
+                        'Please scroll up the disclaimer',
+                        style: TextStyle(color: HenryColors.puti, fontSize: 3.sp),
+                      ),
+                    ),
                   ),
                 ),
                 // MENU
@@ -191,19 +200,23 @@ class DisclaimerView extends GetView {
                             // await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: hc.defaultTerminalID.value);
                             // hc.statusMessage.value = 'Issuing Command to Cash Dispenser';
                             // print(dispenseResponse);
-
+                            hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'TD', type: 'TITLE');
                             var response = await hc.addTransaction(credentialHeaders: hc.accessTOKEN);
-
                             if (response) {
                               hc.disposeCamera();
                               hc.isLoading.value = false;
-                              // STOP THE DISPENSER CASH POLLING
-                              // await hc.cashDispenserCommand(
-                              //     sCommand: APIConstant.cashPoolingStop, iTerminalID: hc.defaultTerminalID.value);
-                              // hc.isLoading.value = false;
-
                               Get.to(() => PrintingView());
                               // PRINTING OF CARDS AND DISPLAY INFO OF ROOMS
+                            } else {
+                              Get.defaultDialog(
+                                title: 'Error',
+                                titleStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+                                titlePadding: const EdgeInsets.all(10),
+                                middleText: 'Error Adding Transaction',
+                                middleTextStyle: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                                contentPadding: const EdgeInsets.all(20),
+                                backgroundColor: HenryColors.darkGreen,
+                              );
                             }
                           }
                         : null,

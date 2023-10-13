@@ -47,7 +47,6 @@ class HomeView extends GetView<HomeController> {
                   ),
                   // TITLE
                   KioskMenuTitle(
-                    titleLength: hc.titleTrans.length,
                     titleTrans: hc.titleTrans,
                     fontSize: orientation == Orientation.portrait ? 12.sp : 10.sp,
                     heights: orientation == Orientation.portrait ? 7.h : 2.h,

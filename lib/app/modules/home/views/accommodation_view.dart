@@ -48,7 +48,6 @@ class AccommodationView extends GetView {
                   ),
                   // TITLE
                   KioskMenuTitle(
-                    titleLength: hc.titleTrans.length,
                     titleTrans: hc.titleTrans,
                     fontSize: orientation == Orientation.portrait ? 12.sp : 8.sp,
                     heights: orientation == Orientation.portrait ? 7.h : 2.h,

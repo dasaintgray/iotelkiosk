@@ -43,6 +43,7 @@ import 'package:iotelkiosk/globals/constant/led_constant.dart';
 import 'package:iotelkiosk/globals/constant/settings_constant.dart';
 import 'package:iotelkiosk/globals/services/base/base_storage.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
+import 'package:logger/logger.dart';
 import 'package:signalr_core/signalr_core.dart';
 import 'package:system_idle/system_idle.dart';
 
@@ -227,7 +228,7 @@ class HomeController extends GetxController with BaseController {
     await getCutOffs(credentialHeaders: accessTOKEN, isActive: true);
     await getAvailableRoomsGraphQL(credentialHeaders: accessTOKEN, roomTYPEID: 1, accommodationTYPEID: 1);
 
-    ledPort.value = kDebugMode ? 'COM1' : 'COM8';
+    kDebugMode ? ledPort.value = "COM1" : ledPort.value = "COM8";
 
     // paymentChargesID.value = (await getChargesV2(credentialHeaders: accessTOKEN, codeValue: 'PYMT', ))!;
 
@@ -415,9 +416,8 @@ class HomeController extends GetxController with BaseController {
     //     ? {"terminalID": terminalID, "status": "NEW", "delay": delay, "iteration": iteration}
     //     : {"terminalID": terminalID, "status": "NEW", "delay": delay, "iteration": iteration, "code": sCode};
 
-    Snapshot terminalDataSnapShot = await hasuraConnect.subscription(terminalData, variables: variables);
-
     // LISTENING
+    Snapshot terminalDataSnapShot = await hasuraConnect.subscription(terminalData, variables: variables);
     terminalDataSnapShot.listen(
       (event) {
         var eventData = terminalDataModelFromJson(jsonEncode(event['data']['TerminalData']));
@@ -839,8 +839,10 @@ class HomeController extends GetxController with BaseController {
     }
   }
 
-  //  MUTATION AREA
+  //  MUTATION AREA - TRANSACTION
   Future addTransaction({required Map<String, String> credentialHeaders}) async {
+    final logger = Logger();
+
     if (selecttedLanguageID.value != 0) {
       // selectedNationalities.value = resultID!;
       String? name = '${screenController.hostname}-${seriesDetailsList.first.data.seriesDetails.first.docNo}';
@@ -863,6 +865,8 @@ class HomeController extends GetxController with BaseController {
           genderID: 1,
           discriminitor: 'Contact',
           headers: credentialHeaders);
+
+      logger.d(contactID);
 
       // String? basePhoto = await HomeController().takePicture();
       // add Photo discreetly
@@ -1642,7 +1646,7 @@ class HomeController extends GetxController with BaseController {
     required DateTime? endTime,
     required bool? isOR,
   }) {
-    final libPath = Platform.script.resolve("/library/dll/Msprintsdkx64.dll").path;
+    final libPath = Platform.script.resolve("assets/dll/Msprintsdkx64.dll").path;
     final logoPath = Platform.script.resolve("assets/logo/iotel.bmp").path;
     final dylib = ffi.DynamicLibrary.open(libPath.substring(1, libPath.length));
 

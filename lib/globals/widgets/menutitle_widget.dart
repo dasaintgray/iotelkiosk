@@ -4,11 +4,9 @@ import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:get/get.dart';
 
 class KioskMenuTitle extends StatelessWidget {
-  const KioskMenuTitle(
-      {super.key, required this.titleLength, required this.titleTrans, required this.fontSize, required this.heights});
+  const KioskMenuTitle({super.key, required this.titleTrans, required this.fontSize, required this.heights});
 
   final RxList<Conversion?> titleTrans;
-  final int? titleLength;
   final double? fontSize;
   final double? heights;
 
