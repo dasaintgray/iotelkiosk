@@ -1646,9 +1646,10 @@ class HomeController extends GetxController with BaseController {
     required DateTime? endTime,
     required bool? isOR,
   }) {
-    final libPath = Platform.script.resolve("assets/dll/Msprintsdkx64.dll").path;
-    final logoPath = Platform.script.resolve("assets/logo/iotel.bmp").path;
-    final dylib = ffi.DynamicLibrary.open(libPath.substring(1, libPath.length));
+    // final libPath = Platform.script.resolve("assets/hardware/Msprintsdkx64.dll").path;
+    // final logoPath = Platform.script.resolve("assets/logo/iotel.bmp").path;
+    // final dylib = ffi.DynamicLibrary.open(libPath.substring(1, libPath.length));
+    final dylib = ffi.DynamicLibrary.open("assets/hardware/Msprintsdkx64.dll");
 
     DateTime dtNow = DateTime.now();
     final ngayongAraw = DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
@@ -1689,7 +1690,8 @@ class HomeController extends GetxController with BaseController {
           setCommandmode(3);
           setAlignment(1);
           // printFeedline(1);
-          printDiskbmpfile(logoPath.substring(1, logoPath.length).toNativeUtf8());
+          // printDiskbmpfile(logoPath.substring(1, logoPath.length).toNativeUtf8());
+          printDiskbmpfile('assets/logo/iotel.bmp'.toNativeUtf8());
           //
           // printDiskbmpfile(emailPath.substring(1, emailPath.length).toNativeUtf8());
           setClean();

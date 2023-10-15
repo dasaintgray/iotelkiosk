@@ -14,6 +14,8 @@ import 'package:iotelkiosk/app/data/models_graphql/translation_terms_model.dart'
 import 'package:iotelkiosk/app/data/models_rest/roomavailable_model.dart';
 
 import 'package:iotelkiosk/app/providers/providers_global.dart';
+import 'package:iotelkiosk/globals/constant/environment_constant.dart';
+import 'package:iotelkiosk/globals/services/base/base_storage.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
 import 'package:iotelkiosk/globals/services/devices/display_service.dart';
 import 'package:media_kit/media_kit.dart';
@@ -39,6 +41,11 @@ class ScreenController extends GetxController with BaseController {
   final weatherCondition = ''.obs;
   final weatherLocation = ''.obs;
   final weatherCountry = ''.obs;
+  final selectedLanguageCode = 'en'.obs;
+  final selecttedLanguageID = 1.obs;
+  final kioskURL = ''.obs;
+  late String languageCODE = '';
+
   // INTEGER
 
   // LIST or OBJECT DATA
@@ -66,7 +73,6 @@ class ScreenController extends GetxController with BaseController {
   // LISTENING
   late final player = Player();
   late final videoController = VideoController(player);
-
   // GLOBAL
   // var ports = <String>[];
   // late SerialPort port;
@@ -76,7 +82,10 @@ class ScreenController extends GetxController with BaseController {
   void onInit() async {
     super.onInit();
 
+    await getSettings();
+
     await getWeather();
+
     hostname.value = Platform.localHostname;
 
     // monitorInfo();
@@ -116,17 +125,17 @@ class ScreenController extends GetxController with BaseController {
   }
 
   @override
-  void onReady() async {
+  void onReady() {
     super.onReady();
-    await mediaOpen(useLocal: true);
+    mediaOpen(useLocal: true);
   }
 
-  // @override
-  // void onClose() {
-  //   super.onClose();
-
-  //   // port.close();
-  // }
+  @override
+  void onClose() {
+    super.onClose();
+    player.dispose();
+    // port.close();
+  }
 
   // APP LIFE CYCLE ***********************************************************************************
 
@@ -140,6 +149,50 @@ class ScreenController extends GetxController with BaseController {
   //     return userLoginList.first.accessToken;
   //   }
   // }
+
+  Future<bool> getSettings() async {
+    // isLoading.value = true;
+
+    final accessToken = await HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
+    final headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'};
+
+    final settingsResponse = await GlobalProvider().fetchSettings(headers: headers);
+
+    try {
+      if (settingsResponse != null) {
+        // settingsList.add(settingsResponse);
+
+        // GET CITY
+        final cityIndex = settingsResponse.data.settings.indexWhere((element) => element.code == "CITY");
+        sCity.value = settingsResponse.data.settings[cityIndex].value;
+
+        // DEFAULT LANGUAGE CODE
+        final langIndex =
+            settingsResponse.data.settings.indexWhere((element) => element.code == "EN" || element.value == "English");
+        selectedLanguageCode.value = settingsResponse.data.settings[langIndex].code;
+        languageCODE = settingsResponse.data.settings[langIndex].code.toLowerCase().toString();
+
+        final idx = settingsResponse.data.settings.indexWhere((element) => element.code == 'PHLOCKURL');
+        kioskURL.value = settingsResponse.data.settings[idx].value;
+
+        // isLoading.value = false;
+        return true;
+      }
+    } finally {
+      // isLoading.value = false;
+    }
+    return false;
+  }
+
+  Future<Map<String, String>?> getAccessToken() async {
+    var accessToken = await HenryStorage.readFromLS(titulo: HenryGlobal.jwtToken);
+    if (accessToken != null) {
+      Map<String, String> globalToken = {'Content-Type': 'application/json', 'Authorization': 'Bearer $accessToken'};
+      return globalToken;
+    } else {
+      return null;
+    }
+  }
 
   Future<bool> getWeather() async {
     final weatherResponse =
@@ -715,16 +768,7 @@ class ScreenController extends GetxController with BaseController {
   // -----------------------------------------------------------------------------------------
 
   Future<void> mediaOpen({required bool useLocal}) async {
-    // if (kDebugMode) player.setVolume(0);
-
-    final playable = Playlist(
-      [
-        Media('assets/background/iOtelWalkin.mp4'),
-        Media('assets/background/iotel.mp4'),
-      ],
-    );
-
-    final networkPlay = Playlist(
+    final networkPlayable = Playlist(
       [
         Media('https://user-images.githubusercontent.com/28951144/229373695-22f88f13-d18f-4288-9bf1-c3e078d83722.mp4'),
         Media('https://user-images.githubusercontent.com/28951144/229373709-603a7a89-2105-4e1b-a5a5-a6c3567c9a59.mp4'),
@@ -734,7 +778,18 @@ class ScreenController extends GetxController with BaseController {
       ],
     );
 
-    await player.open(useLocal ? playable : networkPlay, play: true);
+    final localPlayable = Playlist([
+      Media('assets/background/iOtelWalkin.mp4'),
+      Media('assets/background/iotel.mp4'),
+    ]);
+
+    await player.open(useLocal ? localPlayable : networkPlayable);
+
+    // final playList = Playlist(medias: [
+    //   Media.asset('assets/background/iotel.mp4'),
+    //   Media.asset('assets/background/iOtelWalkin.mp4'),
+    // ]);
+    // player.open(playList, autoStart: true);
   }
 
   // SUBSCRIPTION

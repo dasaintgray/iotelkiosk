@@ -11,10 +11,11 @@ import 'app/routes/app_pages.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
+  // FOR FLUTTER INITIALIZATION
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
 
-  // VIDEO PLAYER
+  // VIDEO PLAYER INITIALIZATION
   MediaKit.ensureInitialized();
 
   await windowManager.ensureInitialized();

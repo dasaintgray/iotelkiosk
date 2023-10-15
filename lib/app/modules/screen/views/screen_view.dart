@@ -21,14 +21,6 @@ class ScreenView extends GetView<ScreenController> {
 
   @override
   Widget build(BuildContext context) {
-    // sc.player.playbackStream.listen(
-    //   (PlaybackState state) {
-    //     if (state.isCompleted) {
-    //       sc.player.play();
-    //     }
-    //   },
-    // );
-
     sc.player.stream.playing.listen(
       (bool playing) {
         sc.player.play();
@@ -51,7 +43,7 @@ class ScreenView extends GetView<ScreenController> {
               Positioned(
                 child: Video(
                   controller: sc.videoController,
-                  filterQuality: FilterQuality.high,
+                  fit: BoxFit.fill,
                 ),
               ),
 

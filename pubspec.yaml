@@ -19,7 +19,6 @@ dependencies:
   #WINDOW UI
   window_manager: ^0.3.4
   sizer: ^2.0.15
-  # flutter_acrylic: ^1.1.0+1
   one_clock: ^1.0.8
   timezone: ^0.9.1
   flutter_svg: ^2.0.0+1
@@ -28,7 +27,6 @@ dependencies:
   virtual_keyboard_multi_language: ^1.0.3
   flutter_form_builder: ^9.1.1
   flutter_datetime_picker: ^1.5.1
-  # dart_vlc: ^0.4.0
   marquee: ^2.2.3
   flutter_animate: ^4.1.1+1
   camera_windows: ^0.2.1+8
@@ -39,8 +37,7 @@ dependencies:
   # MEDIA AND AUDIO
   media_kit: ^1.1.8+2
   media_kit_video: ^1.2.1                        # For video rendering.
-  media_kit_libs_video: ^1.0.3                   # Native video dependencies.
-  media_kit_libs_audio: ^1.0.3                   # Native audio dependencies.
+  media_kit_libs_video: ^1.0.3
 
   # WEB COMMUNICATION 
   signalr_core: ^1.1.1
@@ -61,13 +58,13 @@ dependencies:
 
   #SERIAL COMMUNICATION 
   # serial_port_win32: ^0.7.0
-  hex: ^0.2.0
-
-  #ACCESSIBILITY
-  # accessibility_tools: ^1.0.0
-
   flutter_libserialport: ^0.3.0
 
+  #ACCESSIBILITY
+  hex: ^0.2.0
+  # accessibility_tools: ^1.0.0
+
+  
   #WIN32.PUB
   # windows_graphics: ^0.0.4+1
   # windows_devices: ^0.0.2+2
@@ -102,6 +99,6 @@ flutter:
     - assets/menus/
     - assets/lottie/
     - assets/logo/
-    - assets/dll/
+    - assets/hardware/
   uses-material-design: true
 
