@@ -22,7 +22,7 @@ class BookaroomView extends GetView {
         return GestureDetector(
           onTap: () {
             if (hc.isIdleActive.value) {
-              sc.player.play();
+              // sc.player.play();
             }
           },
           child: Stack(
@@ -181,7 +181,7 @@ class BookaroomView extends GetView {
                       hc.selectedRoomType.value = hc.roomTypeList.first.data.roomTypes[index].code;
                       hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'SACT', type: 'TITLE');
                       var response = await hc.getAccommodation(
-                          credentialHeaders: hc.accessTOKEN, languageCode: hc.selectedLanguageCode.value);
+                          credentialHeaders: hc.accessTOKEN, languageCode: hc.selectedLanguageCode.value, recordValue: 6);
                       if (response) {
                         if (kDebugMode) print('SELECTED ROOM TYPE ID: ${hc.selectedRoomTypeID.value}');
                         // Get.to(() => AccommodationView());

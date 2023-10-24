@@ -50,6 +50,7 @@ class ViewBooking {
   String room;
   DateTime startDate;
   DateTime endDate;
+  int roomTypeID;
   String roomType;
   int bookingStatusId;
   String bookingStatus;
@@ -72,6 +73,7 @@ class ViewBooking {
     required this.room,
     required this.startDate,
     required this.endDate,
+    required this.roomTypeID,
     required this.roomType,
     required this.bookingStatusId,
     required this.bookingStatus,
@@ -95,6 +97,7 @@ class ViewBooking {
         room: json["room"],
         startDate: DateTime.parse(json["startDate"]),
         endDate: DateTime.parse(json["endDate"]),
+        roomTypeID: json["RoomTypeId"],
         roomType: json["RoomType"],
         bookingStatusId: json["BookingStatusId"],
         bookingStatus: json["BookingStatus"],
@@ -118,6 +121,7 @@ class ViewBooking {
         "room": room,
         "startDate": startDate.toIso8601String(),
         "endDate": endDate.toIso8601String(),
+        "RoomTypeId": roomTypeID,
         "RoomType": roomType,
         "BookingStatusId": bookingStatusId,
         "BookingStatus": bookingStatus,

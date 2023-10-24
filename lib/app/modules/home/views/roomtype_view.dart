@@ -146,7 +146,11 @@ class RoomTypeView extends GetView {
                         await hc.cashDispenserCommand(
                             sCommand: APIConstant.cashPoolingStop, iTerminalID: hc.defaultTerminalID.value);
                         hc.isLoading.value = false;
-                        Get.to(() => PaymentMethodView());
+                        Get.to(
+                          () => PaymentMethodView(
+                            isBookedRoom: false,
+                          ),
+                        );
                       }
                     },
                     child: SizedBox(

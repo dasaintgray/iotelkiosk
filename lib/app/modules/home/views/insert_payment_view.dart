@@ -15,10 +15,14 @@ import 'package:iotelkiosk/globals/widgets/menutitle_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class InsertPaymentView extends GetView {
-  InsertPaymentView({Key? key}) : super(key: key);
+  InsertPaymentView({Key? key, required this.isBookedRoom, this.sourceRoomNumber, this.sourceRoomRate})
+      : super(key: key);
 
   final hc = Get.find<HomeController>();
   // final sc = Get.find<ScreenController>();
+  final bool? isBookedRoom;
+  final String? sourceRoomNumber;
+  final double? sourceRoomRate;
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +122,10 @@ class InsertPaymentView extends GetView {
           toLang: langCode.first.code.toLowerCase());
     }
 
+    if (isBookedRoom!) {
+      hc.totalAmountDue.value = sourceRoomRate! + hc.cardDeposit.value;
+    }
+
     return SizedBox(
       height: orientation == Orientation.portrait ? 40.h : 25.h,
       width: 75.w,
@@ -168,12 +176,16 @@ class InsertPaymentView extends GetView {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$roomNumber : ${hc.availRoomList[hc.preSelectedRoomID.value].description}',
+                      isBookedRoom!
+                          ? '$roomNumber : $sourceRoomNumber'
+                          : '$roomNumber : ${hc.availRoomList[hc.preSelectedRoomID.value].description}',
                       style: TextStyle(
                           color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 10.sp : 8.sp),
                     ),
                     Text(
-                      '$roomRate : $denomination ${moneyFormatting.format(hc.availRoomList[hc.preSelectedRoomID.value].rate)}',
+                      isBookedRoom!
+                          ? '$roomRate : $denomination ${moneyFormatting.format(sourceRoomRate!)}'
+                          : '$roomRate : $denomination ${moneyFormatting.format(hc.availRoomList[hc.preSelectedRoomID.value].rate)}',
                       style: TextStyle(
                           color: HenryColors.puti, fontSize: orientation == Orientation.portrait ? 10.sp : 8.sp),
                     ),
@@ -265,7 +277,13 @@ class InsertPaymentView extends GetView {
                                 hc.statusMessage.value = "Processing... please wait..";
                                 hc.isButtonActive.value = true;
 
-                                Get.to(() => DisclaimerView());
+                                Get.to(
+                                  () => DisclaimerView(
+                                    isBookedRoom: isBookedRoom!,
+                                    sourceRoomNumber: sourceRoomNumber!,
+                                    sourceRoomRate: sourceRoomRate!,
+                                  ),
+                                );
                               }
                             : null,
                         style: ElevatedButton.styleFrom(

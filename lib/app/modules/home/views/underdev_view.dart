@@ -20,7 +20,7 @@ class UnderdevView extends GetView {
       return GestureDetector(
         onTap: () {
           if (hc.isIdleActive.value) {
-            sc.player.play();
+            // sc.player.play();
           }
         },
         child: Stack(

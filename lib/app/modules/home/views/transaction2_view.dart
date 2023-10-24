@@ -150,7 +150,9 @@ class Transaction2View extends GetView {
                           {
                             hc.isLoading.value = true;
                             var response = await hc.getAccommodation(
-                                credentialHeaders: hc.accessTOKEN, languageCode: hc.selectedLanguageCode.value);
+                                credentialHeaders: hc.accessTOKEN,
+                                languageCode: hc.selectedLanguageCode.value,
+                                recordValue: 6);
                             if (response) {
                               if (kDebugMode) print('SELECTED ROOM TYPE ID: ${hc.selectedRoomTypeID.value}');
                               // sc.selectedRoomType.value = sc.roomTypeList.first.data.roomTypes[index].code;

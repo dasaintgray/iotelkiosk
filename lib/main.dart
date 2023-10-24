@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:media_kit/media_kit.dart';
 
 import 'app/routes/app_pages.dart';
 
@@ -16,28 +15,30 @@ void main() async {
   await GetStorage.init();
 
   // VIDEO PLAYER INITIALIZATION
-  MediaKit.ensureInitialized();
+  // MediaKit.ensureInitialized();
 
   await windowManager.ensureInitialized();
 
-  WindowOptions windowOptions = const WindowOptions(
-    size: Size(1080, 1920),
-    fullScreen: true,
-    center: true,
-    alwaysOnTop: false,
-    skipTaskbar: false,
-    // titleBarStyle: TitleBarStyle.normal,
-  );
+  // WindowOptions windowOptions = const WindowOptions(
+  //   size: Size(1920, 1080),
+  //   // size: Size(800, 600),
+  //   // fullScreen: true,
+  //   center: true,
+  //   alwaysOnTop: false,
+  //   skipTaskbar: false,
+  //   titleBarStyle: TitleBarStyle.normal,
+  // );
 
-  windowManager.waitUntilReadyToShow(
-    windowOptions,
-    () async {
-      await windowManager.setFullScreen(true);
-      // await windowManager.setAlignment(Alignment.center);
-      await windowManager.show();
-      await windowManager.focus();
-    },
-  );
+  // windowManager.waitUntilReadyToShow(
+  //   windowOptions,
+  //   () async {
+  //     await windowManager.setFullScreen(true);
+  //     await windowManager.setAlignment(Alignment.center);
+  //     await windowManager.isDockable();
+  //     await windowManager.focus();
+  //     await windowManager.show();
+  //   },
+  // );
 
   runApp(
     GetMaterialApp(

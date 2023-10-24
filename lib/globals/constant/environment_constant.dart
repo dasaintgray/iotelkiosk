@@ -372,8 +372,10 @@ mutation updateDenomination($bente: Int!, $tapwe: Int!, $isangdaan: Int!, $dalaw
 ''';
 
 String searchBookedRooms = r'''
-query searchBooking($bookingReference: String!) {
-  ViewBookings(where: {agentDocNo: $bookingReference}) {
+query searchBooking($bookingReference: String!, $bookingDate: DateTime!) {
+  ViewBookings(where: {agentDocNo: $bookingReference, 
+    endDate: $bookingDate, 
+    startDate: $bookingDate}) {
     Id
     isWithBreakfast
     isDoNotDesturb
@@ -383,6 +385,7 @@ query searchBooking($bookingReference: String!) {
     room
     startDate
     endDate
+    RoomTypeId
     RoomType
     BookingStatusId
     BookingStatus
@@ -748,6 +751,23 @@ query searchSettings($code: String!) {
     value
     description
     code
+  }
+}
+''';
+
+String searchKuwarto = r'''
+query searchROOMS($roomName:String!) {
+  Rooms(where: {description: $roomName}) {
+    Id
+    isActive
+    description
+    code
+    isFunctionRoom
+    minPAX
+    maxPAX
+    isWithBreakfast
+    isLockset
+    bed
   }
 }
 ''';

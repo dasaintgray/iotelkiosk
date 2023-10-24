@@ -124,13 +124,13 @@ class WeatherAndClock extends StatelessWidget {
                               DefaultTextStyle(
                                 style: TextStyle(color: HenryColors.puti, fontSize: 6.sp),
                                 child: Text(
-                                  '$degreeC° C',
+                                  '$degreeC °C',
                                 ),
                               ),
                               DefaultTextStyle(
                                 style: TextStyle(color: HenryColors.puti, fontSize: 6.sp),
                                 child: Text(
-                                  '$degreeF° F',
+                                  '$degreeF °F',
                                 ),
                               ),
 

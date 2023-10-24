@@ -23,6 +23,8 @@ import 'package:iotelkiosk/app/data/models_graphql/charges_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/cutoff_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/payment_type_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/payments_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/rooms_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
@@ -33,7 +35,6 @@ import 'package:iotelkiosk/app/data/models_rest/apiresponse_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/cardissueresponse_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/cardresponse_model.dart';
 import 'package:iotelkiosk/app/data/models_rest/userlogin_model.dart';
-import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart';
 import 'package:iotelkiosk/app/modules/screen/views/screen_view.dart';
 import 'package:iotelkiosk/app/providers/providers_global.dart';
 import 'package:iotelkiosk/globals/constant/api_constant.dart';
@@ -43,7 +44,6 @@ import 'package:iotelkiosk/globals/constant/led_constant.dart';
 import 'package:iotelkiosk/globals/constant/settings_constant.dart';
 import 'package:iotelkiosk/globals/services/base/base_storage.dart';
 import 'package:iotelkiosk/globals/services/controller/base_controller.dart';
-import 'package:logger/logger.dart';
 import 'package:signalr_core/signalr_core.dart';
 import 'package:system_idle/system_idle.dart';
 
@@ -53,6 +53,7 @@ import 'package:translator/translator.dart';
 
 import 'package:timezone/data/latest.dart' as tzd;
 import 'package:timezone/standalone.dart' as tz;
+import 'package:window_manager/window_manager.dart';
 
 // FFI AND WIN32
 
@@ -82,6 +83,8 @@ class HomeController extends GetxController with BaseController {
   final cashpositionList = <CashPositionModel>[];
   final readCardInfoList = <CardResponseModel>[];
   final guestInfoList = <BookingInfoModel>[];
+  final paymentsList = <PaymentsModel>[];
+  final roomList = <RoomsModel>[];
 
   final transactionList = <TransactionModel>[].obs;
   final pageTrans = <Conversion>[].obs;
@@ -130,6 +133,7 @@ class HomeController extends GetxController with BaseController {
   final isCashDispenserRunning = false.obs;
   final isGuestFound = false.obs;
   final isSearchButton = false.obs;
+  final isRoomPayed = false.obs;
   // INT
   final menuIndex = 0.obs;
 
@@ -188,13 +192,15 @@ class HomeController extends GetxController with BaseController {
   // ScreenController screenController = Get.put(ScreenController());
   // final ScreenController screenController = Get.find<ScreenController>();
 
-  final ScreenController screenController = Get.put(ScreenController());
+  // final ScreenController screenController = Get.put(ScreenController());
 
   final SystemIdle systemIdle = SystemIdle.instance;
   final translator = GoogleTranslator();
 
   // SCROLL CONTROLLERS
-  var scrollController = ScrollController();
+  // var scrollController = ScrollController();
+  var disclaimerScroller = ScrollController();
+  var guestScroller = ScrollController();
   var accessTOKEN = <String, String>{};
 
   // TIMER TO USE TO FETCH OR READ CARD
@@ -266,12 +272,32 @@ class HomeController extends GetxController with BaseController {
     clockLiveUpdate.value = true;
     nabasangPera.value = 0;
     // defaultCutOffID.value = getCutOffs(credentialHeaders: accessTOKEN, isActive: true);
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(1080, 1920),
+      center: true,
+      alwaysOnTop: false,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.hidden,
+    );
+
+    windowManager.waitUntilReadyToShow(
+      windowOptions,
+      () async {
+        // await windowManager.setFullScreen(true);
+        await windowManager.setAlignment(Alignment.center);
+        // await windowManager.isDockable();
+        await windowManager.focus();
+        await windowManager.show();
+      },
+    );
   }
 
   @override
   void onClose() {
     super.onClose();
     readCardTimer?.cancel();
+    disclaimerScroller.dispose();
+    guestScroller.dispose();
     // scrollController.dispose();
     // stopTimer();
     // screenController.dispose();
@@ -585,12 +611,12 @@ class HomeController extends GetxController with BaseController {
       if (kDebugMode) {
         print('SYSTEM IDLE?: $event');
       }
-      screenController.player.play(); //play the video
-      getMenu(code: 'SLMT', type: 'TITLE'); //go back to main selection
+      // screenController.player.play(); //play the video
+      getMenu(languageID: selecttedLanguageID.value, code: 'SLMT', type: 'TITLE'); //go back to main selection
       isIdleActive.value = event;
       //CLOSE THE HOMECONTROLLER INTO THE MEMORY AND STAY THE SCREENCONTROLLER ALIVE
-      // Get.off(() => ScreenView());
-      Get.offAll(() => ScreenView());
+      Get.off(() => ScreenView());
+      // Get.offAll(() => ScreenView());
       // Get.back();
     });
   }
@@ -840,12 +866,12 @@ class HomeController extends GetxController with BaseController {
   }
 
   //  MUTATION AREA - TRANSACTION
-  Future addTransaction({required Map<String, String> credentialHeaders}) async {
-    final logger = Logger();
+  Future addTransaction({required Map<String, String> credentialHeaders, String? ledCOMPORT}) async {
+    // final logger = Logger();
 
     if (selecttedLanguageID.value != 0) {
       // selectedNationalities.value = resultID!;
-      String? name = '${screenController.hostname}-${seriesDetailsList.first.data.seriesDetails.first.docNo}';
+      String? name = '${Platform.localHostname}-${seriesDetailsList.first.data.seriesDetails.first.docNo}';
       DateTime? dtNow = DateTime.now();
 
       if (cutOffList.isNotEmpty) {
@@ -866,7 +892,7 @@ class HomeController extends GetxController with BaseController {
           discriminitor: 'Contact',
           headers: credentialHeaders);
 
-      logger.d(contactID);
+      // logger.d(contactID);
 
       // String? basePhoto = await HomeController().takePicture();
       // add Photo discreetly
@@ -1039,7 +1065,7 @@ class HomeController extends GetxController with BaseController {
 
           statusMessage.value = 'Issuing Card....';
 
-          openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.cardON);
+          openLEDLibserial(portName: ledCOMPORT, ledLocationAndStatus: LedOperation.cardON);
           // PRINTING CARD
           // 202309081129
           // DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
@@ -1080,11 +1106,11 @@ class HomeController extends GetxController with BaseController {
             final updateResponse = await GlobalProvider().mutateGraphQLData(
                 documents: updateBookingTable, variables: updateBookingParams, accessHeaders: credentialHeaders);
             if (updateResponse["data"]["Bookings"]["response"] == "Success") {
-              openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.cardOFF);
+              openLEDLibserial(portName: ledCOMPORT, ledLocationAndStatus: LedOperation.cardOFF);
               statusMessage.value = 'Finalizing transaction';
             }
 
-            openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.printingON);
+            openLEDLibserial(portName: ledCOMPORT, ledLocationAndStatus: LedOperation.printingON);
 
             final consumeTime = computeTimeDifference(
               startDate: dtNow,
@@ -1129,7 +1155,7 @@ class HomeController extends GetxController with BaseController {
               isOR: false,
             );
 
-            openLEDLibserial(portName: ledPort.value, ledLocationAndStatus: LedOperation.printingOFF);
+            openLEDLibserial(portName: ledCOMPORT, ledLocationAndStatus: LedOperation.printingOFF);
             statusMessage.value = 'Closing Transaction';
             setBackToDefaultValue();
             return true;
@@ -1141,6 +1167,271 @@ class HomeController extends GetxController with BaseController {
     } else {
       return false;
     }
+  }
+
+  // PARAMETERIZED ADD TRASACTION VERSION 2
+  // PURPOSE: PARA MATAWAG NG KAHIT SINO
+  // 18 OCTOBER, 2023
+  // AUTHOR: HENRY V. MEMPIN
+  Future<bool> postTransaction({
+    required String? ledPORT,
+    required String? seriesControlNo,
+    required int? totalHoursStay,
+    required String? assignBookingNumber,
+    required double? selectedRoomRate,
+    required int? assignBookingID,
+    required int? selectedAccommodationTypeID,
+    required int? agentID,
+    required int? selectedCutOffID,
+    required int? selectedRoomTypeID,
+    required int? numberOfBED,
+    required int? numberOfPAX,
+    required int? roomID,
+    required double? discountAMOUNT,
+    required double? serviceCHARGE,
+    required double? depositAMOUNT,
+    required String? invoiceNO,
+    required double? dVAT,
+    required int? cashPOSITIONID,
+    required int? iChargesID,
+    required int? iQTY,
+    required int? paymentTYPEID,
+    required int? terminalID,
+    required String? roomNO,
+    required String? keycardNO,
+    // required String? companyAddress,
+    // required String? companyOwner,
+    // required String? companyTelephone,
+    // required String? companyEmail,
+    // required String? companyTIN,
+    // required double? totalAMOUTDUE,
+    // required double? changeDUE,
+    // required String? currencyString,
+    // required String? paymentMETHOD,
+    // required double? vatTABLE,
+    // required double? vatTAX,
+    // required bool? isIssueOR,
+  }) async {
+    final localhostName = Platform.localHostname;
+    if (selecttedLanguageID.value != 0) {
+      String? name = '$localhostName-$seriesControlNo';
+      DateTime? dtNow = DateTime.now();
+
+      statusMessage.value = 'Transaction started...';
+      // ADD CONTACT INFO
+      int? contactID = await GlobalProvider().addContacts(
+        code: seriesControlNo,
+        firstName: name,
+        lastName: "Terminal ${defaultTerminalID.value}",
+        middleName: 'Guest',
+        prefixID: 1,
+        suffixID: 1,
+        nationalityID: selecttedLanguageID.value,
+        genderID: 1,
+        discriminitor: 'Contact',
+        headers: accessTOKEN,
+      );
+      // PHOTO SECTION
+      String? basePhoto = await takePicture(camID: cameraID.value);
+      var photoResponse = await GlobalProvider()
+          .addContactPhotoes(accessHeader: accessTOKEN, contactID: contactID!, isActive: true, photo: basePhoto);
+      statusMessage.value = 'Processing client transaction';
+      if (photoResponse) {
+        // update series, on CONTACT MODULE ID
+        await GlobalProvider().updateSeriesDetails(
+          accessHeader: accessTOKEN,
+          idNo: globalFetchID.value,
+          docNo: contactNumber.value,
+          isActive: false,
+          tranDate: DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow),
+        );
+
+        DateTime? endTime = totalHoursStay! == 1
+            ? dtNow.add(Duration(days: totalHoursStay))
+            : dtNow.add(Duration(hours: totalHoursStay));
+
+        String startDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
+        String endDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(endTime);
+
+        final bookingParams = {
+          "isActive": true,
+          "isWithBreakFast": false,
+          "isDoNotDesturb": false,
+          "docNo": assignBookingNumber,
+          "accommodationTypeID": selectedAccommodationTypeID,
+          "agentID": agentID,
+          "bookingStatusID": 2,
+          "cuttOffID": selectedCutOffID,
+          "roomTypeID": selectedRoomTypeID,
+          "bed": numberOfBED,
+          "numPax": numberOfPAX,
+          "actualStartDate": startDateTime,
+          "startDate": startDateTime,
+          "endDate": endDateTime,
+          "roomRate": selectedRoomRate,
+          "roomID": roomID,
+          "discountAmount": discountAMOUNT,
+          "serviceCharge": serviceCHARGE,
+          "contactID": contactID,
+          "deposit": depositAMOUNT,
+        };
+
+        statusMessage.value = 'Posting .....';
+        final bookingResponse = await GlobalProvider()
+            .mutateGraphQLData(documents: addBooking, variables: bookingParams, accessHeaders: accessTOKEN);
+        final saveResponse = bookingResponse['data']['Bookings']['response'];
+        final bookingIDResponse = bookingResponse['data']['Bookings']['Ids'];
+
+        if (saveResponse == "Success") {
+          generatedBookingID.value = bookingIDResponse[0];
+          // update seriesDetails base on the bookings
+          await GlobalProvider().updateSeriesDetails(
+            accessHeader: accessTOKEN,
+            idNo: globalFetchID.value,
+            docNo: bookingNumber.value,
+            isActive: false,
+            tranDate: DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow),
+          );
+
+          // PROCESSING PAYMENT;
+          // insert all Charges into Booking Charges
+          // BOOKING CHARGES
+          statusMessage.value = 'Processing Booking Charges';
+          for (var x = 0; x < chargesList.first.data.charges.length; x++) {
+            bool isRoomBa = chargesList.first.data.charges[x].code == "Room" ? true : false;
+            final bookingChargesParams = {
+              "iBookingID": generatedBookingID.value,
+              "iChargeID": chargesList.first.data.charges[x].id,
+              "isForDebit": chargesList.first.data.charges[x].isForDebit,
+              "quantity": 1,
+              "rate": isRoomBa ? availRoomList[preSelectedRoomID.value].rate : chargesList.first.data.charges[x].rate,
+              "tranDate": startDateTime
+            };
+            await GlobalProvider().mutateGraphQLData(
+                documents: addBookingCharges, variables: bookingChargesParams, accessHeaders: accessTOKEN);
+          }
+
+          statusMessage.value = 'Posting client transaction';
+
+          final vatAMT = (dVAT! * selectedRoomRate!) / 100;
+
+          statusMessage.value = 'Payments';
+          // PAYMENTS AREA
+          final paymentParams = {
+            "cutOffID": selectedCutOffID,
+            "balance": 0.0,
+            "bookingNo": assignBookingNumber,
+            "discount": 0,
+            "discountAmount": 0.0,
+            "dueDate": DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow),
+            "totalAmount": selectedRoomRate,
+            "totalPaid": selectedRoomRate,
+            "totalQuantity": iQTY,
+            "tranDate": DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow),
+            "vat": dVAT,
+            "vatAmount": vatAMT,
+            "invoiceNo": invoiceNO,
+            "cashPosition": cashPOSITIONID,
+            "chargeID": iChargesID
+          };
+
+          statusMessage.value = 'Processing payment transaction';
+
+          final paymentResponse = await GlobalProvider()
+              .mutateGraphQLData(documents: addPayments, variables: paymentParams, accessHeaders: accessTOKEN);
+          final paymentID = paymentResponse['data']['Payments']['Ids'];
+          // print(paymentResponse);
+          statusMessage.value = "Processing payment details";
+
+          final paymentDetailsParams = {
+            "amount": selectedRoomRate,
+            "paymentID": paymentID[0],
+            "paymentTypeID": paymentTYPEID,
+          };
+
+          await GlobalProvider().mutateGraphQLData(
+              documents: addPaymentDetails, variables: paymentDetailsParams, accessHeaders: accessTOKEN);
+          statusMessage.value = 'Issuing Card....';
+          openLEDLibserial(portName: ledPORT, ledLocationAndStatus: LedOperation.cardON);
+          // PRINTING CARD
+          // 202309081129
+          // DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow);
+          roomNumber.value = availRoomList[preSelectedRoomID.value].code;
+          final issueCardResponse = await issueCard(
+            command: APIConstant.issueCard,
+            iTerminalID: terminalID,
+            roomNo: roomNO,
+            checkInTime: DateFormat('yyyyMMddHHmm').format(dtNow),
+            checkOuttime: DateFormat('yyyyMMddHHmm').format(endTime),
+            guestName: name,
+            commonDoor: "01",
+            liftReader: "010101",
+          );
+
+          if (issueCardResponse) {
+            statusMessage.value = 'Updating series....';
+            // update seriesDetails
+            await GlobalProvider().updateSeriesDetails(
+              accessHeader: accessTOKEN,
+              idNo: globalFetchID.value,
+              docNo: invoiceNumber.value,
+              isActive: false,
+              tranDate: DateFormat('yyyy-MM-dd HH:mm:ss').format(dtNow),
+            );
+
+            // UPDATE BOOKING WITH FINAL INVOICE#
+            final updateBookingParams = {
+              "bookingNumber": assignBookingNumber!,
+              "invoiceNo": invoiceNO!,
+              "cardNo": keycardNO
+            };
+
+            statusMessage.value = 'Printing receipt';
+            final updateResponse = await GlobalProvider().mutateGraphQLData(
+                documents: updateBookingTable, variables: updateBookingParams, accessHeaders: accessTOKEN);
+            if (updateResponse["data"]["Bookings"]["response"] == "Success") {
+              openLEDLibserial(portName: ledPORT, ledLocationAndStatus: LedOperation.cardOFF);
+              statusMessage.value = 'Finalizing transaction';
+            }
+            openLEDLibserial(portName: ledPORT, ledLocationAndStatus: LedOperation.printingON);
+
+            final consumeTime = computeTimeDifference(
+              startDate: dtNow,
+              endDate: endTime,
+            );
+
+            // printResibo(
+            //   address: companyAddress,
+            //   owner: companyOwner,
+            //   telephone: companyTelephone,
+            //   email: companyEmail,
+            //   vatTin: companyTIN,
+            //   bookingID: assignBookingID,
+            //   terminalID: terminalID,
+            //   qty: iQTY,
+            //   roomRate: NumberFormat("#,##0.00", "en_PH").format(selectedRoomRate),
+            //   deposit: NumberFormat("#,##0.00", "en_PH").format(depositAMOUNT),
+            //   totalAmount: NumberFormat("#,##0.00", "en_PH").format(totalAMOUTDUE),
+            //   totalAmountPaid: NumberFormat("#,##0.00", "en_PH").format(totalAMOUTDUE),
+            //   paymentMethod: paymentMETHOD,
+            //   changeValue: NumberFormat("#,##0.00", "en_PH").format(changeDUE),
+            //   currencyString: currencyString!,
+            //   vatTable: NumberFormat("#,##0.00", "en_PH").format(vatTABLE),
+            //   vatTax: NumberFormat("#,##0.00", "en_PH").format(vatTAX),
+            //   roomNumber: roomNO,
+            //   timeConsume: consumeTime,
+            //   endTime: endTime,
+            //   isOR: isIssueOR,
+            // );
+            openLEDLibserial(portName: ledPORT, ledLocationAndStatus: LedOperation.printingOFF);
+            statusMessage.value = 'Closing Transaction';
+            setBackToDefaultValue();
+            return true;
+          }
+        }
+      }
+    } //END OF IF NG selecttedLanguageID
+    return false;
   }
 
   // CHECKOUT MODULE
@@ -1170,10 +1461,13 @@ class HomeController extends GetxController with BaseController {
     return null;
   }
 
-  Future<bool> getAccommodation({required Map<String, String> credentialHeaders, required String? languageCode}) async {
+  Future<bool> getAccommodation(
+      {required Map<String, String> credentialHeaders,
+      required String? languageCode,
+      required int? recordValue}) async {
     // isLoading.value = true;
 
-    final response = await GlobalProvider().fetchAccommodationType(6, headers: credentialHeaders);
+    final response = await GlobalProvider().fetchAccommodationType(recordValue, headers: credentialHeaders);
     // const inputHenry = 'Acknowledgement';
 
     try {
@@ -1462,10 +1756,32 @@ class HomeController extends GetxController with BaseController {
 
   // BOOKED ROOMS
   Future<bool> searchBK({required String? bookingNumber, required Map<String, String> credentialHeaders}) async {
-    final searchResponse =
-        await GlobalProvider().fetchBookingInfo(bookingNumber: bookingNumber, accessHeader: credentialHeaders);
+    DateTime? dtNow = DateTime.now();
+    final searchResponse = await GlobalProvider()
+        .fetchBookingInfo(bookingNumber: bookingNumber, bookingDate: dtNow, accessHeader: credentialHeaders);
     if (searchResponse != null) {
       guestInfoList.add(searchResponse);
+      return true;
+    }
+    return false;
+  }
+
+  // PAYMENTS
+  Future<bool> searchPayments({required String? bookingNumber, required Map<String, String> credentialHeaders}) async {
+    final searchResponse =
+        await GlobalProvider().fetchPayments(bookingNumber: bookingNumber, accessHeader: credentialHeaders);
+    if (searchResponse != null) {
+      isRoomPayed.value = true;
+      return true;
+    }
+    return false;
+  }
+
+  // SEARCH ROOMS
+  Future<bool> getRooms({required String? roomName}) async {
+    final roomResponse = await GlobalProvider().searchRooms(roomName: roomName, accessHeader: accessTOKEN);
+    if (roomResponse != null) {
+      roomList.add(roomResponse);
       return true;
     }
     return false;

@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 import 'package:get/get.dart';
 import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/printing_view.dart';
+import 'package:iotelkiosk/globals/constant/settings_constant.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:iotelkiosk/globals/widgets/companylogo_widget.dart';
 import 'package:iotelkiosk/globals/widgets/kioskbi_widget.dart';
@@ -18,9 +20,13 @@ import 'package:lottie/lottie.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 
 class DisclaimerView extends GetView {
-  DisclaimerView({Key? key}) : super(key: key);
+  DisclaimerView({Key? key, required this.isBookedRoom, this.sourceRoomNumber, this.sourceRoomRate}) : super(key: key);
 
   final hc = Get.find<HomeController>();
+  final bool? isBookedRoom;
+  final String? sourceRoomNumber;
+  final double? sourceRoomRate;
+
   // final sc = Get.find<ScreenController>();
 
   @override
@@ -84,6 +90,7 @@ class DisclaimerView extends GetView {
 
   Widget menuDisclaimer(Orientation orientation, BuildContext context) {
     final imgKey = GlobalKey();
+    // var scrollController = ScrollController();
     return SizedBox(
       height: orientation == Orientation.portrait ? 40.h : 20.h,
       width: 75.w,
@@ -159,7 +166,7 @@ class DisclaimerView extends GetView {
                     : SizedBox(
                         height: 24.h,
                         child: SingleChildScrollView(
-                          controller: hc.scrollController,
+                          controller: hc.disclaimerScroller,
                           child: Text(
                             hc.languageList.first.data.languages.first.disclaimer,
                             style: TextStyle(
@@ -192,31 +199,82 @@ class DisclaimerView extends GetView {
                             hc.isButtonActive.value = false;
                             hc.isBottom.value = false;
                             hc.isDisclaimer.value = false;
-                            // var output = hc.findVideoPlayer(pamagat: 'iOtel Kiosk Application');
-                            // final handle = imgKey.currentContext?.findAncestorWidgetOfExactType<SizedBox>().hashCode;
-                            // if (kDebugMode) print('Picture Handle: $handle');
-                            // hc.getMenu(code: 'SLMT', type: 'TITLE');
-
-                            // await hc.cashDispenserCommand(sCommand: 'CASH', iTerminalID: hc.defaultTerminalID.value);
-                            // hc.statusMessage.value = 'Issuing Command to Cash Dispenser';
-                            // print(dispenseResponse);
                             hc.getMenu(languageID: hc.selecttedLanguageID.value, code: 'TD', type: 'TITLE');
-                            var response = await hc.addTransaction(credentialHeaders: hc.accessTOKEN);
-                            if (response) {
-                              hc.disposeCamera();
-                              hc.isLoading.value = false;
-                              Get.to(() => PrintingView());
-                              // PRINTING OF CARDS AND DISPLAY INFO OF ROOMS
-                            } else {
-                              Get.defaultDialog(
-                                title: 'Error',
-                                titleStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
-                                titlePadding: const EdgeInsets.all(10),
-                                middleText: 'Error Adding Transaction',
-                                middleTextStyle: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
-                                contentPadding: const EdgeInsets.all(20),
-                                backgroundColor: HenryColors.darkGreen,
+                            // var response = await hc.addTransaction(credentialHeaders: hc.accessTOKEN);
+                            var ledPORT = kDebugMode ? 'COM1' : 'COM8';
+
+                            if (isBookedRoom!) {
+                              hc.statusMessage.value = 'Initializing devices';
+                              await hc.getAccommodation(
+                                credentialHeaders: hc.accessTOKEN,
+                                languageCode: hc.selectedLanguageCode.value,
+                                recordValue: 8,
                               );
+
+                              var durationValue = hc.accommodationTypeList.first.data.accommodationTypes.where(
+                                  (element) =>
+                                      element.description ==
+                                      hc.guestInfoList.first.data.viewBookings.first.accommodationType);
+
+                              final int hoursStay = durationValue.first.valueMax.toInt();
+
+                              final moduleReponse = hc.settingsList.first.data.settings
+                                  .where((element) => element.code == SettingConstant.bookingModuleID);
+                              final assignBookingNumber = await hc.getSeriesDetails(
+                                  credentialHeaders: hc.accessTOKEN, moduleID: int.parse(moduleReponse.first.value));
+
+                              await hc.getRooms(roomName: hc.guestInfoList.first.data.viewBookings.first.room);
+
+                              await hc.getCamera();
+
+                              final postResponse = await hc.postTransaction(
+                                  ledPORT: ledPORT,
+                                  seriesControlNo: hc.seriesDetailsList.first.data.seriesDetails.first.docNo,
+                                  totalHoursStay: hoursStay,
+                                  assignBookingNumber: assignBookingNumber,
+                                  selectedRoomRate: sourceRoomRate,
+                                  assignBookingID: hc.generatedBookingID.value,
+                                  selectedAccommodationTypeID: durationValue.first.id,
+                                  agentID: hc.guestInfoList.first.data.viewBookings.first.agentId,
+                                  selectedCutOffID: hc.cutOffList.first.data.cutOffs.first.id,
+                                  selectedRoomTypeID: hc.guestInfoList.first.data.viewBookings.first.roomTypeID,
+                                  numberOfBED: hc.guestInfoList.first.data.viewBookings.first.bed,
+                                  numberOfPAX: 2,
+                                  roomID: hc.roomList.first.data.rooms.first.id,
+                                  discountAMOUNT: 0,
+                                  serviceCHARGE: 0,
+                                  depositAMOUNT: 100,
+                                  invoiceNO: '',
+                                  dVAT: 12,
+                                  cashPOSITIONID: 1,
+                                  iChargesID: 1,
+                                  iQTY: 1,
+                                  paymentTYPEID: 1,
+                                  terminalID: 1,
+                                  roomNO: hc.guestInfoList.first.data.viewBookings.first.room,
+                                  keycardNO: '');
+                              if (postResponse) {
+                                // PRINT THE RECEIPT
+                              }
+                            } else {
+                              var response =
+                                  await hc.addTransaction(credentialHeaders: hc.accessTOKEN, ledCOMPORT: ledPORT);
+                              if (response) {
+                                hc.disposeCamera();
+                                hc.isLoading.value = false;
+                                Get.to(() => PrintingView());
+                                // PRINTING OF CARDS AND DISPLAY INFO OF ROOMS
+                              } else {
+                                Get.defaultDialog(
+                                  title: 'Error',
+                                  titleStyle: TextStyle(color: HenryColors.puti, fontSize: 8.sp),
+                                  titlePadding: const EdgeInsets.all(10),
+                                  middleText: 'Error Adding Transaction',
+                                  middleTextStyle: TextStyle(color: HenryColors.puti, fontSize: 12.sp),
+                                  contentPadding: const EdgeInsets.all(20),
+                                  backgroundColor: HenryColors.darkGreen,
+                                );
+                              }
                             }
                           }
                         : null,

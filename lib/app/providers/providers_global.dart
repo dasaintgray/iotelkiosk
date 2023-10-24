@@ -11,6 +11,8 @@ import 'package:iotelkiosk/app/data/models_graphql/cutoff_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/denomination_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/languages_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/payment_type_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/payments_model.dart';
+import 'package:iotelkiosk/app/data/models_graphql/rooms_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/roomtype_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/seriesdetails_model.dart';
 import 'package:iotelkiosk/app/data/models_graphql/settings_model.dart';
@@ -388,14 +390,45 @@ class GlobalProvider extends BaseController {
   }
 
   Future<BookingInfoModel?> fetchBookingInfo(
-      {required String? bookingNumber, required Map<String, String>? accessHeader}) async {
-    final searchParams = {'bookingReference': bookingNumber};
+      {required String? bookingNumber,
+      required DateTime? bookingDate,
+      required Map<String, String>? accessHeader}) async {
+    final searchParams = {
+      'bookingReference': bookingNumber,
+      'bookingDate': bookingDate!.toIso8601String(),
+    };
 
     HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: accessHeader);
     final response = await hasuraConnect.query(searchBookedRooms, variables: searchParams).catchError(handleError);
 
     if (response["data"]["ViewBookings"].toString() != "[]") {
       return bookingInfoModelFromJson(jsonEncode(response));
+    }
+    return null;
+  }
+
+  Future<PaymentsModel?> fetchPayments(
+      {required String? bookingNumber, required Map<String, String>? accessHeader}) async {
+    final searchParams = {"bookingNo": bookingNumber};
+
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: accessHeader);
+
+    final response = await hasuraConnect.query(searchPayment, variables: searchParams).catchError(handleError);
+    if (response["data"]["Payments"].toString() != "[]") {
+      return paymentsModelFromJson(jsonEncode(response));
+    }
+    return null;
+  }
+
+  Future<RoomsModel?> searchRooms({required String? roomName, required Map<String, String> accessHeader}) async {
+    final searchParams = {"roomName": roomName};
+
+    HasuraConnect hasuraConnect = HasuraConnect(HenryGlobal.sandboxGQL, headers: accessHeader);
+
+    final roomResponse = await hasuraConnect.query(searchKuwarto, variables: searchParams).catchError(handleError);
+
+    if (roomResponse["data"]["Rooms"].toString() != "[]") {
+      return roomsModelFromJson(jsonEncode(roomResponse));
     }
     return null;
   }
@@ -464,7 +497,7 @@ class GlobalProvider extends BaseController {
       String? firstName,
       String? lastName,
       String? middleName,
-      int? prefixID = 1,
+      int? prefixID = 1, 
       int? suffixID = 1,
       int? nationalityID = 77,
       int? genderID = 1,

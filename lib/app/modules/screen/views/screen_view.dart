@@ -6,8 +6,8 @@ import 'package:iotelkiosk/app/modules/home/controllers/home_controller.dart';
 import 'package:iotelkiosk/app/modules/home/views/home_view.dart';
 import 'package:iotelkiosk/globals/constant/theme_constant.dart';
 import 'package:marquee/marquee.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 import 'package:sizer/sizer.dart';
+// import 'package:win32/win32.dart';
 
 import '../controllers/screen_controller.dart';
 
@@ -21,18 +21,18 @@ class ScreenView extends GetView<ScreenController> {
 
   @override
   Widget build(BuildContext context) {
-    sc.player.stream.playing.listen(
-      (bool playing) {
-        sc.player.play();
-      },
-    );
+    // sc.player.stream.playing.listen(
+    //   (bool playing) {
+    //     // sc.player.play();
+    //   },
+    // );
 
     return Sizer(
       builder: (BuildContext context, Orientation orientation, DeviceType deviceType) {
         return GestureDetector(
           onTap: () {
             if (!sc.isLoading.value) {
-              sc.player.stop();
+              // sc.player.stop();
               hc.getMenu(code: 'SLMT', type: 'TITLE');
               Get.to(() => HomeView());
             }
@@ -41,9 +41,13 @@ class ScreenView extends GetView<ScreenController> {
             children: [
               // VIDEOS
               Positioned(
-                child: Video(
-                  controller: sc.videoController,
-                  fit: BoxFit.fill,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/background/main.png'),
+                      fit: BoxFit.fill,
+                    ),
+                  ),
                 ),
               ),
 

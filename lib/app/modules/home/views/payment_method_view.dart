@@ -16,9 +16,13 @@ import 'package:iotelkiosk/globals/widgets/menutitle_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class PaymentMethodView extends GetView {
-  PaymentMethodView({Key? key}) : super(key: key);
+  PaymentMethodView({Key? key, required this.isBookedRoom, this.sourceRoomNumber, this.sourceRoomRate})
+      : super(key: key);
 
   final hc = Get.find<HomeController>();
+  final bool? isBookedRoom;
+  final String? sourceRoomNumber;
+  final double? sourceRoomRate;
   // final sc = Get.find<ScreenController>();
 
   @override
@@ -211,7 +215,13 @@ class PaymentMethodView extends GetView {
                                           await hc.getCamera();
 
                                           // hc.update();
-                                          Get.to(() => InsertPaymentView());
+                                          Get.to(
+                                            () => InsertPaymentView(
+                                              isBookedRoom: isBookedRoom,
+                                              sourceRoomNumber: sourceRoomNumber,
+                                              sourceRoomRate: sourceRoomRate,
+                                            ),
+                                          );
                                         }
                                       }
                                     }
