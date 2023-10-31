@@ -1199,6 +1199,7 @@ class HomeController extends GetxController with BaseController {
     required int? terminalID,
     required String? roomNO,
     required String? keycardNO,
+    required int? contactID,
     // required String? companyAddress,
     // required String? companyOwner,
     // required String? companyTelephone,
@@ -1219,23 +1220,37 @@ class HomeController extends GetxController with BaseController {
 
       statusMessage.value = 'Transaction started...';
       // ADD CONTACT INFO
-      int? contactID = await GlobalProvider().addContacts(
-        code: seriesControlNo,
-        firstName: name,
-        lastName: "Terminal ${defaultTerminalID.value}",
-        middleName: 'Guest',
-        prefixID: 1,
-        suffixID: 1,
-        nationalityID: selecttedLanguageID.value,
-        genderID: 1,
-        discriminitor: 'Contact',
-        headers: accessTOKEN,
-      );
+      // int? contactID = await GlobalProvider().addContacts(
+      //   code: seriesControlNo,
+      //   firstName: name,
+      //   lastName: "Terminal ${defaultTerminalID.value}",
+      //   middleName: 'Guest',
+      //   prefixID: 1,
+      //   suffixID: 1,
+      //   nationalityID: selecttedLanguageID.value,
+      //   genderID: 1,
+      //   discriminitor: 'Contact',
+      //   headers: accessTOKEN,
+      // );
+
       // PHOTO SECTION
       String? basePhoto = await takePicture(camID: cameraID.value);
-      var photoResponse = await GlobalProvider()
-          .addContactPhotoes(accessHeader: accessTOKEN, contactID: contactID!, isActive: true, photo: basePhoto);
+
+      var photoResponse = await GlobalProvider().addContactPhotoes(
+        accessHeader: accessTOKEN,
+        contactID: contactID!,
+        isActive: true,
+        photo: basePhoto,
+      );
+
       statusMessage.value = 'Processing client transaction';
+
+      final settingResponse =
+          settingsList.first.data.settings.where((element) => element.code == SettingConstant.contactModuleID);
+
+      contactNumber.value =
+          (await getSeriesDetails(credentialHeaders: accessTOKEN, moduleID: int.parse(settingResponse.first.value)))!;
+
       if (photoResponse) {
         // update series, on CONTACT MODULE ID
         await GlobalProvider().updateSeriesDetails(
@@ -1428,7 +1443,7 @@ class HomeController extends GetxController with BaseController {
             setBackToDefaultValue();
             return true;
           }
-        }
+        } //end of if
       }
     } //END OF IF NG selecttedLanguageID
     return false;

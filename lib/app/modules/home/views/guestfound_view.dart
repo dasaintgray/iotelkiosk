@@ -95,8 +95,8 @@ class GuestfoundView extends GetView {
     final moneyFormatting = NumberFormat("#,##0.00", "en_PH");
 
     var nameText = 'Guest Name'.obs;
-    var bookingSourceText = 'Booking Source'.obs;
-    var bookingNumberText = 'Booking Number'.obs;
+    var bookingSourceText = 'Agent Booking Source'.obs;
+    var bookingNumberText = 'Agent Booking Number'.obs;
     var bookingStatusText = 'Booking Status'.obs;
     var roomTypeText = 'Room Type'.obs;
     var roomNumberText = 'Room Number'.obs;
@@ -106,6 +106,7 @@ class GuestfoundView extends GetView {
     var paymentStatusText = 'Payment Status'.obs;
     var proceedPaymentText = 'Proceed for Payments'.obs;
     var checkInText = 'Check-In'.obs;
+    var inHouseBookingNumberText = 'iOtel Booking Number'.obs;
 
     final String langCode = hc.selectedLanguageCode.value.toString();
 
@@ -122,6 +123,9 @@ class GuestfoundView extends GetView {
     translator.translate(paymentStatusText.value, to: langCode).then((value) => paymentStatusText.value = value.text);
     translator.translate(proceedPaymentText.value, to: langCode).then((value) => proceedPaymentText.value = value.text);
     translator.translate(checkInText.value, to: langCode).then((value) => checkInText.value = value.text);
+    translator
+        .translate(inHouseBookingNumberText.value, to: langCode)
+        .then((value) => inHouseBookingNumberText.value = value.text);
 
     // var scrollController = ScrollController();
 
@@ -388,36 +392,74 @@ class GuestfoundView extends GetView {
                     ),
                   ],
                 ),
-                Card(
-                  color: hc.isRoomPayed.value ? HenryColors.darkGreen : HenryColors.warmRed,
-                  // elevation: 2.0,
-                  margin: const EdgeInsets.all(8.0),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(15.0)),
-                  ),
-                  child: ListTile(
-                    leading: Image.asset(
-                      hc.isRoomPayed.value ? 'assets/icons/rate.png' : 'assets/icons/unpaid.png',
-                      height: 12.h,
-                      width: 5.w,
-                      fit: BoxFit.fill,
-                    ),
-                    title: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          paymentStatusText.value,
-                          style: TextStyle(color: HenryColors.black87, fontSize: 6.sp),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Card(
+                        color: hc.isRoomPayed.value ? HenryColors.darkGreen : HenryColors.warmRed,
+                        // elevation: 2.0,
+                        margin: const EdgeInsets.all(8.0),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(15.0)),
                         ),
-                        Text(
-                          hc.isRoomPayed.value ? roomPaidText.value : roomNotPaidText.value,
-                          style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                        child: ListTile(
+                          leading: Image.asset(
+                            'assets/icons/booknum.png',
+                            height: 12.h,
+                            width: 5.w,
+                            fit: BoxFit.fill,
+                          ),
+                          title: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                inHouseBookingNumberText.value,
+                                style: TextStyle(color: HenryColors.black87, fontSize: 6.sp),
+                              ),
+                              Text(
+                                hc.guestInfoList.first.data.viewBookings.first.docNo,
+                                style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
+                      ).animate().scaleXY(duration: 500.ms),
                     ),
-                  ),
-                ).animate().slideX(duration: 500.ms),
+                    Expanded(
+                      child: Card(
+                        color: hc.isRoomPayed.value ? HenryColors.darkGreen : HenryColors.warmRed,
+                        // elevation: 2.0,
+                        margin: const EdgeInsets.all(8.0),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                        ),
+                        child: ListTile(
+                          leading: Image.asset(
+                            hc.isRoomPayed.value ? 'assets/icons/rate.png' : 'assets/icons/unpaid.png',
+                            height: 12.h,
+                            width: 5.w,
+                            fit: BoxFit.fill,
+                          ),
+                          title: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                paymentStatusText.value,
+                                style: TextStyle(color: HenryColors.black87, fontSize: 6.sp),
+                              ),
+                              Text(
+                                hc.isRoomPayed.value ? roomPaidText.value : roomNotPaidText.value,
+                                style: TextStyle(color: HenryColors.puti, fontSize: 10.sp),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ).animate().scaleXY(duration: 500.ms),
+                    ),
+                  ],
+                ),
                 // BUTTON - IS DEPEND EITHER PAID OR NOT PAID
                 // GOTO TO PAYMENT METHOD
                 SizedBox(

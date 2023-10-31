@@ -89,7 +89,9 @@ class ScreenController extends GetxController with BaseController {
 
     hostname.value = Platform.localHostname;
 
-    if (kDebugMode) setDisplayMonitor('DISPLAY2');
+    if (kDebugMode) setDisplayMonitor('DISPLAY3');
+
+    cardDispenser(portNumber: 'COM1');
 
     // monitorInfo();
 
@@ -694,45 +696,47 @@ class ScreenController extends GetxController with BaseController {
     }
   }
 
-  // void cardDispenser({required String portNumber}) {
-  //   // final serialPort = SerialPort.availablePorts;
-  //   final port = SerialPort(portNumber);
-  //   final portConfig = SerialPortConfig();
+  void cardDispenser({required String portNumber}) {
+    // final serialPort = SerialPort.availablePorts;
+    final port = SerialPort(portNumber);
+    final portConfig = SerialPortConfig();
 
-  //   portConfig.baudRate = 9600;
-  //   // portConfig.parity = SerialPortParity.none;
-  //   // portConfig.bits = 1;
-  //   // portConfig.stopBits = 1;
+    portConfig.baudRate = 9600;
+    // portConfig.parity = SerialPortParity.none;
+    // portConfig.bits = 1;
+    // portConfig.stopBits = 1;
 
-  //   if (!port.openReadWrite()) {
-  //     if (kDebugMode) print(SerialPort.lastError);
-  //     // exit(-1);
-  //   }
+    if (!port.openReadWrite()) {
+      if (kDebugMode) print(SerialPort.lastError);
+      // exit(-1);
+    }
 
-  //   var sendCmd = '02 00 00 00 02 52 46 03 00';
-  //   Uint8List byteAP = Uint8List.fromList(HEX.decode(sendCmd));
+    // var sendCmd = '02 00 00 00 02 52 46 03 00';
+    var sendCmd = '02,30,30,00,02,47,56,03,12';
+    // Uint8List byteAP = Uint8List.fromList(HEX.decode(sendCmd));
+    Uint8List byteAP = Uint8List.fromList(ascii.encode(sendCmd));
 
-  //   port.write(byteAP);
+    port.write(byteAP);
 
-  //   if (kDebugMode) print('${port.name} is open');
+    if (kDebugMode) print('${port.name} is open');
 
-  //   int readBuffer = 512;
+    int readBuffer = 512;
 
-  //   while (port.isOpen) {
-  //     Uint8List bytesRead = port.read(readBuffer, timeout: 60);
+    while (port.isOpen) {
+      Uint8List bytesRead = port.read(readBuffer, timeout: 60);
 
-  //     if (bytesRead.isNotEmpty) {
-  //       if (kDebugMode) print('BYTES READ DECIMAL: $bytesRead');
-  //       if (kDebugMode) print('BYTES READ HEX: ${HEX.encode(bytesRead).toUpperCase()}');
-  //       var asciiTable = String.fromCharCodes(bytesRead);
-  //       if (kDebugMode) print('ASCII: $asciiTable');
-  //     }
+      if (bytesRead.isNotEmpty) {
+        if (kDebugMode) print('BYTES READ DECIMAL: $bytesRead');
+        if (kDebugMode) print('BYTES READ HEX: ${HEX.encode(bytesRead).toUpperCase()}');
+        var asciiTable = String.fromCharCodes(bytesRead);
+        if (kDebugMode) print('ASCII: $asciiTable');
+      }
 
-  //     if (bytesRead.isEmpty) {
-  //       port.close();
-  //     }
-  //   }
-  // }
+      if (bytesRead.isEmpty) {
+        port.close();
+      }
+    }
+  }
 
   // void openLED() {
   //   final serialPort = winsp.SerialPort.getAvailablePorts();
