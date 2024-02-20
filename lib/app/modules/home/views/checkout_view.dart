@@ -13,7 +13,7 @@ import 'package:lottie/lottie.dart';
 import 'package:sizer/sizer.dart';
 
 class CheckoutView extends GetView<HomeController> {
-  CheckoutView({Key? key}) : super(key: key);
+  CheckoutView({super.key});
 
   final hc = Get.find<HomeController>();
 

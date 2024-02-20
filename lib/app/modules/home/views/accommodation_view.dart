@@ -16,7 +16,7 @@ import 'package:iotelkiosk/globals/widgets/menutitle_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class AccommodationView extends GetView {
-  AccommodationView({Key? key}) : super(key: key);
+  AccommodationView({super.key});
 
   final hc = Get.find<HomeController>();
   // final sc = Get.find<ScreenController>();

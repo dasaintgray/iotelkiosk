@@ -35,9 +35,8 @@ class HenryClock extends StatefulWidget {
       required this.locationOfTime,
       required this.locationStyle,
       isLive,
-      Key? key})
-      : isLive = isLive ?? (dateTime == null),
-        super(key: key);
+      super.key})
+      : isLive = isLive ?? (dateTime == null);
 
   @override
   // ignore: no_logic_in_create_state

@@ -17,7 +17,7 @@ import 'package:iotelkiosk/globals/widgets/menutitle_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class Transaction2View extends GetView {
-  Transaction2View({Key? key}) : super(key: key);
+  Transaction2View({super.key});
 
   final hc = Get.find<HomeController>();
 

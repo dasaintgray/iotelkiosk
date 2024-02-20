@@ -15,7 +15,7 @@ import 'package:translator/translator.dart';
 import 'package:virtual_keyboard_multi_language/virtual_keyboard_multi_language.dart';
 
 class BookedroomView extends GetView {
-  BookedroomView({Key? key}) : super(key: key);
+  BookedroomView({super.key});
 
   final hc = Get.find<HomeController>();
 

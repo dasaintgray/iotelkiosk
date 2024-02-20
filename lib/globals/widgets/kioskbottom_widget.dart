@@ -5,7 +5,7 @@ import 'package:iotelkiosk/app/modules/screen/controllers/screen_controller.dart
 import 'package:iotelkiosk/globals/constant/image_constant.dart';
 
 class KioskBottom extends StatelessWidget {
-  KioskBottom({Key? key}) : super(key: key);
+  KioskBottom({super.key});
 
   final hc = Get.find<HomeController>();
   final sc = Get.find<ScreenController>();

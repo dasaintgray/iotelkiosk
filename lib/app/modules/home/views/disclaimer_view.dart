@@ -20,7 +20,7 @@ import 'package:lottie/lottie.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 
 class DisclaimerView extends GetView {
-  DisclaimerView({Key? key, required this.isBookedRoom, this.sourceRoomNumber, this.sourceRoomRate}) : super(key: key);
+  DisclaimerView({super.key, required this.isBookedRoom, this.sourceRoomNumber, this.sourceRoomRate});
 
   final hc = Get.find<HomeController>();
   final bool? isBookedRoom;

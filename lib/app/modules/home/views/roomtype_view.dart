@@ -16,7 +16,7 @@ import 'package:iotelkiosk/globals/widgets/menutitle_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class RoomTypeView extends GetView {
-  RoomTypeView({Key? key}) : super(key: key);
+  RoomTypeView({super.key});
 
   final hc = Get.find<HomeController>();
   // final sc = Get.find<ScreenController>();

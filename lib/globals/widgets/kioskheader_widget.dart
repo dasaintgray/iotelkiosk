@@ -7,7 +7,7 @@ import 'package:iotelkiosk/globals/widgets/weather_clock_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class KioskHeader extends StatelessWidget {
-  KioskHeader({Key? key, required this.isLive}) : super(key: key);
+  KioskHeader({super.key, required this.isLive});
 
   final hc = Get.find<HomeController>();
   final sc = Get.find<ScreenController>();

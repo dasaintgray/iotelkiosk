@@ -6,8 +6,7 @@ class HMText extends StatelessWidget {
   final double fontSize;
   final FontWeight fontWeight;
 
-  const HMText({Key? key, required this.text, required this.color, required this.fontSize, required this.fontWeight})
-      : super(key: key);
+  const HMText({super.key, required this.text, required this.color, required this.fontSize, required this.fontWeight});
 
   @override
   Widget build(BuildContext context) {

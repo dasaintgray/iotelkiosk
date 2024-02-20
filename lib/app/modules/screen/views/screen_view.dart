@@ -12,7 +12,7 @@ import 'package:sizer/sizer.dart';
 import '../controllers/screen_controller.dart';
 
 class ScreenView extends GetView<ScreenController> {
-  ScreenView({Key? key}) : super(key: key);
+  ScreenView({super.key});
 
   // CONTROLLER
   // final sc = Get.find<ScreenController>();

@@ -16,8 +16,7 @@ import 'package:iotelkiosk/globals/widgets/menutitle_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class PaymentMethodView extends GetView {
-  PaymentMethodView({Key? key, required this.isBookedRoom, this.sourceRoomNumber, this.sourceRoomRate})
-      : super(key: key);
+  PaymentMethodView({super.key, required this.isBookedRoom, this.sourceRoomNumber, this.sourceRoomRate});
 
   final hc = Get.find<HomeController>();
   final bool? isBookedRoom;

@@ -17,7 +17,7 @@ import 'package:sizer/sizer.dart';
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
-  HomeView({Key? key}) : super(key: key);
+  HomeView({super.key});
 
   // final hc = Get.find<HomeController>();
   final hc = Get.put(HomeController());

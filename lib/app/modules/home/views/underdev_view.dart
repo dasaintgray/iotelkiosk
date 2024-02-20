@@ -9,7 +9,7 @@ import 'package:iotelkiosk/globals/widgets/weather_clock_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class UnderdevView extends GetView {
-  UnderdevView({Key? key}) : super(key: key);
+  UnderdevView({super.key});
 
   final hc = Get.find<HomeController>();
   final sc = Get.find<ScreenController>();

@@ -89,7 +89,7 @@ class ScreenController extends GetxController with BaseController {
 
     hostname.value = Platform.localHostname;
 
-    if (kDebugMode) setDisplayMonitor('DISPLAY3');
+    if (kDebugMode) setDisplayMonitor('DISPLAY2');
 
     cardDispenser(portNumber: 'COM1');
 

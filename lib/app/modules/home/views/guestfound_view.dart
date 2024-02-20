@@ -17,7 +17,7 @@ import 'package:sizer/sizer.dart';
 import 'package:translator/translator.dart';
 
 class GuestfoundView extends GetView {
-  GuestfoundView({Key? key}) : super(key: key);
+  GuestfoundView({super.key});
 
   final hc = Get.find<HomeController>();
   final translator = GoogleTranslator();

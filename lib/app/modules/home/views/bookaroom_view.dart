@@ -12,7 +12,7 @@ import 'package:iotelkiosk/globals/widgets/weather_clock_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class BookaroomView extends GetView {
-  BookaroomView({Key? key}) : super(key: key);
+  BookaroomView({super.key});
   final hc = Get.find<HomeController>();
   final sc = Get.find<ScreenController>();
   @override

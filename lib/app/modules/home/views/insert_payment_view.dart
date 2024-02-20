@@ -15,8 +15,7 @@ import 'package:iotelkiosk/globals/widgets/menutitle_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class InsertPaymentView extends GetView {
-  InsertPaymentView({Key? key, required this.isBookedRoom, this.sourceRoomNumber, this.sourceRoomRate})
-      : super(key: key);
+  InsertPaymentView({super.key, required this.isBookedRoom, this.sourceRoomNumber, this.sourceRoomRate});
 
   final hc = Get.find<HomeController>();
   // final sc = Get.find<ScreenController>();

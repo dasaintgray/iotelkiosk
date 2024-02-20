@@ -11,7 +11,7 @@ import 'package:iotelkiosk/globals/widgets/kioskheader_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class PrintingView extends GetView {
-  PrintingView({Key? key}) : super(key: key);
+  PrintingView({super.key});
 
   final hc = Get.find<HomeController>();
   // final sc = Get.find<ScreenController>();

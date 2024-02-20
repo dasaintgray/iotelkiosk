@@ -20,7 +20,7 @@ import 'package:sizer/sizer.dart';
 import '../controllers/home_controller.dart';
 
 class TransactionView extends GetView<HomeController> {
-  TransactionView({Key? key}) : super(key: key);
+  TransactionView({super.key});
 
   final hc = Get.find<HomeController>();
   // final hc = Get.put(HomeController());
